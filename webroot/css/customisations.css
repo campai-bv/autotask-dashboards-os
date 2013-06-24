@@ -1,0 +1,259 @@
+body {
+	background-color: #000;
+	font-family: 'Merriweather Sans', sans-serif;
+}
+
+	.navbar-inner .last-import {
+		display: block;
+		float: left;
+		margin: 9px 0 0 20px;
+		color: #959595;
+	}
+
+	.breadcrumb {
+		background-color: #000;
+	}
+
+		.breadcrumb li {
+			text-shadow: none;
+		}
+
+.dashboard {
+	background-color: #000;
+}
+
+	.kill-rate-counts,
+	.kill-rate-bars,
+	.queue-health-counts,
+	.gridster li {
+		background-color: #242527;
+		border-radius: 4px;
+	}
+
+	.status-count {
+		background-color: #242527;
+		text-align: center;
+		border: 0;
+		font-size: 1.3em;
+	}
+
+		.status-count h4,
+		.kill-rate-counts h4,
+		.kill-rate-bars h4,
+		.queue-health-counts h4 {
+			color: #959595;
+			text-transform: uppercase;
+			height: 3em;
+		}
+
+			.kill-rate-counts h4,
+			.kill-rate-bars h4,
+			.queue-health-counts h4 {
+				position: absolute;
+				z-index: 99999;
+				margin-left: 40%;
+				height: auto;
+				padding: 0;
+			}
+
+		.status-count hr {
+			border: 0;
+			margin: 0;
+		}
+
+		.status-count hr.dark {
+			height: 1px;
+			background-color: #000;
+		}
+
+		.status-count hr.light {
+			height: 1px;
+			background-color: #313234;
+		}
+
+		.status-count h1 {
+			color: #fff;
+			margin-top: 0.2em;
+			margin-bottom: 0;
+			font-size: 2.4em;
+		}
+
+		.status-count span {
+			font-size: 1em;
+		}
+
+		.status-count span.positive {
+			color: #51a351;
+		}
+
+		.status-count span.neutral {
+			color: #2f96b4;
+		}
+
+		.status-count span.negative {
+			color: #bd362f;
+		}
+
+			.status-count span i {
+				font-size: 1.5em;
+				position: relative;
+				top: 0.15em;
+			}
+
+.table {
+	color: #fff;
+	background-color: #242527;
+	font-size: 1.1em;
+	border-radius: 4px;
+}
+
+	.table th,
+	.table td {
+		line-height: 1.2em;
+	}
+
+	.table th {
+		color: #959595;
+		text-align: center;
+		border-bottom: 1px solid #000;
+	}
+
+	.table th:first-child {
+		text-align: left;
+	}
+
+	.table td {
+		text-align: left;
+		padding-right: 20px;
+		border-top: 1px dotted #2f3032;
+	}
+
+		.table td.first {
+			color: #959595;
+			display: block;
+			height: 1.2em;
+			overflow: hidden;
+		}
+
+		.table td.number {
+			font-size: 1.4em;
+			text-align: center;
+		}
+
+	.table tr.row_1,
+	.table tr.row_1 td.first {
+		color: #eaec5d;
+	}
+
+	.table tr.row_1.account,
+	.table tr.row_1.account td.first {
+		color: #bd362f;
+	}
+
+.table.kill-rate {
+	height: 200px;
+}
+
+	.table.kill-rate td {
+		border: 0;
+	}
+
+		.table.kill-rate td .progress {
+			margin: 0;
+		}
+
+		.table.kill-rate h1 {
+			font-size: 3em;
+			margin-top: 0.8em;
+			margin-left: 0.4em;
+		}
+
+		.table.kill-rate h3 {
+			margin-top: 0.25em;
+			text-align: left;
+			padding-left: 1em;
+		}
+
+form {
+	width: 100%;
+}
+
+	.form-horizontal label {
+		color: #959595;
+	}
+
+	/* Multiple checkboxes */
+	.control-group.input.checkboxes-container {
+		padding-left: 0;
+	}
+
+		.control-group.input.checkboxes-container .control-label {
+			margin-top: -5px;
+		}
+
+		.checkboxes-container .controls {
+			margin: 0;
+			float: left;
+			width: 890px;
+			padding-left: 20px;
+		}
+
+			.checkboxes-container .checkbox {
+				float: left;
+				margin: 0 20px 0 0;
+				width: 230px;
+			}
+
+			.checkboxes-container fieldset {
+				float: left;
+				clear: none;
+				margin-bottom: 10px;
+			}
+
+				.checkboxes-container fieldset legend {
+					margin-bottom: 10px;
+				}
+	/* End Multiple checkboxes */
+
+	/* Single checkbox */
+	.control-group.input.checkbox-container {
+		padding-left: 180px;
+		margin-bottom: 0;
+	}
+
+		.control-group.input.checkbox-container label {
+			float: left;
+			text-align: left;
+			width: 170px;
+		}
+
+		.control-group.input.checkbox-container input {
+			float: left;
+			margin-top: 8px;
+			margin-right: 10px;
+		}
+
+	.checkbox-container .controls {
+		margin: 0;
+		float: left;
+		width: 160px;
+		padding-right: 20px;
+	}
+	/* End Single checkbox */
+
+.tooltip {
+	font-size: 0.9em;
+}
+
+input[type="submit"] {
+	margin-left: 180px;
+	margin-top: 20px;
+}
+
+.table.span12 {
+	max-width: none;
+}
+
+.gridster li {
+	list-style-type: none;
+}

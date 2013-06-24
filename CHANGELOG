@@ -1,0 +1,61 @@
+====================
+1.2.0
+====================
+-	New widget: Rolling week! A history of the past week (default) showing your new vs. closed tickets per day. Available in line- and bar chart widgets.
+	Configure the amount of days and the title of the widget in the bootstrap ('Widget.RollingWeek.daysOfHistory' and 'Widget.RollingWeek.title').
+-	New widget: Queue Health! A history of the past week (default) showing the average days a ticket in your queues is open.
+	Configure the amount of days and the title of the widget in the bootstrap ('Widget.QueueHealth.daysOfHistory' and 'Widget.QueueHealth.title').
+-	New widget: Amount of Tickets that violate their SLA!
+-	Restructured the Dashboard layout. You can now re-order the dashboard in any way you want :-)
+-	iPad is now handled as desktop, not mobile.
+-	Queue Health now shows the amount of overdue tickets.
+-	Accounts show max 4 instead of 10 records, preventing messing up of the grid.
+-	The dashboard view is now being cached. After the data has been (re-)fetched the cache gets invalidated and the dashboards rebuilt. No more half-full dashboards!
+-	The date and time of the last import are shown in the title bar.
+-	Fixed issue that would cause errors when fetching more then 500 tickets.
+-	Cronjob now properly logs errors that occur in queries to the Autotask API, like invalid credentials or wrong domain for the autotask user.
+-	The bootstrap now contains an explanation on which API locations to choose.
+-	Added link to "View Dashboard" on the success message after editing a Dashboard.
+-	Fixed lame ass error message issue when not selecting any resources or queues at all.
+-	Added missing table header on the Dashboard index.
+
+Note: SQL schema update required (upgrade-1.1.1-to-1.2.0.sql)!
+
+
+====================
+1.1.1
+====================
+-	"Missing Issue Type" now looks for tickets where sub issue type simply isn't set at all (in addition to a custom sub issue type ID).
+-	Cronjob is no longer affected by the API limit of 500 tickets and now fetches unlimited amounts of tickets.
+-	Cronjob now logs the creation of Accounts, Queues, Resources, Ticket Statuses and Sub Issue Types.
+-	In addition to a single sub issue type ID you can now add multiple ID's. Set 'MIT.subIssueTypeIds' in your bootstrap.php. Please use this setting as 'MIT.subIssueTypeId' will become deprecrated in the future.
+-	Kill Rate didn't take into account the unassigned tickets, neither did accounts and "Missing Issue Type".
+-	Added a check on the SOAP extension. If SOAP isn't available it's being logged to both the error.log and cronjob.log.
+-	Added a check on your API credentials. If you forget to enter something it's being logged to both the error.log and cronjob.log.
+-	Fixed empty array checking in the list views (queues, resources, ticket statuses, sub issue types).
+-	Fixed empty array checking in the Ticket Model.
+-	Fixed typo in the label of unknown queue names in the queue list.
+
+
+====================
+1.1.0
+====================
+-	The totals of the "Missing Issue Type" widget didn't listen to selected resources or queues.
+-	The cronjob now just fetches all freakin' tickets instead of those from Queues that you don't have ;-)
+-	Queues and Ticket Statuses get imported with the label 'Not yet specified'.
+
+
+====================
+1.0.2
+====================
+-	Fixed a bug that caused Dashboards not being saved after updating them.
+-	Fixed a bug where you couldn't navigate to the Dashboards list when viewing a Dashboard.
+
+
+====================
+1.0.1
+====================
+-	Fixed a bug that caused queues having wrong totals. It now includes unassigned tickets too.
+-	Fixed a bug that caused ticket status widgets to have wrong totals. It now includes unassigned tickets too.
+-	Cronjob now properly checks for empty results from the Autotask API.
+

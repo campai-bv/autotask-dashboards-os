@@ -1,0 +1,16 @@
+.checkboxes-container .controls {
+	width: 100%;
+}
+
+.control-group.input.checkbox-container {
+	padding-left: 0;
+}
+
+	.control-group.input.checkbox-container input {
+		margin-top: 0px;
+	}
+
+input[type="submit"] {
+	margin-left: 30px;
+	margin-top: 20px;
+}
