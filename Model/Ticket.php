@@ -29,6 +29,10 @@
 			,	'Autotask.Subissuetype'
 		);
 
+		public $hasMany = array(
+				'Autotask.Timeentry'
+		);
+
 		/**
 		 * 
 		 * @param  string $sType  'open', 'waitingCustomer' 

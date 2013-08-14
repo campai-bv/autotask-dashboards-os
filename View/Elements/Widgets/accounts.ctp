@@ -6,9 +6,36 @@
 		<table class="<?php echo implode( ' ', $aClasses ); ?>">
 			<thead>
 				<tr>
-					<th>Account</th>
-					<th>#</th>
-					<th>Avg. days</th>
+					<th class="jeditable_setting" id="title_account_name"><?php
+						$aSetting = Hash::extract( $aSettings, '{n}[name=title_account_name].value' );
+
+						if( isset( $aSetting[0] ) ) {
+							echo $aSetting[0];
+						} else {
+							echo 'Name';
+						}
+
+					?></th>
+					<th class="jeditable_setting" id="title_amount_of_tickets"><?php
+						$aSetting = Hash::extract( $aSettings, '{n}[name=title_amount_of_tickets].value' );
+						
+						if( isset( $aSetting[0] ) ) {
+							echo $aSetting[0];
+						} else {
+							echo '#';
+						}
+
+					?></th>
+					<th class="jeditable_setting" id="title_average_days"><?php
+						$aSetting = Hash::extract( $aSettings, '{n}[name=title_average_days].value' );
+						
+						if( isset( $aSetting[0] ) ) {
+							echo $aSetting[0];
+						} else {
+							echo 'Avg. days';
+						}
+
+					?></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -44,5 +71,33 @@
 			</tbody>
 		</table>
 
-	<?php
-	echo '</li>';
+<?php echo '</li>';
+
+	if( 'Dashboards' == $this->name && 'reorganize' == $this->action ) { ?>
+
+		<script type="text/javascript">
+
+			$(function() {
+
+				$( 'li#<?php echo $iDashboardWidgetId; ?> .jeditable_setting' ).editable( function( sNewValue, settings ) {
+
+					$.post( '/autotask/dashboardwidgetsettings/edit/<?php echo $iDashboardWidgetId; ?>' , {
+
+							name: $( this ).attr( 'id' )
+						,	value: sNewValue
+
+					} );
+
+					return sNewValue;
+
+				}, { 
+					indicator : 'Saving..',
+					tooltip   : 'Click to edit',
+					onblur : 'submit'
+				});
+
+			});
+
+		</script>
+
+	<?php } ?>

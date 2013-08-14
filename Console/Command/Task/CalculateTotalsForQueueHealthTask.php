@@ -21,6 +21,10 @@
 
 		public function execute() {
 
+			if( !$this->iLogLevel = Configure::read( 'Import.logLevel' ) ) {
+				$this->iLogLevel = 0;
+			}
+
 			$aDashboards = $this->Dashboard->find( 'all' );
 
 			if( !empty( $aDashboards ) ) {
@@ -44,7 +48,11 @@
 								,	$aQueueHealth['id']
 								,	$aQueueHealth['average_days_open']
 							) ) {
-								$this->log( '  - Saved queue health history for dashboard "' . $aDashboard['Dashboard']['name'] . '", queue "' . $aQueueHealth['name'] . '".', 'cronjob' );
+
+								if( 3 < $this->iLogLevel ) {
+									$this->log( '  - Saved queue health history for dashboard "' . $aDashboard['Dashboard']['name'] . '", queue "' . $aQueueHealth['name'] . '".', 'cronjob' );
+								}
+
 							} else {
 								$this->log( '  - Could not save queue health history for dashboard "' . $aDashboard['Dashboard']['name'] . '", queue "' . $aQueueHealth['name'] . '".', 'cronjob' );
 							}

@@ -47,7 +47,13 @@
 
 		public function getTotals( $aQueueIds = array(), $aResourceIds = array() ) {
 
-			$aResourceTotals = array();
+			$aResourceTotals = array(
+					'time_totals' => array(
+							'hours_to_bill' => 0
+						,	'hours_worked' => 0
+					)
+				,	'Resource' => array()
+			);
 
 			// First we take care of the resources,
 			// in the end we check the unassigned tickets.
@@ -56,6 +62,11 @@
 				$aResources = $this->find( 'all', array(
 						'conditions' => array(
 								'Resource.id' => $aResourceIds
+						)
+					,	'contain' => array(
+								'Ticket' => array(
+										'Timeentry'
+								)
 						)
 				) );
 
@@ -68,10 +79,14 @@
 				$iTotalDaysOpen = 0;
 				$iTicketsToDivideBy = 0;
 				$iTicketsClosedToday = 0;
+				$aTimeTotals = array(
+						'hours_to_bill' => 0
+					,	'hours_worked' => 0
+				);
 
 				foreach ( $aResource['Ticket'] as $aTicket ) {
 
-					if( 5 != $aTicket['ticketstatus_id'] ) { // Completed
+					if( 5 != $aTicket['ticketstatus_id'] ) { // Not completed
 
 						if( !empty( $aQueueIds ) ) {
 
@@ -116,24 +131,41 @@
 
 					}
 
+					// Calculate the time spent
+					if( !empty( $aTicket['Timeentry'] ) ) {
+
+						foreach ( $aTicket['Timeentry'] as $aTimeEntry ) {
+
+							$aTimeTotals['hours_worked'] += $aTimeEntry['hours_worked'];
+							$aResourceTotals['time_totals']['hours_worked'] += $aTimeEntry['hours_worked'];
+							$aTimeTotals['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
+							$aResourceTotals['time_totals']['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
+
+						}
+
+					}
+					// End
+
 				}
 
 				if( 0 == $iTicketsToDivideBy ) {
 
-					$aResourceTotals[ $aResource['Resource']['id'] ] = array(
+					$aResourceTotals['Resource'][ $aResource['Resource']['id'] ] = array(
 							'name' => $aResource['Resource']['name']
 						,	'count' => 0
 						,	'closed' => $iTicketsClosedToday
 						,	'average_days_open' => 0
+						,	'time_totals' => $aTimeTotals
 					);
 
 				} else {
 
-					$aResourceTotals[ $aResource['Resource']['id'] ] = array(
+					$aResourceTotals['Resource'][ $aResource['Resource']['id'] ] = array(
 							'name' => $aResource['Resource']['name']
 						,	'count' => $iTicketsToDivideBy
 						,	'closed' => $iTicketsClosedToday
 						,	'average_days_open' => number_format( $iTotalDaysOpen/$iTicketsToDivideBy, 0, ',', '.' )
+						,	'time_totals' => $aTimeTotals
 					);
 
 				}
@@ -141,7 +173,7 @@
 			}
 			// End
 
-			$aResourceTotals = Hash::sort( $aResourceTotals, '{n}.closed', 'desc', 'numeric' );
+			$aResourceTotals['Resource'] = Hash::sort( $aResourceTotals['Resource'], '{n}.time_totals.hours_worked', 'desc', 'numeric' );
 			return $aResourceTotals;
 
 		}

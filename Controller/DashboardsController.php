@@ -87,13 +87,18 @@
 			// Set it to request->data so the app controller can use it.
 			$this->request->data = $this->Dashboard->read( null, $iDashboardId );
 
-			$aWidgets = $this->Dashboard->getWidgetData( $iDashboardId );
+			$sCacheFile = 'widgets_for_dashboard_' . $iDashboardId;
+			$aWidgets = Cache::read( $sCacheFile, '1_hour' );
+			if ( !$aWidgets ) {
+				$aWidgets = $this->Dashboard->getWidgetData( $iDashboardId );
+				Cache::write( $sCacheFile, $aWidgets, '1_hour' );
+			}
 
 			// Backwards compatibility.
 			if( empty( $aWidgets ) ) {
 
 				// This dashboard didnt have widgets attached 'new style'. Rebuild it :-)
-				$this->Dashboard->createDashboardWidgets( $iDashboardId );
+				$this->Dashboard->createDashboardWidgets( $this->request->data );
 				$aWidgets = $this->Dashboard->getWidgetData( $iDashboardId );
 
 			}
@@ -121,6 +126,12 @@
 		}
 
 
+		/**
+		 * Save function that gets called when you drag & drop widgets.
+		 * 
+		 * @param  integer $iDashboardId - The ID of the dashboard you're modifying.
+		 * @return -
+		 */
 		public function ajaxSave( $iDashboardId ) {
 
 			if(
@@ -152,7 +163,7 @@
 
 				}
 
-				clearCache();
+				clearCache(); // Remove the view cache
 
 				if( $bErrorOccured ) {
 					echo 'Saved but with errors.';
@@ -257,6 +268,7 @@
 
 			$aDashboard = $this->Dashboard->read( null, $iDashboardId );
 
+			// Set all the options for the checkboxes, together with the already selected options.
 			$aResources['options'] = $this->Resource->find( 'list', array(
 					'order' => 'name asc'
 			) );
@@ -287,12 +299,16 @@
 			$this->set( 'aResources', $aResources );
 			$this->set( 'aQueues', $aQueues );
 			$this->set( 'aTicketstatuses', $aTicketstatuses );
+			// End
 
 			if(
 				$this->request->is( 'put' )
 				||
 				$this->request->is( 'post' )
 			) {
+
+				// Adjust all widgets
+				$this->Dashboard->createDashboardWidgets( $this->request->data );
 
 				$this->Dashboard->save( $this->request->data['Dashboard'] );
 
@@ -354,14 +370,6 @@
 
 				}
 				// End - Ticket statuses
-				
-				// Widgets
-				$this->Dashboardwidget->deleteAll( array(
-						'dashboard_id' => $this->request->data['Dashboard']['id']
-				) );
-
-				$this->Dashboard->createDashboardWidgets( $this->request->data['Dashboard']['id'] );
-				// End - Widgets
 
 				$sFlashMessage = '<strong>Success!</strong> Dashboard has been updated.';
 
@@ -377,6 +385,9 @@
 									,	$this->request->data['Dashboard']['id']
 								)
 				);
+
+				clearCache(); // Clear the view cache
+				Cache::clear( null ,'1_hour' ); // Clear the model cache
 
 				$this->Session->setFlash( $sFlashMessage );
 				$this->redirect( array(
@@ -408,6 +419,34 @@
 				exit();
 
 			}
+
+		}
+
+
+		/**
+		 * Enables you to toggle a dashboard fullscreen, basically meaning you hide the navbar :-)
+		 * 
+		 * @param  integer $iDashboardId - The id of the dashboard.
+		 * @return -
+		 */
+		public function toggleFullscreen( $iDashboardId = null ) {
+
+			$iIsFullscreen = $this->Session->read( 'Dashboard.' . $iDashboardId . '.fullscreen' );
+
+			if( 0 == $iIsFullscreen ) {
+
+				$this->Session->write( 'Dashboard.' . $iDashboardId . '.fullscreen', 1 );
+				echo 'enabled';
+
+			} else {
+
+				$this->Session->write( 'Dashboard.' . $iDashboardId . '.fullscreen', 0 );
+				echo 'disabled';
+
+			}
+
+			clearCache(); // Clear the view cache
+			exit();
 
 		}
 

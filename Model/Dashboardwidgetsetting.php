@@ -12,20 +12,12 @@
 	 */
 	App::uses('AutotaskAppModel', 'Autotask.Model');
 
-	class Dashboardwidget extends AutotaskAppModel {
+	class Dashboardwidgetsetting extends AutotaskAppModel {
 
-		public $name = 'Dashboardwidget';
+		public $name = 'Dashboardwidgetsetting';
 
 		public $belongsTo = array(
-				'Autotask.Dashboard'
-			,	'Autotask.Widget'
-		);
-
-		public $hasMany = array(
-				'Dashboardwidgetsetting' => array(
-						'className' => 'Autotask.Dashboardwidgetsetting'
-					,	'dependent' => true
-				)
+				'Autotask.Dashboardwidget'
 		);
 
 	}

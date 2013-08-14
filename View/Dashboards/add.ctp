@@ -227,6 +227,32 @@
 			)
 	) );
 
+	echo $this->Form->input( 'Dashboard.show_tickets_top_x', array(
+			'type' => 'checkbox'
+		,	'div' => array(
+					'class' => 'control-group input checkbox-container'
+			)
+		,	'class' => 'checkbox'
+		,	'label' => array(
+					'class' => 'control-label'
+				,	'text' => 'Show Top X Tickets'
+				,	'title' => 'The latest tickets created within Autotask.'
+			)
+	) );
+
+	echo $this->Form->input( 'Dashboard.show_clock', array(
+			'type' => 'checkbox'
+		,	'div' => array(
+					'class' => 'control-group input checkbox-container'
+			)
+		,	'class' => 'checkbox'
+		,	'label' => array(
+					'class' => 'control-label'
+				,	'text' => 'Show the clock'
+				,	'title' => 'Do you have the time?'
+			)
+	) );
+
 	if( 'add' == $this->action) {
 
 		echo $this->Form->submit( 'Add', array(
@@ -248,7 +274,7 @@
 	$(function() {
 
 		$( '.control-label' ).tooltip({
-				placement: 'top'
+				placement: 'right'
 			,	html: true
 		});
 

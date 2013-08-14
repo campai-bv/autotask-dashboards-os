@@ -14,15 +14,24 @@
 
 		public $uses = array(
 				'Autotask.Ticket'
-			,	'Autotask.Queue'
+			,	'Autotask.Dashboardqueue'
 		);
 
+		/**
+		 * Gets all the tickets that have been closed today for all queues
+		 * that are active on any dashboard.
+		 * 
+		 * @return
+		 */
 		public function execute() {
 
 			$oResult = $this->Ticket->findInAutotask( 'closed', array(
 					'conditions' => array(
 							'IsThisDay' => array(
 								'CompletedDate' => date( 'Y-m-d' )
+							)
+						,	'Equals' => array(
+								'QueueID' => Hash::extract( $this->Dashboardqueue->find( 'all' ), '{n}.Dashboardqueue.queue_id' )
 							)
 					)
 			) );

@@ -21,6 +21,10 @@
 
 		public function execute() {
 
+			if( !$this->iLogLevel = Configure::read( 'Import.logLevel' ) ) {
+				$this->iLogLevel = 0;
+			}
+
 			$aDashboards = $this->Dashboard->find( 'all' );
 
 			if( !empty( $aDashboards ) ) {
@@ -41,7 +45,11 @@
 						,	$aKillRate['created']
 						,	$aKillRate['completed']
 					) ) {
-						$this->log( '  - Saved kill rate history for dashboard "' . $aDashboard['Dashboard']['name'] . '" (' . $aKillRate['created'] . ' new, ' . $aKillRate['completed'] . ' completed)', 'cronjob' );
+
+						if( 3 < $this->iLogLevel ) {
+							$this->log( '  - Saved kill rate history for dashboard "' . $aDashboard['Dashboard']['name'] . '" (' . $aKillRate['created'] . ' new, ' . $aKillRate['completed'] . ' completed)', 'cronjob' );
+						}
+
 					} else {
 						$this->log( '  - Could not save kill rate history for dashboard "' . $aDashboard['Dashboard']['name'] . '"', 'cronjob' );
 					}

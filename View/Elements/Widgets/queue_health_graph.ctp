@@ -5,7 +5,7 @@
 ?>
 
 		<div class="queue-health-counts" style="position: relative; margin-bottom: 20px;">
-			<h4><?php echo $sTitle; ?></h4>
+			<h4 class="jeditable" id="display_name"><?php echo $sTitle; ?></h4>
 			<div id="container" style="height: 202px; margin: 0 auto"></div>
 		</div>
 
@@ -95,3 +95,21 @@
 	});
 
 </script>
+
+<?php if( 'Dashboards' == $this->name && 'reorganize' == $this->action ) { ?>
+
+	<script type="text/javascript">
+
+		$(function() {
+
+			$( 'li#<?php echo $iDashboardWidgetId; ?> .jeditable' ).editable( '/autotask/dashboardwidgets/edit/<?php echo $iDashboardWidgetId; ?>', {
+				indicator : 'Saving..',
+				tooltip   : 'Click to edit',
+				onblur : 'submit'
+			});
+
+		});
+
+	</script>
+
+<?php } ?>

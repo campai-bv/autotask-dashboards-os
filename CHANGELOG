@@ -1,4 +1,44 @@
 ====================
+1.3.2
+====================
+
+Note: SQL schema update required!
+
+-	Added the new widgets to the SQL file so they will be there when you upgrade, D'oh! ;-)
+	Run upgrade-1.3.0-to-1.3.2.sql to fix. Thanks Luke Cook for the help!
+-	Fixed a bug that caused existing dashboards to have problems with rebuilding widgets.
+
+
+====================
+1.3.1
+====================
+-	Fixed an issue with importing time entries.
+
+
+====================
+1.3.0
+====================
+-	The models now use caching. Add the cache configuration to your bootstrap.php file. This prevents zeros from showing up in your widgets while the import is running.
+-	Added log levels so you can decide how much detail you want the log file to contain.
+-	Added timezone configuration to the bootstrap.
+-	Fixed a bug that caused wrong ticket dates to get saved into the database (thanks for the help Stephen Gibson!).
+-	Specify the IPs that have access to your dashboards through the interface (see the "Settings" page).
+-	Widgets now have in-place-editable titles and texts.
+-	Dashboards can be set to fullscreen mode hiding the menu and title bar.
+-	New widget: top 10 tickets!
+-	New widget: a clock!
+-	Fixed a bug that would cause change percentages of ticket statuses to display wrong numbers when no history is available.
+-	Altered the import script so it only imports tickets from configured queues and it properly logs a message when any error occurs.
+-	Tickets "of the future" (recurring tickets) aren't supported any longer, since they have the tendency to increase import time by several minutes.
+-	Import script only imports open tickets from up till a year ago, adjustable through 'Import.OpenTickets.history'
+-	Tickets now get their ID from Autotask instead of a freshly generated one.
+-	Resource widget extended with hours worked.
+
+Note: Update your bootstrap.php file with the Cache configuration (Cache::config directive in the bootstrap template)!
+Note: SQL schema update required!
+
+
+====================
 1.2.0
 ====================
 -	New widget: Rolling week! A history of the past week (default) showing your new vs. closed tickets per day. Available in line- and bar chart widgets.

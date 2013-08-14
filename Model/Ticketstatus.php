@@ -119,10 +119,10 @@
 
 				// You cant divide by zero
 				if( 0 == $iOld ) {
-					$iOld = 1;
+					$aTotals[ $iTicketStatusId ]['counts']['difference'] = 0;
+				} else {
+					$aTotals[ $iTicketStatusId ]['counts']['difference'] = number_format( ( ( 100 * $iNew ) / $iOld ) - 100, 0, ',', '.' );
 				}
-
-				$aTotals[ $iTicketStatusId ]['counts']['difference'] = number_format( ( ( 100 * $iNew ) / $iOld ) - 100, 0, ',', '.' );
 
 			}
 

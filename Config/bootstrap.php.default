@@ -33,6 +33,18 @@
 	) );
 
 	/**
+	 * Uncomment this line and correct your server timezone to fix any date & time related errors.
+	 * See http://www.php.net/manual/en/timezones.php for a list of supported timezones.
+	 * 
+	 * To correct your server timezone, run
+	 * dpkg-reconfigure tzdata
+	 * from the console.
+	 * 
+	 * Originally from /app/Config/core.php but moved into here for your convenience.
+	 */
+	//date_default_timezone_set('Europe/Amsterdam');
+
+	/**
 	 * When we get new tickets through the Email 2 Autotask system it automatically
 	 * gets assigned subissuetype ID 69 (ATES). That way we know the ticket hasn't been
 	 * taken care of properly and things like issue type and work type are missing.
@@ -54,18 +66,33 @@
 	Configure::write( 'Widget.RollingWeek.daysOfHistory', 7 );
 
 	/**
-	 * With this value you can change the title of the Rolling Week widget. Useful
-	 * if you decide to change the days :-)
-	 */
-	Configure::write( 'Widget.RollingWeek.title', 'ROLLING WEEK' );
-
-	/**
 	 * With this value you can change the number of days you want to the Queue Health widget
 	 * to display. Defaults to 7.
 	 */
 	Configure::write( 'Widget.QueueHealth.daysOfHistory', 7 );
 
 	/**
-	 * With this value you can change the title of the Queue Health widget.
+	 * Enables the models to use caching.
 	 */
-	Configure::write( 'Widget.QueueHealth.title', 'AVERAGE DAYS OPEN' );
+	Cache::config( '1_hour', array(
+			'engine' => 'File'
+		,	'duration' => '+1 hours'
+		,	'path' => CACHE
+		,	'prefix' => 'cake_1_hour_'
+	));
+
+	/**
+	 * The number of days the import script has to go back to search for open tickets.
+	 * Defaults to 365.
+	 */
+	Configure::write( 'Import.OpenTickets.history', 365 );
+
+	/**
+	 * Sets the detail of the log file.
+	 * 
+	 * 0 - No logging.
+	 * 1 - Only core messages are logged (start, complete, errors).
+	 * 2 - Adds more detail, show stuff like the fases the script goes through, the amount of tickets created etc.
+	 * 4 - Shows the most detail possible: every new resource, queue, issuetype etc that gets created is logged.
+	 */
+	Configure::write( 'Import.logLevel', 0 );

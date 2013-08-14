@@ -6,43 +6,33 @@
 		<table class="<?php echo implode( ' ', $aClasses ); ?>">
 			<thead>
 				<tr>
-					<th class="jeditable_setting" id="title_queue_name"><?php
-						$aSetting = Hash::extract( $aSettings, '{n}[name=title_queue_name].value' );
+					<th class="jeditable_setting" id="title_created"><?php
+						$aSetting = Hash::extract( $aSettings, '{n}[name=title_created].value' );
 
 						if( isset( $aSetting[0] ) ) {
 							echo $aSetting[0];
 						} else {
-							echo 'Queue';
+							echo 'Created';
 						}
 
 					?></th>
-					<th class="jeditable_setting" id="title_amount_of_tickets"><?php
-						$aSetting = Hash::extract( $aSettings, '{n}[name=title_amount_of_tickets].value' );
+					<th class="jeditable_setting" id="title_name"><?php
+						$aSetting = Hash::extract( $aSettings, '{n}[name=title_name].value' );
 
 						if( isset( $aSetting[0] ) ) {
 							echo $aSetting[0];
 						} else {
-							echo '# Tickets';
+							echo 'Name';
 						}
 
 					?></th>
-					<th class="jeditable_setting" id="title_average_days"><?php
-						$aSetting = Hash::extract( $aSettings, '{n}[name=title_average_days].value' );
-						
-						if( isset( $aSetting[0] ) ) {
-							echo $aSetting[0];
-						} else {
-							echo 'Avg. days';
-						}
+					<th class="jeditable_setting" id="title_number"><?php
+						$aSetting = Hash::extract( $aSettings, '{n}[name=title_number].value' );
 
-					?></th>
-					<th class="jeditable_setting" id="title_days_overdue"><?php
-						$aSetting = Hash::extract( $aSettings, '{n}[name=title_days_overdue].value' );
-						
 						if( isset( $aSetting[0] ) ) {
 							echo $aSetting[0];
 						} else {
-							echo 'Overdue';
+							echo 'Number';
 						}
 
 					?></th>
@@ -52,22 +42,15 @@
 				<?php
 					$iPointer = 1;
 
-					foreach ( $aData as $iQueueId => $aQueueDetails ) {
+					foreach ( $aData as $iTicketId => $aTicketDetails ) {
 
 						$sClass = 'row_' . $iPointer;
 				?>
 
 				<tr class="<?php echo $sClass; ?>">
-					<td class="first"><?php
-						if( 1 == $iPointer ) {
-							echo ' <i class="icon-trophy"></i> ' . $aQueueDetails['name'];
-						} else {
-							echo $aQueueDetails['name'];
-						}
-					?></td>
-					<td class="number"><?php echo $aQueueDetails['count']; ?></td>
-					<td class="number"><?php echo $aQueueDetails['average_days_open']; ?></td>
-					<td class="number"><?php echo $aQueueDetails['overdue']; ?></td>
+					<td class="first"><?php echo $this->Time->format( 'd-m-Y', $aTicketDetails['Ticket']['created'] ); ?></td>
+					<td><?php echo $aTicketDetails['Ticket']['title']; ?></td>
+					<td><?php echo $aTicketDetails['Ticket']['number']; ?></td>
 				</tr>
 
 				<?php
@@ -75,7 +58,6 @@
 				} ?>
 			</tbody>
 		</table>
-
 
 <?php echo '</li>';
 

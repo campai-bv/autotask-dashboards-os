@@ -35,6 +35,107 @@
 				)
 		);
 
+		private $__aCalculatedWidgets = array(
+				'kill_rate' => array(
+						'database_field' => 'show_kill_rate'
+					,	'widget_id' => 1
+					,	'type' => ''
+					,	'settings' => array(
+								'title_new' => 'New'
+							,	'title_completed' => 'Completed'
+						)
+				)
+			,	'rolling_week' => array(
+						'database_field' => 'show_rolling_week'
+					,	'widget_id' => 2
+					,	'type' => ''
+				)
+			,	'queue_health' => array(
+						'database_field' => 'show_queue_health'
+					,	'widget_id' => 3
+					,	'type' => ''
+				)
+			,	'accounts' => array(
+						'database_field' => 'show_accounts'
+					,	'widget_id' => 4
+					,	'type' => ''
+					,	'settings' => array(
+								'title_account_name' => 'Account'
+							,	'title_amount_of_tickets' => '#'
+							,	'title_average_days' => 'Avg. days'
+						)
+				)
+			,	'queues' => array(
+						'database_field' => 'show_queues'
+					,	'widget_id' => 5
+					,	'type' => ''
+					,	'settings' => array(
+								'title_queue_name' => 'Queue'
+							,	'title_amount_of_tickets' => '#'
+							,	'title_average_days' => 'Avg. days open'
+							,	'title_days_overdue' => '# Overdue'
+						)
+				)
+			,	'resources' => array(
+						'database_field' => 'show_resources'
+					,	'widget_id' => 6
+					,	'type' => ''
+					,	'settings' => array(
+								'title_hours_worked' => 'Hours worked'
+							,	'title_hours_billable' => 'Billable'
+							,	'title_resource' => 'Resource'
+							,	'title_active_tickets' => 'Active'
+							,	'title_closed_today' => 'Closed today'
+							,	'title_average_days' => 'Days'
+							,	'title_worked' => 'Worked'
+						)
+				)
+			,	'unassigned' => array(
+						'database_field' => 'show_unassigned'
+					,	'widget_id' => 7
+					,	'type' => 'unassigned'
+					,	'settings' => array(
+							'goal_description' => 'Should be 0'
+						)
+				)
+			,	'sla_violations' => array(
+						'database_field' => 'show_sla_violations'
+					,	'widget_id' => 7
+					,	'type' => 'sla_violations'
+					,	'settings' => array(
+							'goal_description' => 'Should be 0'
+						)
+				)
+			,	'missing_issue_type' => array(
+						'database_field' => 'show_missing_issue_type'
+					,	'widget_id' => 7
+					,	'type' => 'missing_issue_type'
+					,	'settings' => array(
+							'goal_description' => 'Should be 0'
+						)
+				)
+			,	'rolling_week_bars' => array(
+						'database_field' => 'show_rolling_week_bars'
+					,	'widget_id' => 8
+					,	'type' => ''
+				)
+			,	'tickets_top_x' => array(
+						'database_field' => 'show_tickets_top_x'
+					,	'widget_id' => 9
+					,	'type' => ''
+					,	'settings' => array(
+								'title_created' => 'Created'
+							,	'title_name' => 'Name'
+							,	'title_number' => 'Number'
+						)
+				)
+			,	'clock' => array(
+						'database_field' => 'show_clock'
+					,	'widget_id' => 10
+					,	'type' => ''
+				)
+		);
+
 
 		public function getWidgetData( $iDashboardId ) {
 
@@ -86,6 +187,7 @@
 				,	'contain' => array(
 							'Dashboardwidget' => array(
 									'Widget'
+								,	'Dashboardwidgetsetting'
 								,	'order' => 'Dashboardwidget.row ASC'
 							)
 					)
@@ -227,6 +329,22 @@
 
 						break;
 
+
+						// 10 latest tickets.
+						case 9:
+
+							App::uses( 'Ticket', 'Autotask.Model' );
+							$this->Ticket = new Ticket();
+
+							$aWidget = array_merge( $aWidget, array(
+									'Widgetdata' => $this->Ticket->find( 'all', array(
+											'limit' => 11
+										,	'order' => 'created DESC'
+									) )
+							) );
+
+						break;
+
 						default:
 						break;
 
@@ -271,157 +389,41 @@
 
 		/**
 		 * Since 1.2.0 widgets are seperate database entries.
-		 * Whenever you first fire up a dashboard, all widgets are saved
+		 * Whenever you first fire up a dashboard or edit one, all widgets are saved
 		 * in the database.
 		 * 
-		 * @param  [type] $iDashboardId [description]
-		 * @return [type]               [description]
+		 * @param  integer $iDashboardId - The ID of the dashboard you're editing
+		 * @return -
 		 */
-		public function createDashboardWidgets( $iDashboardId ) {
+		public function createDashboardWidgets( Array $aSubmittedData ) {
+
+			App::uses( 'Dashboardwidget', 'Autotask.Model' );
+			$this->Dashboardwidget = new Dashboardwidget();
+
+			App::uses( 'Dashboardwidgetsetting', 'Autotask.Model' );
+			$this->Dashboardwidgetsetting = new Dashboardwidgetsetting();
+
+			App::uses( 'Ticketstatus', 'Autotask.Model' );
+			$this->Ticketstatus = new Ticketstatus();
+
+			$iDashboardId = $aSubmittedData['Dashboard']['id'];
 
 			$this->recursive = 2;
-			$aDashboard = $this->find( 'first', array(
+			$aExistingDashboard = $this->find( 'first', array(
 					'conditions' => array(
 							'Dashboard.id' => $iDashboardId
 					)
 			) );
 
-			App::uses( 'Dashboardwidget', 'Autotask.Model' );
-			$this->Dashboardwidget = new Dashboardwidget();
-
-			// Take care of the ticket statuses
-			if( !empty( $aDashboard['Dashboardticketstatus'] ) ) {
-
-				foreach ( $aDashboard['Dashboardticketstatus'] as $aTicketstatus ) {
-
-					$this->Dashboardwidget->create();
-					$this->Dashboardwidget->save( array(
-							'dashboard_id' => $iDashboardId
-						,	'widget_id' => 7
-						,	'ticketstatus_id' => $aTicketstatus['Ticketstatus']['id']
-						,	'display_name' => $aTicketstatus['Ticketstatus']['name']
-					) );
-
-				}
-
+			if( !$this->__updateTicketstatuses( $aSubmittedData, $aExistingDashboard ) ) {
+				return false;
 			}
 
-				// Unassigned
-				if( 1 == $aDashboard['Dashboard']['show_unassigned'] ) {
-
-					$this->Dashboardwidget->create();
-					$this->Dashboardwidget->save( array(
-							'dashboard_id' => $iDashboardId
-						,	'widget_id' => 7
-						,	'type' => 'unassigned'
-						,	'display_name' => 'Unassigned'
-					) );
-
-				}
-				// End
-				
-				// Missing Issue Type
-				if( 1 == $aDashboard['Dashboard']['show_missing_issue_type'] ) {
-
-					$this->Dashboardwidget->create();
-					$this->Dashboardwidget->save( array(
-							'dashboard_id' => $iDashboardId
-						,	'widget_id' => 7
-						,	'type' => 'missing_issue_type'
-						,	'display_name' => 'Missing Issue Type'
-					) );
-
-				}
-				// End
-				
-				// SLA Violations
-				if( 1 == $aDashboard['Dashboard']['show_sla_violations'] ) {
-
-					$this->Dashboardwidget->create();
-					$this->Dashboardwidget->save( array(
-							'dashboard_id' => $iDashboardId
-						,	'widget_id' => 7
-						,	'type' => 'sla_violations'
-						,	'display_name' => 'SLA Violations'
-					) );
-
-				}
-				// End
-
-
-			// End
-
-			if( 1 == $aDashboard['Dashboard']['show_kill_rate'] ) {
-
-				$this->Dashboardwidget->create();
-				$this->Dashboardwidget->save( array(
-						'dashboard_id' => $iDashboardId
-					,	'widget_id' => 1
-				) );
-
+			if( !$this->__updateCalculatedWidgets( $aSubmittedData, $aExistingDashboard ) ) {
+				return false;
 			}
 
-			if( 1 == $aDashboard['Dashboard']['show_rolling_week'] ) {
-
-				$this->Dashboardwidget->create();
-				$this->Dashboardwidget->save( array(
-						'dashboard_id' => $iDashboardId
-					,	'widget_id' => 2
-				) );
-
-			}
-
-			if( 1 == $aDashboard['Dashboard']['show_rolling_week_bars'] ) {
-
-				$this->Dashboardwidget->create();
-				$this->Dashboardwidget->save( array(
-						'dashboard_id' => $iDashboardId
-					,	'widget_id' => 8
-				) );
-
-			}
-
-			if( 1 == $aDashboard['Dashboard']['show_queue_health'] ) {
-
-				$this->Dashboardwidget->create();
-				$this->Dashboardwidget->save( array(
-						'dashboard_id' => $iDashboardId
-					,	'widget_id' => 3
-				) );
-
-			}
-
-			if( 1 == $aDashboard['Dashboard']['show_accounts'] ) {
-
-				$this->Dashboardwidget->create();
-				$this->Dashboardwidget->save( array(
-						'dashboard_id' => $iDashboardId
-					,	'widget_id' => 4
-				) );
-
-			}
-
-			if( 1 == $aDashboard['Dashboard']['show_queues'] ) {
-
-				$this->Dashboardwidget->create();
-				$this->Dashboardwidget->save( array(
-						'dashboard_id' => $iDashboardId
-					,	'widget_id' => 5
-				) );
-
-			}
-
-			if( 1 == $aDashboard['Dashboard']['show_resources'] ) {
-
-				$this->Dashboardwidget->create();
-				$this->Dashboardwidget->save( array(
-						'dashboard_id' => $iDashboardId
-					,	'widget_id' => 6
-				) );
-
-			}
-
-			return;
+			return true;
 
 		}
 
@@ -441,5 +443,159 @@
 
 		}
 
+
+		/**
+		 * When you edit a dashboard, this function takes care of any changes in the
+		 * ticketstatus widgets (added or removed ones).
+		 * 
+		 * @param  Array  $aSubmittedData - Data of the updated dashboard
+		 * @param  mixed $aExistingDashboard - The data of the (possible) existing dashboard
+		 * @return -
+		 */
+		private function __updateTicketstatuses( Array $aSubmittedData, $aExistingDashboard ) {
+
+			// Standard statuses
+				if( !empty( $aExistingDashboard['Dashboardticketstatus'] ) ) {
+					$aTicketstatusIdsBefore = Hash::extract( $aExistingDashboard, 'Dashboardticketstatus.{n}.ticketstatus_id' );
+				} else {
+					$aTicketstatusIdsBefore = array();
+				}
+
+				if( !empty( $aSubmittedData['Dashboardticketstatus']['id'] ) ) {
+					$aTicketstatusIdsAfter = Hash::extract( $aSubmittedData, 'Dashboardticketstatus.id.{n}' );
+				} else {
+					$aTicketstatusIdsAfter = array();
+				}
+
+				// Were there any statuses removed?
+				if( !empty( $aTicketstatusIdsBefore ) ) {
+
+					foreach ( $aTicketstatusIdsBefore as $iTicketstatusId ) {
+
+						if( !in_array( $iTicketstatusId, $aTicketstatusIdsAfter ) ) { // Removed
+
+							if( !$this->Dashboardwidget->deleteAll( array(
+									'dashboard_id' => $aExistingDashboard['Dashboard']['id']
+								,	'ticketstatus_id' => $iTicketstatusId
+								,	'widget_id' => 7
+							) ) ) {
+								return false;
+							}
+
+						}
+
+					}
+
+				}
+
+				// Where there any statuses added?
+				if( !empty( $aTicketstatusIdsAfter ) ) {
+
+					foreach ( $aTicketstatusIdsAfter as $iTicketstatusId ) {
+
+						if( !in_array( $iTicketstatusId, $aTicketstatusIdsBefore ) ) { // Added
+
+							$this->Ticketstatus->recursive = -1;
+							$aTicketstatus = $this->Ticketstatus->find( 'first', array(
+									'conditions' => array(
+											'Ticketstatus.id' => $iTicketstatusId
+									)
+							) );
+
+							$this->Dashboardwidget->create();
+
+							if( !$this->Dashboardwidget->save( array(
+									'dashboard_id' => $aExistingDashboard['Dashboard']['id']
+								,	'widget_id' => 7
+								,	'ticketstatus_id' => $aTicketstatus['Ticketstatus']['id']
+								,	'display_name' => $aTicketstatus['Ticketstatus']['name']
+							) ) ) {
+								return false;
+							}
+
+						}
+
+					}
+
+				}
+			// End
+
+			return true;
+
+		}
+
+
+		/**
+		 * Adds or removes the 'calculated' widgets like the kill rates and queue health.
+		 * 
+		 * @param  Array  $aSubmittedData - Data of the updated dashboard
+		 * @param  mixed $aExistingDashboard - The data of the (possible) existing dashboard
+		 * @return -
+		 */
+		private function __updateCalculatedWidgets( Array $aSubmittedData, $aExistingDashboard ) {
+
+			foreach ( $this->__aCalculatedWidgets as $aWidget ) {
+
+				// Was '<widget name here>' added?
+				if(
+					1 == $aSubmittedData['Dashboard'][ $aWidget['database_field'] ]
+					&&
+					false == $aExistingDashboard['Dashboard'][ $aWidget['database_field'] ]
+				) {
+
+					$this->Dashboardwidget->create();
+					if( !$this->Dashboardwidget->save( array(
+							'dashboard_id' => $aExistingDashboard['Dashboard']['id']
+						,	'widget_id' => $aWidget['widget_id']
+						,	'type' => $aWidget['type']
+					) ) ) {
+
+						return false;
+
+					} else {
+
+						if( !empty( $aWidget['settings'] ) ) {
+
+							foreach ( $aWidget['settings'] as $sName => $sValue ) {
+
+								$this->Dashboardwidgetsetting->create();
+								if( !$this->Dashboardwidgetsetting->save( array(
+										'dashboardwidget_id' => $this->Dashboardwidget->id
+									,	'name' => $sName
+									,	'value' => $sValue
+								) ) ) {
+
+									return false;
+
+								}
+
+							}
+
+						}
+
+					}
+
+				// Or was '<widget name here>' removed?
+				} elseif(
+					0 == $aSubmittedData['Dashboard'][ $aWidget['database_field'] ]
+					&&
+					true == $aExistingDashboard['Dashboard'][ $aWidget['database_field'] ]
+				) {
+
+					// Cascade deletes the old widget
+					if( !$this->Dashboardwidget->deleteAll( array(
+							'dashboard_id' => $aExistingDashboard['Dashboard']['id']
+						,	'widget_id' => $aWidget['widget_id']
+					) ) ) {
+						return false;
+					}
+
+				}
+
+			}
+
+			return true;
+
+		}
 
 	}

@@ -35,6 +35,18 @@
 			'class' => 'span3'
 	) );
 
+	echo '<h2>Access restriction</h2>';
+
+	echo $this->Form->input( 'Setting.ips', array(
+			'class' => 'span4'
+		,	'type' => 'textarea'
+		,	'label' => array(
+					'text' => 'IPs with access'
+				,	'class' => 'control-label'
+			)
+		,	'placeholder' => '155.12.0.55 # Office (location Amsterdam)'
+	) );
+
 	echo $this->Form->submit( 'Save', array(
 			'class' => 'btn btn-success'
 	) );

@@ -18,6 +18,10 @@
 
 		public function queryAutotask( Model $oModel, $sEntity, Array $aQuery ) {
 
+			if( !$this->iLogLevel = Configure::read( 'Import.logLevel' ) ) {
+				$this->iLogLevel = 0;
+			}
+
 			if ( !extension_loaded( 'soap' ) ) {
 
 				$this->log( 'SOAP is not available, unable to perform requests to the Autotask API.', 'cronjob' );
@@ -42,7 +46,7 @@
 
 				$this->log( 'I\'m not able to use the Autotask API if you don\'t provide your credentials (/var/www/app/Plugin/Autotask/Config/bootstrap.php).', 'cronjob' );
 				$this->log( 'I\'m not able to use the Autotask API if you don\'t provide your credentials (/var/www/app/Plugin/Autotask/Config/bootstrap.php).', 'error' );
-				exit();
+				return false;
 
 			}
 
@@ -107,6 +111,7 @@
 				$oResponse = $this->oAutotask->query( array( 'sXML' => $sXML ) );
 			} catch ( SoapFault $fault ) {
 				$this->log( ' - Error occured while performing query: "' . $fault->faultcode .' - ' . $fault->faultstring . '"', 'cronjob' );
+				return false;
 			}
 
 			if( !empty( $oResponse->queryResult->EntityResults->Entity ) ) {

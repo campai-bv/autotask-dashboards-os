@@ -61,6 +61,11 @@
 				$aWidgetVariables['aData'] = $aWidget['Dashboardwidget']['Widgetdata'];
 			}
 
+			// Set the specific setting (if there are any)
+			if( isset( $aWidget['Dashboardwidget']['Dashboardwidgetsetting'] ) ) {
+				$aWidgetVariables['aSettings'] = $aWidget['Dashboardwidget']['Dashboardwidgetsetting'];
+			}
+
 			// Set the ticketstatus ID (if any)
 			if( !empty( $aWidget['Dashboardwidget']['ticketstatus_id'] ) ) {
 				$aWidgetVariables['iStatusId'] = $aWidget['Dashboardwidget']['ticketstatus_id'];
@@ -71,7 +76,6 @@
 
 				case 4:
 				case 5:
-				case 6:
 
 					if( 4 >= count( $aWidgetVariables['aData'] ) ) {
 						$aWidgetVariables['iDataSizeY'] = 1;
@@ -85,6 +89,28 @@
 						9 < count( $aWidgetVariables['aData'] )
 						&&
 						13 >= count( $aWidgetVariables['aData'] )
+					) {
+						$aWidgetVariables['iDataSizeY'] = 3;
+					} else {
+						$aWidgetVariables['iDataSizeY'] = 4;
+					}
+
+				break;
+
+				case 6:
+
+					if( 4 >= count( $aWidgetVariables['aData']['Resource'] ) ) {
+						$aWidgetVariables['iDataSizeY'] = 1;
+					} elseif(
+						4 < count( $aWidgetVariables['aData']['Resource'] )
+						&&
+						9 >= count( $aWidgetVariables['aData']['Resource'] )
+					) {
+						$aWidgetVariables['iDataSizeY'] = 2;
+					} elseif(
+						9 < count( $aWidgetVariables['aData']['Resource'] )
+						&&
+						13 >= count( $aWidgetVariables['aData']['Resource'] )
 					) {
 						$aWidgetVariables['iDataSizeY'] = 3;
 					} else {

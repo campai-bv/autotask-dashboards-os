@@ -3,11 +3,24 @@ body {
 	font-family: 'Merriweather Sans', sans-serif;
 }
 
+h2 {
+	color: #acacac;
+}
+
 	.navbar-inner .last-import {
 		display: block;
 		float: left;
 		margin: 9px 0 0 20px;
 		color: #959595;
+	}
+
+	.fullscreen {
+		position: absolute;
+		right: 10px;
+		top: 10px;
+		z-index: 9999;
+		color: #959595;
+		cursor: pointer;
 	}
 
 	.breadcrumb {
@@ -25,6 +38,7 @@ body {
 	.kill-rate-counts,
 	.kill-rate-bars,
 	.queue-health-counts,
+	.worked,
 	.gridster li {
 		background-color: #242527;
 		border-radius: 4px;
@@ -40,7 +54,9 @@ body {
 		.status-count h4,
 		.kill-rate-counts h4,
 		.kill-rate-bars h4,
-		.queue-health-counts h4 {
+		.queue-health-counts h4,
+		#resources h2,
+		#resources h4 {
 			color: #959595;
 			text-transform: uppercase;
 			height: 3em;
@@ -56,22 +72,26 @@ body {
 				padding: 0;
 			}
 
-		.status-count hr {
+		.status-count hr,
+		.carousel hr {
 			border: 0;
 			margin: 0;
 		}
 
-		.status-count hr.dark {
+		.status-count hr.dark,
+		.carousel hr.dark {
 			height: 1px;
 			background-color: #000;
 		}
 
-		.status-count hr.light {
+		.status-count hr.light,
+		.carousel hr.light {
 			height: 1px;
 			background-color: #313234;
 		}
 
-		.status-count h1 {
+		.status-count h1,
+		#resources h2 {
 			color: #fff;
 			margin-top: 0.2em;
 			margin-bottom: 0;
@@ -99,6 +119,10 @@ body {
 				position: relative;
 				top: 0.15em;
 			}
+
+#resources table td {
+	text-align: center;
+}
 
 .table {
 	color: #fff;
