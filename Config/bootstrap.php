@@ -1,0 +1,98 @@
+<?php
+	/**
+	 * Copyright 2013, Campai Business Solutions B.V. (http://www.campai.nl)
+	 *
+	 * Licensed under The MIT License
+	 * Redistributions of files must retain the above copyright notice.
+	 *
+	 * @copyright     Copyright 2013, Campai Business Solutions B.V. (http://www.campai.nl)
+	 * @link          http://autotask.campai.nl
+	 * @license       MIT License (http://opensource.org/licenses/mit-license.php)
+	 * @author        Coen Coppens <coen@campai.nl>
+	 */
+	/**
+	 * Contains the login credentials for the Autotask API and the location of your service.
+	 * The URL for wsdl and asmx are the same, only the extension differs (.asmx vs .wsdl).
+	 * 
+	 * America East: https://webservices3.autotask.net/atservices/1.5/atws.wsdl
+	 * America West: https://webservices5.autotask.net/atservices/1.5/atws.wsdl
+	 * London Data Center: https://webservices4.autotask.net/atservices/1.5/atws.wsdl (Formerly Global 1)
+	 * Australia: https://webservices6.autotask.net/atservices/1.5/atws.wsdl
+	 * Germany: https://webservices7.autotask.net/atservices/1.5/atws.wsdl
+	 * China: https://webservices8.autotask.net/atservices/1.5/atws.wsdl
+	 * Italy: https://webservices9.autotask.net/atservices/1.5/atws.wsdl
+	 * France: https://webservices10.autotask.net/atservices/1.5/atws.wsdl
+	 * Japan: https://webservices11.autotask.net/atservices/1.5/atws.wsdl
+	 * Spain, Latin America: https://webservices12.autotask.net/atservices/1.5/atws.wsdl</pre>
+	 */
+	Configure::write( 'Autotask', array(
+			'wsdl' => 'https://webservices4.autotask.net/atservices/1.5/atws.wsdl'
+		,	'asmx' => 'https://webservices4.autotask.net/atservices/1.5/atws.asmx'
+		,	'username' => 'dtwickler@campai.nl'
+		,	'password' => 'amsterdam78'
+	) );
+
+	/**
+	 * Uncomment this line and correct your server timezone to fix any date & time related errors.
+	 * See http://www.php.net/manual/en/timezones.php for a list of supported timezones.
+	 * 
+	 * To correct your server timezone, run
+	 * dpkg-reconfigure tzdata
+	 * from the console.
+	 * 
+	 * Originally from /app/Config/core.php but moved into here for your convenience.
+	 */
+	//date_default_timezone_set('Europe/Amsterdam');
+
+	/**
+	 * When we get new tickets through the Email 2 Autotask system it automatically
+	 * gets assigned subissuetype ID 69 (ATES). That way we know the ticket hasn't been
+	 * taken care of properly and things like issue type and work type are missing.
+	 * 
+	 * Enter your own ID's like this:
+	 * Configure::write( 'MIT.subIssueTypeIds', array(
+	 * 		5
+	 * ,	17
+	 * ,	23
+	 * ) );
+	 */
+	Configure::write( 'MIT.subIssueTypeIds', array(
+	) );
+
+	/**
+	 * With this value you can change the number of days you want to the Rolling Week widget
+	 * to display. Defaults to 7.
+	 */
+	Configure::write( 'Widget.RollingWeek.daysOfHistory', 7 );
+
+	/**
+	 * With this value you can change the number of days you want to the Queue Health widget
+	 * to display. Defaults to 7.
+	 */
+	Configure::write( 'Widget.QueueHealth.daysOfHistory', 7 );
+
+	/**
+	 * Enables the models to use caching.
+	 */
+	Cache::config( '1_hour', array(
+			'engine' => 'File'
+		,	'duration' => '+1 hours'
+		,	'path' => CACHE
+		,	'prefix' => 'cake_1_hour_'
+	));
+
+	/**
+	 * The number of days the import script has to go back to search for open tickets.
+	 * Defaults to 365.
+	 */
+	Configure::write( 'Import.OpenTickets.history', 365 );
+
+	/**
+	 * Sets the detail of the log file.
+	 * 
+	 * 0 - No logging.
+	 * 1 - Only core messages are logged (start, complete, errors).
+	 * 2 - Adds more detail, show stuff like the fases the script goes through, the amount of tickets created etc.
+	 * 4 - Shows the most detail possible: every new resource, queue, issuetype etc that gets created is logged.
+	 */
+	Configure::write( 'Import.logLevel', 2 );
