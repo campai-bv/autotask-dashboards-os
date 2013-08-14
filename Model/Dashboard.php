@@ -433,10 +433,7 @@
 			$sFilename = APP . 'tmp/logs/cronjob.log';
 
 			if ( file_exists( $sFilename ) ) {
-
-				date_default_timezone_set( 'Europe/Amsterdam' );
 				return date( "Y-m-d H:i:s", filemtime( $sFilename ) );
-
 			}
 
 			return false;
@@ -454,7 +451,15 @@
 		 */
 		private function __updateTicketstatuses( Array $aSubmittedData, $aExistingDashboard ) {
 
-			// Standard statuses
+			// You've created a new dashboard
+			if( empty( $aExistingDashboard['Dashboardwidget'] ) ) {
+
+				$aTicketstatusIdsBefore = array();
+				$aTicketstatusIdsAfter = Hash::extract( $aExistingDashboard, 'Dashboardticketstatus.{n}.ticketstatus_id' );
+
+			// You're updating an existing one
+			} else {
+
 				if( !empty( $aExistingDashboard['Dashboardticketstatus'] ) ) {
 					$aTicketstatusIdsBefore = Hash::extract( $aExistingDashboard, 'Dashboardticketstatus.{n}.ticketstatus_id' );
 				} else {
@@ -467,58 +472,59 @@
 					$aTicketstatusIdsAfter = array();
 				}
 
-				// Were there any statuses removed?
-				if( !empty( $aTicketstatusIdsBefore ) ) {
+			}
 
-					foreach ( $aTicketstatusIdsBefore as $iTicketstatusId ) {
+			// Were there any statuses removed?
+			if( !empty( $aTicketstatusIdsBefore ) ) {
 
-						if( !in_array( $iTicketstatusId, $aTicketstatusIdsAfter ) ) { // Removed
+				foreach ( $aTicketstatusIdsBefore as $iTicketstatusId ) {
 
-							if( !$this->Dashboardwidget->deleteAll( array(
-									'dashboard_id' => $aExistingDashboard['Dashboard']['id']
-								,	'ticketstatus_id' => $iTicketstatusId
-								,	'widget_id' => 7
-							) ) ) {
-								return false;
-							}
+					if( !in_array( $iTicketstatusId, $aTicketstatusIdsAfter ) ) { // Removed
 
+						if( !$this->Dashboardwidget->deleteAll( array(
+								'dashboard_id' => $aExistingDashboard['Dashboard']['id']
+							,	'ticketstatus_id' => $iTicketstatusId
+							,	'widget_id' => 7
+						) ) ) {
+							return false;
 						}
 
 					}
 
 				}
 
-				// Where there any statuses added?
-				if( !empty( $aTicketstatusIdsAfter ) ) {
+			}
 
-					foreach ( $aTicketstatusIdsAfter as $iTicketstatusId ) {
+			// Where there any statuses added?
+			if( !empty( $aTicketstatusIdsAfter ) ) {
 
-						if( !in_array( $iTicketstatusId, $aTicketstatusIdsBefore ) ) { // Added
+				foreach ( $aTicketstatusIdsAfter as $iTicketstatusId ) {
 
-							$this->Ticketstatus->recursive = -1;
-							$aTicketstatus = $this->Ticketstatus->find( 'first', array(
-									'conditions' => array(
-											'Ticketstatus.id' => $iTicketstatusId
-									)
-							) );
+					if( !in_array( $iTicketstatusId, $aTicketstatusIdsBefore ) ) { // Added
 
-							$this->Dashboardwidget->create();
+						$this->Ticketstatus->recursive = -1;
+						$aTicketstatus = $this->Ticketstatus->find( 'first', array(
+								'conditions' => array(
+										'Ticketstatus.id' => $iTicketstatusId
+								)
+						) );
 
-							if( !$this->Dashboardwidget->save( array(
-									'dashboard_id' => $aExistingDashboard['Dashboard']['id']
-								,	'widget_id' => 7
-								,	'ticketstatus_id' => $aTicketstatus['Ticketstatus']['id']
-								,	'display_name' => $aTicketstatus['Ticketstatus']['name']
-							) ) ) {
-								return false;
-							}
+						$this->Dashboardwidget->create();
 
+						if( !$this->Dashboardwidget->save( array(
+								'dashboard_id' => $aExistingDashboard['Dashboard']['id']
+							,	'widget_id' => 7
+							,	'ticketstatus_id' => $aTicketstatus['Ticketstatus']['id']
+							,	'display_name' => $aTicketstatus['Ticketstatus']['name']
+						) ) ) {
+							return false;
 						}
 
 					}
 
 				}
-			// End
+
+			}
 
 			return true;
 
@@ -534,60 +540,99 @@
 		 */
 		private function __updateCalculatedWidgets( Array $aSubmittedData, $aExistingDashboard ) {
 
-			foreach ( $this->__aCalculatedWidgets as $aWidget ) {
+			// You've created a new dashboard
+			if( empty( $aExistingDashboard['Dashboardwidget'] ) ) {
 
-				// Was '<widget name here>' added?
-				if(
-					1 == $aSubmittedData['Dashboard'][ $aWidget['database_field'] ]
-					&&
-					false == $aExistingDashboard['Dashboard'][ $aWidget['database_field'] ]
-				) {
+				foreach ( $this->__aCalculatedWidgets as $aWidget ) {
 
-					$this->Dashboardwidget->create();
-					if( !$this->Dashboardwidget->save( array(
-							'dashboard_id' => $aExistingDashboard['Dashboard']['id']
-						,	'widget_id' => $aWidget['widget_id']
-						,	'type' => $aWidget['type']
-					) ) ) {
+					// Was '<widget name here>' added?
+					if( 1 == $aSubmittedData['Dashboard'][ $aWidget['database_field'] ] ) {
 
-						return false;
-
-					} else {
-
-						if( !empty( $aWidget['settings'] ) ) {
-
-							foreach ( $aWidget['settings'] as $sName => $sValue ) {
-
-								$this->Dashboardwidgetsetting->create();
-								if( !$this->Dashboardwidgetsetting->save( array(
-										'dashboardwidget_id' => $this->Dashboardwidget->id
-									,	'name' => $sName
-									,	'value' => $sValue
-								) ) ) {
-
-									return false;
-
-								}
-
-							}
-
+						if( !$this->__updateCalculatedWidget( $aExistingDashboard['Dashboard']['id'], $aWidget ) ) {
+							return false;
 						}
 
 					}
 
-				// Or was '<widget name here>' removed?
-				} elseif(
-					0 == $aSubmittedData['Dashboard'][ $aWidget['database_field'] ]
-					&&
-					true == $aExistingDashboard['Dashboard'][ $aWidget['database_field'] ]
-				) {
+				}
 
-					// Cascade deletes the old widget
-					if( !$this->Dashboardwidget->deleteAll( array(
-							'dashboard_id' => $aExistingDashboard['Dashboard']['id']
-						,	'widget_id' => $aWidget['widget_id']
-					) ) ) {
-						return false;
+			// You're updating an existing one
+			} else {
+
+				foreach ( $this->__aCalculatedWidgets as $aWidget ) {
+
+					// Was '<widget name here>' added?
+					if(
+						1 == $aSubmittedData['Dashboard'][ $aWidget['database_field'] ]
+						&&
+						false == $aExistingDashboard['Dashboard'][ $aWidget['database_field'] ]
+					) {
+
+						if( !$this->__updateCalculatedWidget( $aExistingDashboard['Dashboard']['id'], $aWidget ) ) {
+							return false;
+						}
+
+					// Or was '<widget name here>' removed?
+					} elseif(
+						0 == $aSubmittedData['Dashboard'][ $aWidget['database_field'] ]
+						&&
+						true == $aExistingDashboard['Dashboard'][ $aWidget['database_field'] ]
+					) {
+
+						// Cascade deletes the old widget
+						if( !$this->Dashboardwidget->deleteAll( array(
+								'dashboard_id' => $aExistingDashboard['Dashboard']['id']
+							,	'widget_id' => $aWidget['widget_id']
+						) ) ) {
+							return false;
+						}
+
+					}
+
+				}
+
+			}
+
+			return true;
+
+		}
+
+
+		/**
+		 * Updates or adds a calculated widget to a dashboard.
+		 * 
+		 * @param  integer $iDashboardId - The ID of the dashboard
+		 * @param  Array  $aWidget - The widget you're trying to link
+		 * @return bool - true on success, false on error.
+		 */
+		private function __updateCalculatedWidget( $iDashboardId, Array $aWidget ) {
+
+			$this->Dashboardwidget->create();
+			if( !$this->Dashboardwidget->save( array(
+					'dashboard_id' => $iDashboardId
+				,	'widget_id' => $aWidget['widget_id']
+				,	'type' => $aWidget['type']
+			) ) ) {
+
+				return false;
+
+			} else {
+
+				if( !empty( $aWidget['settings'] ) ) {
+
+					foreach ( $aWidget['settings'] as $sName => $sValue ) {
+
+						$this->Dashboardwidgetsetting->create();
+						if( !$this->Dashboardwidgetsetting->save( array(
+								'dashboardwidget_id' => $this->Dashboardwidget->id
+							,	'name' => $sName
+							,	'value' => $sValue
+						) ) ) {
+
+							return false;
+
+						}
+
 					}
 
 				}
