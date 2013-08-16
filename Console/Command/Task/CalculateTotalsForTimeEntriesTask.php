@@ -18,6 +18,10 @@
 			,	'Autotask.Dashboardresource'
 		);
 
+		public $tasks = array(
+				'Autotask.TimeConverter'
+		);
+
 		public function execute() {
 
 			if( !$this->__importTimeEntries() ) {
@@ -56,7 +60,7 @@
 
 					$this->Timeentry->create();
 					if( !$this->Timeentry->save( array(
-							'created' => $oResult->DateWorked
+							'created' => $this->TimeConverter->convertToOwnTimezone( $oResult->StartDateTime )
 						,	'resource_id' => $oResult->ResourceID
 						,	'ticket_id' => $iTicketId
 						,	'hours_to_bill' => $oResult->HoursToBill
@@ -78,7 +82,7 @@
 
 						$this->Timeentry->create();
 						if( !$this->Timeentry->save( array(
-								'created' => $oTimeentry->DateWorked
+								'created' => $this->TimeConverter->convertToOwnTimezone( $oTimeentry->StartDateTime )
 							,	'resource_id' => $oTimeentry->ResourceID
 							,	'ticket_id' => $iTicketId
 							,	'hours_to_bill' => $oTimeentry->HoursToBill
