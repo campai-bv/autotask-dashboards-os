@@ -23,7 +23,8 @@
 		);
 
 		public $tasks = array(
-				'Autotask.GetTicketsCompletedToday'
+				'Autotask.TimeConverter'
+			,	'Autotask.GetTicketsCompletedToday'
 			,	'Autotask.GetTicketsOpenToday'
 			,	'Autotask.CalculateTotalsByTicketStatus'
 			,	'Autotask.CalculateTotalsForKillRate'
@@ -292,14 +293,14 @@
 			// End
 
 			// Reformat the dates to your own timezone.
-			$sCreateDate = $this->__convertToOwnTimezone( $oTicket->CreateDate );
+			$sCreateDate = $this->TimeConverter->convertToOwnTimezone( $oTicket->CreateDate );
 
 			if( !empty( $oTicket->CompletedDate ) ) {
-				$sCompletedDate = $this->__convertToOwnTimezone( $oTicket->CompletedDate );
+				$sCompletedDate = $this->TimeConverter->convertToOwnTimezone( $oTicket->CompletedDate );
 			}
 
 			if( !empty( $oTicket->DueDateTime ) ) {
-				$sDueDateTime = $this->__convertToOwnTimezone( $oTicket->DueDateTime );
+				$sDueDateTime = $this->TimeConverter->convertToOwnTimezone( $oTicket->DueDateTime );
 			}
 			// End
 
@@ -574,20 +575,6 @@
 
 			}
 			// End
-
-		}
-
-
-		/**
-		 * Converts a date from the Autotask API to your own timezone.
-		 * @param  string $sDate - Date from the Autotask API
-		 * @return string - Reformatted date
-		 */
-		private function __convertToOwnTimezone( $sDate ) {
-
-			$oDate = new DateTime( $sDate, new DateTimeZone( 'EST' ) );
-			$oDate->setTimezone( new DateTimeZone( date_default_timezone_get() ) );
-			return $oDate->format( 'Y-m-d H:i:s' );
 
 		}
 
