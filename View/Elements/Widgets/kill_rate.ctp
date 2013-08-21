@@ -9,21 +9,21 @@
 		<tbody>
 			<tr>
 				<td style="width: 100%;">
-					<div class="progress" style="height: 50px; width: <?php echo $aData['new_progress_width_%']; ?>%;">
-						<div class="bar bar-danger" style="width: 100%;">
-							<h3><?php
-								echo $aData['created'] . ' <span class="jeditable_setting" id="title_new">';
-								$aSetting = Hash::extract( $aSettings, '{n}[name=title_new].value' );
-								
-								if( isset( $aSetting[0] ) ) {
-									echo $aSetting[0];
-								} else {
-									echo 'New';
-								}
+					<div class="progress" style="height: 50px;">
+						<div class="bar bar-danger" style="width: <?php echo $aData['new_progress_width_%']; ?>%;"></div>
+						<div class="bar bar-danger bar-faded" style="width: <?php echo 100 - $aData['new_progress_width_%']; ?>%;"></div>
+						<h3><?php
+							echo $aData['created'] . ' <span class="jeditable_setting" id="title_new">';
+							$aSetting = Hash::extract( $aSettings, '{n}[name=title_new].value' );
+							
+							if( isset( $aSetting[0] ) ) {
+								echo $aSetting[0];
+							} else {
+								echo 'New';
+							}
 
-								echo '</span>';
-							?></h3>
-						</div>
+							echo '</span>';
+						?></h3>
 					</div>
 				</td>
 
@@ -36,21 +36,21 @@
 			</tr>
 			<tr>
 				<td>
-					<div class="progress" style="height: 50px; width: <?php echo $aData['killed_progress_width_%']; ?>%">
-						<div class="bar bar-success" style="width: 100%;">
-							<h3><?php
-								echo $aData['completed'] . ' <span class="jeditable_setting" id="title_completed">';
-								$aSetting = Hash::extract( $aSettings, '{n}[name=title_completed].value' );
-								
-								if( isset( $aSetting[0] ) ) {
-									echo $aSetting[0];
-								} else {
-									echo 'Completed';
-								}
+					<div class="progress" style="height: 50px;">
+						<div class="bar bar-success" style="width: <?php echo $aData['killed_progress_width_%']; ?>%;"></div>
+						<div class="bar bar-success bar-faded" style="width: <?php echo 100 - $aData['killed_progress_width_%']; ?>%;"></div>
+						<h3><?php
+							echo $aData['completed'] . ' <span class="jeditable_setting" id="title_completed">';
+							$aSetting = Hash::extract( $aSettings, '{n}[name=title_completed].value' );
+							
+							if( isset( $aSetting[0] ) ) {
+								echo $aSetting[0];
+							} else {
+								echo 'Completed';
+							}
 
-								echo '</span>';
-							?></h3>
-						</div>
+							echo '</span>';
+						?></h3>
 					</div>
 				</td>
 			</tr>
