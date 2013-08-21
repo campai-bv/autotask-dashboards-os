@@ -184,7 +184,34 @@ h2 {
 
 		.table.kill-rate td .progress {
 			margin: 0;
+			background-image: -moz-linear-gradient(top,#242527,#242527);
+			background-image:-webkit-gradient(linear,0 0,0 100%,from(#242527),to(#242527));
+			background-image:-webkit-linear-gradient(top,#242527,#242527);
+			background-image:-o-linear-gradient(top,#242527,#242527);
+			background-image:linear-gradient(to bottom,#242527,#242527);
+			background-repeat:repeat-x;
+			filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#242527',endColorstr='#242527',GradientType=0)
 		}
+
+			.table.kill-rate td .progress .bar-faded.bar-success {
+				background-image: -moz-linear-gradient(top,#2e4130,#2e4130);
+				background-image:-webkit-gradient(linear,0 0,0 100%,from(#2e4130),to(#2e4130));
+				background-image:-webkit-linear-gradient(top,#2e4130,#2e4130);
+				background-image:-o-linear-gradient(top,#2e4130,#2e4130);
+				background-image:linear-gradient(to bottom,#2e4130,#2e4130);
+				background-repeat:repeat-x;
+				filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#2e4130',endColorstr='#2e4130',GradientType=0)
+			}
+
+			.table.kill-rate td .progress .bar-faded.bar-danger {
+				background-image: -moz-linear-gradient(top,#482c2d,#482c2d);
+				background-image:-webkit-gradient(linear,0 0,0 100%,from(#482c2d),to(#482c2d));
+				background-image:-webkit-linear-gradient(top,#482c2d,#482c2d);
+				background-image:-o-linear-gradient(top,#482c2d,#482c2d);
+				background-image:linear-gradient(to bottom,#482c2d,#482c2d);
+				background-repeat:repeat-x;
+				filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#482c2d',endColorstr='#482c2d',GradientType=0)
+			}
 
 		.table.kill-rate h1 {
 			font-size: 3em;
@@ -196,6 +223,7 @@ h2 {
 			margin-top: 0.25em;
 			text-align: left;
 			padding-left: 1em;
+			position: absolute;
 		}
 
 form {
