@@ -48,12 +48,20 @@
 			)
 	) );
 
-	if( 'edit' == $this->action ) {
-		echo $this->Form->input( 'Dashboard.id' );
-	}
-
 	echo $this->Form->input( 'Dashboard.name' );
-	echo $this->Form->input( 'Dashboard.slug' );
+
+	if( 'edit' == $this->action ) {
+
+		echo $this->Form->input( 'Dashboard.id' );
+		echo $this->Form->input( 'Dashboard.slug', array(
+				'between' => '<div class="controls"><span class="domain_prefix">http://' . $_SERVER['HTTP_HOST'] . '/</span>'
+			,	'label' => array(
+						'text' => 'URL'
+					,	'class' => 'control-label'
+				)
+		) );
+
+	}
 
 	echo $this->Form->input( 'Dashboardqueue.id', array(
 			'options' => $aQueues['options']
