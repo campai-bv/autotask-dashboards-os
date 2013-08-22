@@ -19,13 +19,29 @@
 		/**
 		 * Converts a date from the Autotask API to your own timezone.
 		 * @param  string $sDate - Date from the Autotask API
+		 * @param  string $sFormat - The format you want to have returned.
 		 * @return string - Reformatted date
 		 */
-		public function convertToOwnTimezone( $sDate ) {
+		public function convertToOwnTimezone( $sDate, $sFormat = 'Y-m-d H:i:s' ) {
 
 			$oDate = new DateTime( $sDate, new DateTimeZone( 'EST' ) );
 			$oDate->setTimezone( new DateTimeZone( date_default_timezone_get() ) );
-			return $oDate->format( 'Y-m-d H:i:s' );
+			return $oDate->format( $sFormat );
+
+		}
+
+
+		/**
+		 * Converts a date from your own timezone to the one used by the Autotask API.
+		 * @param  string $sDate - Date in your own timezone
+		 * @param  string $sFormat - The format you want to have returned.
+		 * @return string - Reformatted date
+		 */
+		public function convertToAutotaskTimezone( $sDate, $sFormat = 'Y-m-d H:i:s' ) {
+
+			$oDate = new DateTime( $sDate, new DateTimeZone( date_default_timezone_get() ) );
+			$oDate->setTimezone( new DateTimeZone( 'EST' ) );
+			return $oDate->format( $sFormat );
 
 		}
 
