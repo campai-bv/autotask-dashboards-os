@@ -260,19 +260,19 @@
 				// 3. There's been quite the activity! Both new and completed tickets are available.
 				} elseif( $iTicketsCreatedToday > 0 && $iTicketsCompletedToday > 0 ) {
 
+					$aKillRate['kill_rate'] = number_format( 100 * ( ( ( 100*$iTicketsCompletedToday ) / $iTicketsCreatedToday ) / 100 ), '0', '.', ',' );
+
 					// We're catching up on all those new tickets
 					if( $iTicketsCreatedToday > $iTicketsCompletedToday ) {
 
 						$aKillRate['new_progress_width_%'] = 100;
 						$aKillRate['killed_progress_width_%'] = 100 * ( ( ( 100*$iTicketsCompletedToday ) / $iTicketsCreatedToday ) / 100 );
-						$aKillRate['kill_rate'] = number_format( ( 100 * ( ( ( 100*$iTicketsCompletedToday ) / $iTicketsCreatedToday ) / 100 ) ), '0', '.', ',' );
 
 					// We're ahead of things, sweet!
 					} else {
 
 						$aKillRate['new_progress_width_%'] = 100 * ( ( ( 100*$iTicketsCreatedToday ) / $iTicketsCompletedToday ) / 100 );
 						$aKillRate['killed_progress_width_%'] = 100;
-						$aKillRate['kill_rate'] = number_format( 100 * ( ( ( 100*$iTicketsCompletedToday ) / $iTicketsCreatedToday ) / 100 ), '0', '.', ',' );
 
 					}
 
