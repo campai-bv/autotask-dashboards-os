@@ -195,24 +195,32 @@
 			if(!is_array($aPicklist)) {
 				return false;
 			}
+			$aNewModelRecords = array();
 			foreach ($aPicklist as $iId=>$sName) {
 				$this->log('checking model:'.$sModel.' for name:'.$sName,4);
 				$aModelRecord = $this->$sModel->findByid($iId);
 				if (empty($aModelRecord)) {
-					$this->log('non existing record so inserting:'.$sName.' with id:'.$iId,4);
-					$aModelRecord = $this->$sModel->save(array($sModel=>array('id'=>$iId,'name'=>$sName)));
+					$this->log('non existing:'.$sModel.' model so inserting:'.$sName.' with id:'.$iId,3);
+					$aNewModelRecords[] = array($sModel=>array('id'=>$iId,'name'=>$sName));
 				}
 				else {
 					if (empty($aModelRecord[$sModel]['name'])) {
-						$this->log('updating '.$sModel.' with id:'.$iId.' which does not have a name. New name:'.$sName,4);
-						$aModelRecord[$sModel]['name']=$sName;
-						$this->$sModel->save($aModelRecord);
+						$this->log('updating '.$sModel.' with id:'.$iId.' which does not have a name. New name:'.$sName,3);
+						$aNewModelRecords[]=array($sModel=>array('id'=>$iId,'name'=>$sName));
 					}
 					else {
+						// allow dashboard settings to change name of picklist item.
+						// set back to empty to resync on next cronjob run
 						$this->log($sModel.':'.$sName.' exists and has name:'.$aModelRecord[$sModel]['name'],4);
 					}
 				}
 			}
+			
+			if (!empty($aNewModelRecords)) {
+				// batch write our model changes
+				$this->$sModel->saveAll($aNewModelRecords);
+			}
+
 		}
 		private function __saveTicketsToDatabase( $oTickets ) {
 
