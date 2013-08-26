@@ -42,6 +42,7 @@
 			 */
 			if (isset($this->_aPicklist[$sEntity])) {
 				if(isset($this->_aPicklist[$sEntity][$sPicklist])) {
+					// we only run one loop per entity resultset
 					return $this->_aPicklist[$sEntity][$sPicklist];
 				}
 			}
@@ -63,17 +64,15 @@
 			foreach ($this->_aPicklistResult[$sEntity]->GetFieldInfoResult->Field as $oField) {
 				if(!empty($oField->IsPickList)) {
 					if($oField->IsPickList == true) {
-						if ($oField->Name == $sPicklist) {
-							if (is_array($oField->PicklistValues->PickListValue)) {
-								foreach ($oField->PicklistValues->PickListValue as $oIssueType) {
-									if (is_object($oIssueType)) {
-										if(isset($oIssueType->Value) && isset($oIssueType->Label)) {
-											$this->_aPicklist[$sEntity][$sPicklist][$oIssueType->Value]=$oIssueType->Label;
-										}
+						if (is_array($oField->PicklistValues->PickListValue)) {
+							foreach ($oField->PicklistValues->PickListValue as $oPicklistValue) {
+								if (is_object($oPicklistValue)) {
+									if(isset($oPicklistValue->Value) && isset($oPicklistValue->Label)) {
+										$this->_aPicklist[$sEntity][$sPicklist][$oPicklistValue->Value]=$oPicklistValue->Label;
 									}
 								}
 							}
-						}						
+						}
 					}
 				}
 			}
