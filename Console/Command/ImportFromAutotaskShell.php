@@ -181,7 +181,7 @@
 		private function __syncPicklistsWithDatabase( ) {
 			$aIssueTypes = $this->Ticket->getAutotaskPicklist( 'Ticket', 'IssueType' );
 			$aSubissueTypes = $this->Ticket->getAutotaskPicklist('Ticket','SubIssueType');
-			$aSubissueTypes = $this->Ticket->getAutotaskPicklist('Ticket','QueueID');
+			$aQueues = $this->Ticket->getAutotaskPicklist('Ticket','QueueID');
 			$aTicketstatus = $this->Ticket->getAutotaskPicklist('Ticket','Status');
 			
 			$this->__savePicklistToModel('Issuetype',$aIssueTypes);
