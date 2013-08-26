@@ -64,11 +64,12 @@
 			foreach ($this->_aPicklistResult[$sEntity]->GetFieldInfoResult->Field as $oField) {
 				if(!empty($oField->IsPickList)) {
 					if($oField->IsPickList == true) {
+						$sCurrentPicklist = $oField->Name;
 						if (is_array($oField->PicklistValues->PickListValue)) {
 							foreach ($oField->PicklistValues->PickListValue as $oPicklistValue) {
 								if (is_object($oPicklistValue)) {
 									if(isset($oPicklistValue->Value) && isset($oPicklistValue->Label)) {
-										$this->_aPicklist[$sEntity][$sPicklist][$oPicklistValue->Value]=$oPicklistValue->Label;
+										$this->_aPicklist[$sEntity][$sCurrentPicklist][$oPicklistValue->Value]=$oPicklistValue->Label;
 									}
 								}
 							}
