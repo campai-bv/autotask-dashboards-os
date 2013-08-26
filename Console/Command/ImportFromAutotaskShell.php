@@ -37,7 +37,7 @@
 			if( !$this->iLogLevel = Configure::read( 'Import.logLevel' ) ) {
 				$this->iLogLevel = 0;
 			}			
-			if( $iLevel < $this->iLogLevel ) {
+			if( $iLevel <= $this->iLogLevel ) {
 				parent::log($sMessage, 'cronjob');	
 			}
 		}
