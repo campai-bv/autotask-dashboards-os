@@ -58,7 +58,7 @@
 			} else {
 				// may as well do these first so there are none missing
 				// sync issue types
-				$this->__syncIssueTypesWithDatabase();
+				$this->__syncPicklistsWithDatabase();
 				// Delete any existing records so we have a clean start.
 				$this->log( '> Truncating tickets table..',1 );
 
