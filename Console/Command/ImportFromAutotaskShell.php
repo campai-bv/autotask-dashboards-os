@@ -33,62 +33,48 @@
 		);
 
 
-		public function _welcome() {
-			return;
+		public function log($sMessage,$iLevel = 0) {
+			if( !$this->iLogLevel = Configure::read( 'Import.logLevel' ) ) {
+				$this->iLogLevel = 0;
+			}			
+			if( $iLevel < $this->iLogLevel ) {
+				parent::log($sMessage, 'cronjob');	
+			}
 		}
-
-
 		public function main() {
 
 			$bErrorsEncountered = false;
 
-			if( !$this->iLogLevel = Configure::read( 'Import.logLevel' ) ) {
-				$this->iLogLevel = 0;
-			}
 
-			if( 0 < $this->iLogLevel ) {
-				$this->log( 'Starting with the import.', 'cronjob' );
-			}
+			$this->log( 'Starting with the import.' );
 
-			// First we must make sure we can login. We do this by performing a dummy call and see what it returns.
-			$oResult = $this->Ticket->findInAutotask( 'open', array(
-					'conditions' => array(
-							'IsThisDay' => array(
-								'CreateDate' => date( 'Y-m-d' )
-							)
-					)
-			) );
 
-			if( false === $oResult ) {
+			// First we must make sure we can login. We do this by performing an inexpensive call and see what it returns.
+			if( false === $this->Ticket->connectAutotask() ) {
 				$bErrorsEncountered = true;
 
 			// Appearantly we can login, so let's get into action!
+			// @comment removing this indent.
 			} else {
-
+				// may as well do these first so there are none missing
+				// sync issue types
+				$this->__syncIssueTypesWithDatabase();
 				// Delete any existing records so we have a clean start.
-				if( 1 < $this->iLogLevel ) {
-					$this->log( "\t" . '> Truncating tickets table..', 'cronjob' );
-				}
+				$this->log( '> Truncating tickets table..',1 );
 
 				$this->Ticket->query('TRUNCATE TABLE tickets;');
 
-				if( 1 < $this->iLogLevel ) {
-					$this->log( "\t" . '..done.', 'cronjob' );
-				}
+				$this->log(  ' ..done.',1);
 				// End
 
 				// Import completed tickets
-				if( 1 < $this->iLogLevel ) {
-					$this->log( "\t" . '> Importing completed tickets (today) into the database..', 'cronjob' );
-				}
+				$this->log(  '> Importing completed tickets (today) into the database..',1 );
 
 				$oTickets = $this->GetTicketsCompletedToday->execute();
 
 				if( empty( $oTickets ) ) {
 
-					if( 1 < $this->iLogLevel ) {
-						$this->log( "\t" . '..nothing saved - query returned no tickets.', 'cronjob' );
-					}
+					$this->log( ' ..nothing saved - query returned no tickets.',1 );
 
 				} else {
 
@@ -98,9 +84,7 @@
 
 					} else {
 
-						if( 1 < $this->iLogLevel ) {
-							$this->log( "\t" . '..imported ' . count( $oTickets ) . ' ticket(s).', 'cronjob' );
-						}
+						$this->log(  ' ..imported ' . count( $oTickets ) . ' ticket(s).' ,1);
 
 					}
 
@@ -110,17 +94,13 @@
 				if( !$bErrorsEncountered ) {
 
 					// Import the tickets that have any other status then 'completed'.
-					if( 1 < $this->iLogLevel ) {
-						$this->log( "\t" . '> Importing open tickets (today) into the database..', 'cronjob' );
-					}
+					$this->log(  '> Importing open tickets (today) into the database..',1);
 
 					$oTickets = $this->GetTicketsOpenToday->execute();
 
 					if( empty( $oTickets ) ) {
 
-						if( 1 < $this->iLogLevel ) {
-							$this->log( "\t" . '..nothing saved - query returned no tickets.', 'cronjob' );
-						}
+						$this->log( ' ..nothing saved - query returned no tickets.',1 );
 
 					} else {
 
@@ -130,9 +110,7 @@
 
 						} else {
 
-							if( 1 < $this->iLogLevel ) {
-								$this->log( "\t" . '..imported ' . count( $oTickets ) . ' ticket(s).', 'cronjob' );
-							}
+								$this->log(  ' ..imported ' . count( $oTickets ) . ' ticket(s).' ,1);
 
 						}
 
@@ -141,51 +119,32 @@
 					if( !$bErrorsEncountered ) {
 
 						// Processing of the tickets data into totals for kill rates, queue healths etc.
-						if( 1 < $this->iLogLevel ) {
-							$this->log( "\t" . '> Calculating ticket status totals for all dashboards..', 'cronjob' );
-						}
+						$this->log('> Calculating ticket status totals for all dashboards..',1 );
 
 						$this->CalculateTotalsByTicketStatus->execute();
 
-						if( 1 < $this->iLogLevel ) {
-							$this->log( "\t" . '..done.', 'cronjob' );
-						}
-
-						if( 1 < $this->iLogLevel ) {
-							$this->log( "\t" . '> Calculating kill rate totals for all dashboards..', 'cronjob' );
-						}
+						$this->log( ' ..done.',1 );
+						$this->log( '> Calculating kill rate totals for all dashboards..' ,1);
 
 						$this->CalculateTotalsForKillRate->execute();
 
-						if( 1 < $this->iLogLevel ) {
-							$this->log( "\t" . '..done.', 'cronjob' );
-						}
-
-						if( 1 < $this->iLogLevel ) {
-							$this->log( "\t" . '> Calculating queue health totals for all dashboards..', 'cronjob' );
-						}
+						$this->log( ' ..done.',1 );
+						$this->log( '> Calculating queue health totals for all dashboards..',1 );
 
 						$this->CalculateTotalsForQueueHealth->execute();
 
-						if( 1 < $this->iLogLevel ) {
-							$this->log( "\t" . '..done.', 'cronjob' );
-						}
+						$this->log( ' ..done.' ,1);
 
-						if( 1 < $this->iLogLevel ) {
-							$this->log( "\t" . '> Importing time entries..', 'cronjob' );
-						}
+						$this->log( '> Importing time entries..',1 );
 
 						if( !$this->CalculateTotalsForTimeEntries->execute() ) {
 							$bErrorsEncountered = true;
 						}
 
-						if( 1 < $this->iLogLevel ) {
-							$this->log( "\t" . '..done.', 'cronjob' );
-						}
+						$this->log(  ' ..done.',1 );
 
-						if( 1 < $this->iLogLevel ) {
-							$this->log( "\t" . '> Clearing cache for all dashboards..', 'cronjob' );
-						}
+						$this->log( '> Clearing cache for all dashboards..',1 );
+
 
 						if(
 							clearCache() // Clear the view cache
@@ -193,14 +152,12 @@
 							Cache::clear( null ,'1_hour' ) // Clear the model cache
 						) {
 
-							if( 1 < $this->iLogLevel ) {
-								$this->log( "\t" . '..done.', 'cronjob' );
-							}
+							$this->log(  ' ..done.',1 );
 
 						} else {
 
 							$bErrorsEncountered = true;
-							$this->log( "\t" . '..could not delete view cache!', 'cronjob' );
+							$this->log( ' ..could not delete view cache!' );
 
 						}
 
@@ -212,18 +169,48 @@
 			// End
 
 			if( $bErrorsEncountered ) {
-				$this->log( 'Failed: we\'ve encountered some errors while running the import script.', 'cronjob' );
+				$this->log( 'Failed: we\'ve encountered some errors while running the import script.' );
 			} else {
 
-				if( 0 < $this->iLogLevel ) {
-					$this->log( 'Success: everything imported correctly.', 'cronjob' );
-				}
+				$this->log( 'Success: everything imported correctly.' );
 
 			}
 
 		}
 
+		private function __syncPicklistsWithDatabase( ) {
+			$aIssueTypes = $this->Ticket->getAutotaskPicklist( 'Ticket', 'IssueType' );
+			$aSubissueTypes = $this->Ticket->getAutotaskPicklist('Ticket','SubIssueType');
+			$aSubissueTypes = $this->Ticket->getAutotaskPicklist('Ticket','QueueID');
+			
+			$this->__savePicklistToModel('Issuetype',$aIssueTypes);
+			$this->__savePicklistToModel('Subissuetype',$aSubissueTypes);
+			$this->__savePicklistToModel('Queue',$aQueues);
 
+		}
+		private function __savePicklistToModel($sModel,$aPicklist) {
+			if(!is_array($aPicklist)) {
+				return false;
+			}
+			foreach ($aPicklist as $iId=>$sName) {
+				$this->log('checking model:'.$sModel.' for name:'.$sName,4);
+				$aModelRecord = $this->$sModel->findByid($iId);
+				if (empty($aModelRecord)) {
+					$this->log('non existing record so inserting:'.$sName.' with id:'.$iId,4);
+					$aModelRecord = $this->$sModel->save(array($sModel=>array('id'=>$iId,'name'=>$sName)));
+				}
+				else {
+					if (empty($aModelRecord[$sModel]['name'])) {
+						$this->log('updating '.$sModel.' with id:'.$iId.' which does not have a name. New name:'.$sName,4);
+						$aModelRecord[$sModel]['name']=$sName;
+						$this->$sModel->save($aModelRecord);
+					}
+					else {
+						$this->log($sModel.':'.$sName.' exists and has name:'.$aModelRecord[$sModel]['name'],4);
+					}
+				}
+			}
+		}
 		private function __saveTicketsToDatabase( $oTickets ) {
 
 			if( !empty( $oTickets ) ) {
@@ -259,8 +246,8 @@
 						$this->{$sModel}->query( $sQuery );
 					} catch ( Exception $e ) {
 
-						$this->log( "\t" . '- Could not save the new ' . Inflector::pluralize( $sModel ) . '. MySQL says: "' . $e->errorInfo[2] . '"', 'cronjob' );
-						$this->log( "\t" . '- ' . $sQuery, 'cronjob' );
+						$this->log( '- Could not save the new ' . Inflector::pluralize( $sModel ) . '. MySQL says: "' . $e->errorInfo[2] . '"' );
+						$this->log( '- ' . $sQuery );
 						return false;
 
 					}
@@ -391,6 +378,13 @@
 					if( !empty( $oResource->FirstName ) ) {
 						$sResourceName .= $oResource->LastName;
 					}
+					
+					// mattp resource edit
+					//mysql_real_escape_string
+					if( !empty( $sResourceName ) ) {
+                                                $sResourceName = mysql_real_escape_string($sResourceName);
+                                        }
+
 
 					if( empty( $aQueries['Resource'] ) ) {
 						$aQueries['Resource'] = "INSERT INTO resources (id, name ) VALUES ";
@@ -405,9 +399,7 @@
 
 					$aIds['Resource'][] = $iResourceId;
 
-					if( 3 < $this->iLogLevel ) {
-						$this->log( "\t" . '- Found new Resource => Inserted into the database ("' . $sResourceName . '").', 'cronjob' );
-					}
+					$this->log( '  - Found new Resource => Inserted into the database ("' . $sResourceName . '").' ,3);
 
 				}
 
@@ -439,9 +431,7 @@
 
 					$aIds['Queue'][] = $iQueueId;
 
-					if( 3 < $this->iLogLevel ) {
-						$this->log( "\t" . '- Found new Queue => Inserted into the database (id ' . $iQueueId . ').', 'cronjob' );
-					}
+					$this->log( '  - Found new Queue => Inserted into the database (id ' . $iQueueId . ').' ,3);
 
 				}
 
@@ -470,9 +460,7 @@
 
 				$aIds['Ticketstatus'][] = $oTicket->Status;
 
-				if( 3 < $this->iLogLevel ) {
-					$this->log( "\t" . '- Found new Ticket Status => Inserted into the database (id ' . $oTicket->Status . ').', 'cronjob' );
-				}
+				$this->log('  - Found new Ticket Status => Inserted into the database (id ' . $oTicket->Status . ').' ,3);
 
 			}
 			// End
@@ -509,9 +497,7 @@
 
 					$aIds['Account'][] = $oTicket->AccountID;
 
-					if( 3 < $this->iLogLevel ) {
-						$this->log( "\t" . '- Found new Account => Inserted into the database ("' . $oAccount->AccountName . '").', 'cronjob' );
-					}
+					$this->log( '  - Found new Account => Inserted into the database ("' . $oAccount->AccountName . '").' ,3);
 
 				}
 
@@ -541,9 +527,7 @@
 
 					$aIds['Issuetype'][] = $oTicket->IssueType;
 
-					if( 3 < $this->iLogLevel ) {
-						$this->log( "\t" . '- Found new Issue Type => Inserted into the database (id ' . $oTicket->IssueType . ').', 'cronjob' );
-					}
+						$this->log(  '  - Found new Issue Type => Inserted into the database (id ' . $oTicket->IssueType . ').',3 );
 
 				}
 
@@ -573,9 +557,7 @@
 
 					$aIds['Subissuetype'][] = $oTicket->SubIssueType;
 
-					if( 3 < $this->iLogLevel ) {
-						$this->log( "\t" . '- Found new Sub Issue Type => Inserted into the database (id ' . $oTicket->SubIssueType . ').', 'cronjob' );
-					}
+					$this->log( '  - Found new Sub Issue Type => Inserted into the database (id ' . $oTicket->SubIssueType . ').' ,3);
 
 				}
 
