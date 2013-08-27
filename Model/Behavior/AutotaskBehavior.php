@@ -84,6 +84,7 @@
 			}
 			return false;
 		}
+
 		
 		public function queryAutotask( Model $oModel, $sEntity, Array $aQuery ) {
 
