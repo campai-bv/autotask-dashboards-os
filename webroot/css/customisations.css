@@ -309,3 +309,15 @@ input[type="submit"] {
 .gridster li {
 	list-style-type: none;
 }
+
+.domain_prefix {
+	color: #959595;
+	position: relative;
+	top: 1px;
+	margin-right: 2px;
+}
+
+.error-message {
+	color: #af4946;
+	margin-left: 180px;
+}

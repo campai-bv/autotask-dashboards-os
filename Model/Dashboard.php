@@ -136,6 +136,39 @@
 				)
 		);
 
+		var $validate = array(
+			'slug' => array(
+					'notEmpty' => array(
+							'rule' => 'notEmpty'
+						,	'required' => true
+						,	'message' => 'required_field'
+						,	'on' => 'create'
+					)
+				,	'unique' => array(
+							'rule' => array( 'checkUniqueSlug' )
+						,	'message' => 'URL is already in use.'
+					)
+			)
+		);
+
+		public function checkUniqueSlug( $check ) {
+
+			$aResult = $this->find( 'count', array(
+					'conditions' => array(
+							'Dashboard.slug' => $check['slug']
+						,	'Dashboard.id <>' => $this->data['Dashboard']['id']
+					)
+				)
+			);
+
+			if( 0 == $aResult ) {
+				return true;
+			}
+
+			return false;
+
+		}
+
 
 		public function getWidgetData( $iDashboardId ) {
 

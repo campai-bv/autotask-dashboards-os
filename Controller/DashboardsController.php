@@ -203,6 +203,8 @@
 
 			if( $this->request->is( 'post' ) ) {
 
+				$this->request->data['Dashboard']['slug'] = Inflector::slug( $this->request->data['Dashboard']['name'] );
+
 				if( $this->Dashboard->save( $this->request->data['Dashboard'] ) ) {
 
 					// Queues
@@ -308,96 +310,98 @@
 			) {
 
 				// Adjust all widgets
-				$this->Dashboard->createDashboardWidgets( $this->request->data );
+				if( $this->Dashboard->save( $this->request->data['Dashboard'] ) ) {
 
-				$this->Dashboard->save( $this->request->data['Dashboard'] );
+					$this->Dashboard->createDashboardWidgets( $this->request->data );
 
-				// Queues
-				$this->Dashboardqueue->deleteAll( array(
-						'dashboard_id' => $this->request->data['Dashboard']['id']
-				) );
+					// Queues
+					$this->Dashboardqueue->deleteAll( array(
+							'dashboard_id' => $this->request->data['Dashboard']['id']
+					) );
 
-				if( !empty( $this->request->data['Dashboardqueue']['id'] ) ) {
+					if( !empty( $this->request->data['Dashboardqueue']['id'] ) ) {
 
-					foreach ( $this->request->data['Dashboardqueue']['id'] as $iKey => $iQueueId ) {
+						foreach ( $this->request->data['Dashboardqueue']['id'] as $iKey => $iQueueId ) {
 
-						$this->Dashboardqueue->create();
-						$this->Dashboardqueue->save( array(
-								'queue_id' => $iQueueId
-							,	'dashboard_id' => $this->request->data['Dashboard']['id']
-						) );
+							$this->Dashboardqueue->create();
+							$this->Dashboardqueue->save( array(
+									'queue_id' => $iQueueId
+								,	'dashboard_id' => $this->request->data['Dashboard']['id']
+							) );
+						}
+
 					}
+					// End - queues
+
+
+					// Resources
+					$this->Dashboardresource->deleteAll( array(
+							'dashboard_id' => $this->request->data['Dashboard']['id']
+					) );
+
+					if( !empty( $this->request->data['Dashboardresource']['id'] ) ) {
+
+						foreach ( $this->request->data['Dashboardresource']['id'] as $iKey => $iResourceId ) {
+
+							$this->Dashboardresource->create();
+							$this->Dashboardresource->save( array(
+									'resource_id' => $iResourceId
+								,	'dashboard_id' => $this->request->data['Dashboard']['id']
+							) );
+						}
+
+					}
+					// End - resources
+
+
+					// Ticket statuses
+					$this->Dashboardticketstatus->deleteAll( array(
+							'dashboard_id' => $this->request->data['Dashboard']['id']
+					) );
+
+					if( !empty( $this->request->data['Dashboardticketstatus']['id'] ) ) {
+
+						foreach ( $this->request->data['Dashboardticketstatus']['id'] as $iKey => $iTicketstatusId ) {
+
+							$this->Dashboardticketstatus->create();
+							$this->Dashboardticketstatus->save( array(
+									'ticketstatus_id' => $iTicketstatusId
+								,	'dashboard_id' => $this->request->data['Dashboard']['id']
+							) );
+						}
+
+					}
+					// End - Ticket statuses
+
+					$sFlashMessage = '<strong>Success!</strong> Dashboard has been updated.';
+
+					App::uses('HtmlHelper', 'View/Helper');
+					$this->Html = new HtmlHelper( new View($this) );
+
+					$sFlashMessage .= '<br/>' . $this->Html->link(
+									'View your updated dashboard'
+								,	array(
+											'plugin' => 'autotask'
+										,	'controller' => 'dashboards'
+										,	'action' => 'display'
+										,	$this->request->data['Dashboard']['id']
+									)
+					);
+
+					clearCache(); // Clear the view cache
+					Cache::clear( null ,'1_hour' ); // Clear the model cache
+
+					$this->Session->setFlash( $sFlashMessage );
+					$this->redirect( array(
+							'plugin' => 'autotask'
+						,	'controller' => 'dashboards'
+						,	'action' => 'edit'
+						,	$this->request->data['Dashboard']['id']
+					) );
+
+					exit();
 
 				}
-				// End - queues
-
-
-				// Resources
-				$this->Dashboardresource->deleteAll( array(
-						'dashboard_id' => $this->request->data['Dashboard']['id']
-				) );
-
-				if( !empty( $this->request->data['Dashboardresource']['id'] ) ) {
-
-					foreach ( $this->request->data['Dashboardresource']['id'] as $iKey => $iResourceId ) {
-
-						$this->Dashboardresource->create();
-						$this->Dashboardresource->save( array(
-								'resource_id' => $iResourceId
-							,	'dashboard_id' => $this->request->data['Dashboard']['id']
-						) );
-					}
-
-				}
-				// End - resources
-
-
-				// Ticket statuses
-				$this->Dashboardticketstatus->deleteAll( array(
-						'dashboard_id' => $this->request->data['Dashboard']['id']
-				) );
-
-				if( !empty( $this->request->data['Dashboardticketstatus']['id'] ) ) {
-
-					foreach ( $this->request->data['Dashboardticketstatus']['id'] as $iKey => $iTicketstatusId ) {
-
-						$this->Dashboardticketstatus->create();
-						$this->Dashboardticketstatus->save( array(
-								'ticketstatus_id' => $iTicketstatusId
-							,	'dashboard_id' => $this->request->data['Dashboard']['id']
-						) );
-					}
-
-				}
-				// End - Ticket statuses
-
-				$sFlashMessage = '<strong>Success!</strong> Dashboard has been updated.';
-
-				App::uses('HtmlHelper', 'View/Helper');
-				$this->Html = new HtmlHelper( new View($this) );
-
-				$sFlashMessage .= '<br/>' . $this->Html->link(
-								'View your updated dashboard'
-							,	array(
-										'plugin' => 'autotask'
-									,	'controller' => 'dashboards'
-									,	'action' => 'display'
-									,	$this->request->data['Dashboard']['id']
-								)
-				);
-
-				clearCache(); // Clear the view cache
-				Cache::clear( null ,'1_hour' ); // Clear the model cache
-
-				$this->Session->setFlash( $sFlashMessage );
-				$this->redirect( array(
-						'plugin' => 'autotask'
-					,	'controller' => 'dashboards'
-					,	'action' => 'edit'
-					,	$this->request->data['Dashboard']['id']
-				) );
-
-				exit();
 
 			} else {
 				$this->request->data['Dashboard'] = $aDashboard['Dashboard'];
