@@ -390,12 +390,6 @@
 						$sResourceName .= $oResource->LastName;
 					}
 					
-					// mattp resource edit
-					//mysql_real_escape_string
-					if( !empty( $sResourceName ) ) {
-                                                $sResourceName = mysql_real_escape_string($sResourceName);
-                                        }
-
 
 					if( empty( $aQueries['Resource'] ) ) {
 						$aQueries['Resource'] = "INSERT INTO resources (id, name ) VALUES ";
