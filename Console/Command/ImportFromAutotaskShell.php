@@ -20,7 +20,6 @@
 			,	'Autotask.Account'
 			,	'Autotask.Issuetype'
 			,	'Autotask.Subissuetype'
-			,   'Autotask.atws'
 		);
 
 		public $tasks = array(
