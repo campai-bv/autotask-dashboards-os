@@ -76,7 +76,7 @@
 
 			if( empty( $oTickets ) ) {
 
-				$this->log( ' ..nothing saved - query returned no tickets.',1 );
+				$this->log( ' ..nothing todo - api query returned no tickets completed today.',1 );
 
 			} else {
 
@@ -227,18 +227,8 @@
 
 			if( !empty( $oTickets ) ) {
 
-				// Gets filled up with queries that should get executed.
+				// Gets filled up with ticket model data that should get executed.
 				$aQueries = array();
-				// Gets filled up with the id's of all new records, to prevent duplicate ones.
-				$aIds = array(
-						'Ticket' => array()
-					,	'Account' => array()
-					,	'Resource' => array()
-					,	'Queue' => array()
-					,	'Ticketstatus' => array()
-					,	'Issuetype' => array()
-					,	'Subissuetype' => array()
-				);
 
 				if( 1 == count( $oTickets ) ) {
 
