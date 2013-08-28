@@ -16,10 +16,6 @@
 
 		public $name = 'Resource';
 
-		public $actsAs = array(
-				'Autotask.Autotask'
-		);
-
 		public $hasMany = array(
 				'Autotask.Ticket'
 		);

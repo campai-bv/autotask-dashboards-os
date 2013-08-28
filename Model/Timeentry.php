@@ -16,10 +16,6 @@
 
 		public $name = 'Timeentry';
 
-		public $actsAs = array(
-				'Autotask.Autotask'
-		);
-
 		public $belongsTo = array(
 				'Autotask.Ticket'
 			,	'Autotask.Resource'

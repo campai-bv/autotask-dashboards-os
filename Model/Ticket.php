@@ -16,10 +16,6 @@
 
 		public $name = 'Ticket';
 
-		public $actsAs = array(
-				'Autotask.Autotask'
-		);
-
 		public $belongsTo = array(
 				'Autotask.Resource'
 			,	'Autotask.Ticketstatus'
