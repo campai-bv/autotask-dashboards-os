@@ -97,10 +97,4 @@
 	 */
 	Configure::write( 'Import.logLevel', 0 );
 	
-	/**
-	 * Import the atws library
-	 * @todo: eventually, move the require to the import script as we don't need it unless importing
-	 *        can only do that once models are free of autotask behaivour
-	 */
-	 require_once(dirname(__DIR__) . DS 'Vendors'.DS.'atws'.DS.'php-atws.php'));
 	

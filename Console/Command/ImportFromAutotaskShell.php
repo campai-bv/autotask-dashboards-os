@@ -10,6 +10,9 @@
 	 * @license       MIT License (http://opensource.org/licenses/mit-license.php)
 	 * @author        Coen Coppens <coen@campai.nl>
 	 */
+
+App::import('Vendor', 'Autotask.atws', true, array(), 'atws'.DA.'php-atws.php');
+
 	class ImportFromAutotaskShell extends AppShell {
 
 		public $uses = array(

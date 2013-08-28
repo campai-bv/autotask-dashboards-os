@@ -4,7 +4,7 @@
  * 
  */
 
-require_once('php-atws-classmap.php'); 
+require_once(__DIR__.DIRECTORY_SEPARATOR.'php-atws-classmap.php'); 
 
 class atws extends SoapClient {
 
