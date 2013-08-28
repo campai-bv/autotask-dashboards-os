@@ -212,7 +212,6 @@
 				exit();
 			}
 			// setup the atws object
-			App::import('Vendor', 'atws', array('file' => 'php-atws'.DS.'.php'));
 			$this->oAutotask = new atws();
 			if ($this->oAutotask->connect($aLogin['location'],$aLogin['username'],$aLogin['password'])) {
 				if ($this->checkConnectAutotask() === true) {
