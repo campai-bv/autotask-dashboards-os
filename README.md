@@ -10,14 +10,14 @@ To use this application you'll need:
 * Copy the files in this directory into app/Plugin/Autotask.
 * Load the Plugin by editing your app/Config/bootstrap.php like so:
   ```
-  <?php CakePlugin::load( 'Autotask', array(
+  CakePlugin::load( 'Autotask', array(
   'bootstrap' => true
   ,  'routes' => true
   ) );
   ```
 * Make sure to check if the /app/Config/core.php file of your CakePHP installation enables the checking of cache by looking at line #130, which reads:
-  ```php
-  <?php Configure::write('Cache.check', true);
+  ```
+  Configure::write('Cache.check', true);
   ```
   Uncomment if commented.
 * Copy
