@@ -11,7 +11,8 @@
 	 * @author        Coen Coppens <coen@campai.nl>
 	 */
 
-App::import('Vendor', 'Autotask.atws', true, array(), 'atws'.DA.'php-atws.php');
+//App::import('Vendor', 'Autotask.atws', true, array(), 'atws'.DA.'php-atws.php');
+require_once(dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'Vendor'.DIRECTORY_SEPARATOR.'atws'.DIRECTORY_SEPARATOR.'php-atws.php');
 
 	class ImportFromAutotaskShell extends AppShell {
 
@@ -56,7 +57,7 @@ App::import('Vendor', 'Autotask.atws', true, array(), 'atws'.DA.'php-atws.php');
 
 			// First we must make sure we can login. 
 			//We do this by performing an inexpensive call and see what it returns.
-			if( false === $this->Ticket->connectAutotask() ) {
+			if( false === $this->connectAutotask() ) {
 				$this->log('Failed to connect to autotask');
 				return;
 			} 
@@ -185,10 +186,10 @@ App::import('Vendor', 'Autotask.atws', true, array(), 'atws'.DA.'php-atws.php');
 		}
 
 		private function __syncPicklistsWithDatabase( ) {
-			$aIssueTypes = $this->Ticket->getAutotaskPicklist( 'Ticket', 'IssueType' );
-			$aSubissueTypes = $this->Ticket->getAutotaskPicklist('Ticket','SubIssueType');
-			$aQueues = $this->Ticket->getAutotaskPicklist('Ticket','QueueID');
-			$aTicketstatus = $this->Ticket->getAutotaskPicklist('Ticket','Status');
+			$aIssueTypes = $this->getAutotaskPicklist( 'Ticket', 'IssueType' );
+			$aSubissueTypes = $this->getAutotaskPicklist('Ticket','SubIssueType');
+			$aQueues = $this->getAutotaskPicklist('Ticket','QueueID');
+			$aTicketstatus = $this->getAutotaskPicklist('Ticket','Status');
 			
 			$this->__savePicklistToModel('Issuetype',$aIssueTypes);
 			$this->__savePicklistToModel('Subissuetype',$aSubissueTypes);
@@ -710,7 +711,7 @@ App::import('Vendor', 'Autotask.atws', true, array(), 'atws'.DA.'php-atws.php');
 			$aLogin = array(
 					'login' => Configure::read( 'Autotask.username' )
 				,	'password' => Configure::read( 'Autotask.password' )
-				,	'location' => Configure::read( 'Autotask.asmx' )
+				,	'location' => Configure::read( 'Autotask.wsdl' )
 			);
 
 			if(
@@ -758,7 +759,7 @@ App::import('Vendor', 'Autotask.atws', true, array(), 'atws'.DA.'php-atws.php');
 			}
 			// setup the atws object
 			$this->oAutotask = new atws();
-			if ($this->oAutotask->connect($aLogin['location'],$aLogin['username'],$aLogin['password'])) {
+			if ($this->oAutotask->connect($aLogin['location'],$aLogin['login'],$aLogin['password'])) {
 				if ($this->checkConnectAutotask() === true) {
 					return true;
 				}
