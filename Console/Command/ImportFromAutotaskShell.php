@@ -48,7 +48,8 @@ App::import('Vendor', 'Autotask.atws', true, array(), 'atws'.DA.'php-atws.php');
 		public function main() {
 			
 			$bErrorsEncountered = false;
-
+			$this->connectAutotask();
+			$this->checkConnectAutotask();
 
 			$this->log( 'Starting with the import.' );
 
