@@ -1,4 +1,4 @@
-<?php
+<?php namespace atws;
 /*
  * Created on 27 Aug 2013
  * 
