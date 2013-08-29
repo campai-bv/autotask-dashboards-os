@@ -267,6 +267,90 @@ require_once(dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'Vendor'.DIRECTORY_SE
 
 		}
 
+		/**
+		 * 
+		 * @param  string $sType  'open', 'waitingCustomer' 
+		 * @param  array  $aQuery [description]
+		 * 
+		 * @return object
+		 */
+		public function findInAutotask( $sType = 'open', $aQuery = array() ) {
+
+			switch ( $sType ) {
+
+				case 'open':
+					return $this->_findOpenInAutotask( $aQuery );
+				break;
+
+				case 'closed':
+					return $this->_findClosedInAutotask( $aQuery );
+				break;
+
+				case 'waitingCustomer':
+					return $this->_findWaitingCustomerInAutotask( $aQuery );
+				break;
+
+				default:
+					return false;
+				break;
+			}
+
+		}
+
+		private function _findOpenInAutotask( Array $aQuery ) {
+
+			$aConditions = array(
+					'NotEqual' => array(
+							'Status' => 5
+					)
+			);
+
+			if( !empty( $aQuery['conditions'] ) ) {
+				$aQuery['conditions'] = array_merge_recursive( $aQuery['conditions'], $aConditions );
+			} else {
+				$aQuery['conditions'] = $aConditions;
+			}
+
+			return $this->queryAutotask( 'Ticket', $aQuery );
+
+		}
+
+
+		private function _findWaitingCustomerInAutotask( Array $aQuery ) {
+
+			$aConditions = array(
+					'Equals' => array(
+							'Status' => 7
+					)
+			);
+
+			if( !empty( $aQuery['conditions'] ) ) {
+				$aQuery['conditions'] = array_merge_recursive( $aQuery['conditions'], $aConditions );
+			} else {
+				$aQuery['conditions'] = $aConditions;
+			}
+
+			return $this->queryAutotask( 'Ticket', $aQuery );
+
+		}
+		
+		private function _findClosedInAutotask( Array $aQuery ) {
+
+			$aConditions = array(
+					'Equals' => array(
+							'Status' => 5
+					)
+			);
+
+			if( !empty( $aQuery['conditions'] ) ) {
+				$aQuery['conditions'] = array_merge_recursive( $aQuery['conditions'], $aConditions );
+			} else {
+				$aQuery['conditions'] = $aConditions;
+			}
+
+			return $this->queryAutotask( 'Ticket', $aQuery );
+
+		}
 
 		/**
 		 * Rebuilds the response from the Autotask API into a set of MySQL insert queries.
