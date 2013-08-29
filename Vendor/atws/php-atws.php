@@ -6,7 +6,7 @@
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'php-atws-classmap.php'); 
 
-class atws extends \SoapClient {
+class atws {
 
 	private $_connected = false;
 	
@@ -29,7 +29,7 @@ class atws extends \SoapClient {
 			return true;
 		}
 		try {
-			$this->client = new soapclient($this->_url,$this->soap_options);
+			$this->client = new \soapclient($this->_url,$this->soap_options);
 		}	
 		catch ( SoapFault $fault ) {
 			$this->last_connect_fault = $fault;
