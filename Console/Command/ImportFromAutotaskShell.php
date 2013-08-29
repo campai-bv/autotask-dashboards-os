@@ -570,7 +570,7 @@ require_once(dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'Vendor'.DIRECTORY_SE
 // from the behaivour class
 
 
-		public function getAutotaskPicklist( Model $oModel, $sEntity, $sPicklist ) {
+		public function getAutotaskPicklist( $sEntity, $sPicklist ) {
 			if($this->connectAutotask() !== true ) {
 				return false;
 			}

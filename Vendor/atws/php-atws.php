@@ -69,7 +69,8 @@ class atws extends SoapClient {
 				return false;
 			}
 			else {
-				return $this->getPicklist($entity , $picklist, $attempt++);
+				$attempt++;
+				return $this->getPicklist($entity , $picklist, $attempt);
 			}
 		}
 
