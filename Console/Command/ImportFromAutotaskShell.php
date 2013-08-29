@@ -203,8 +203,8 @@ require_once(dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'Vendor'.DIRECTORY_SE
 			}
 			$aNewModelRecords = array();
 			foreach ($aPicklist as $iId=>$sName) {
-				$this->log('checking model:'.$sModel.' for name:'.$sName,4);
-				$aModelRecord = $this->$sModel->findByid($iId);
+				$this->log('checking model:'.$sModel.' id: '.$iId.' for name:'.$sName,4);
+				$aModelRecord = $this->$sModel->findById($iId);
 				if (empty($aModelRecord)) {
 					$this->log('non existing:'.$sModel.' model so inserting:'.$sName.' with id:'.$iId,3);
 					$aNewModelRecords[] = array($sModel=>array('id'=>$iId,'name'=>$sName));
