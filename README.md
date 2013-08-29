@@ -10,32 +10,32 @@ To use this application you'll need:
 * Copy the files in this directory into app/Plugin/Autotask.
 * Load the Plugin by editing your app/Config/bootstrap.php like so:
   ```php
-  CakePlugin::load( 'Autotask', array(
+  <?php CakePlugin::load( 'Autotask', array(
   'bootstrap' => true
   ,  'routes' => true
   ) );
   ```
 * Make sure to check if the /app/Config/core.php file of your CakePHP installation enables the checking of cache by looking at line #130, which reads:
   ```php
-  Configure::write('Cache.check', true);
+  <?php Configure::write('Cache.check', true);
   ```
   Uncomment if commented.
 * Copy
-  ```text
+  ```
   app/Plugin/Autotask/Config/bootstrap.php.default
   ```
   to
-  ```text
+  ```
   app/Plugin/Autotask/Config/bootstrap.php
   ```
   and enter your Autotask credentials (and optionally other values to find interesting).
 * Run
-  ```text
+  ```
   app/Plugin/Autotask/Config/Schema/autotask.sql
   ```
   to setup your database.
 * Setup the cronjob that imports your Autotask data:
-  ```text
+  ```
   sh </path/to/your/cake/installation/>/lib/CakeConsole/cake -app /path/to/your/application/folder/app Autotask.import_from_autotask
   ```
 
@@ -45,7 +45,7 @@ To use this application you'll need:
   For instance, when you have 1.2 installed, use the file /app/Plugin/Autotask/Config/Schema/upgrade-1.2.0-to-1.3.0.sql.
   If you want to get a clean start, use the autotask-1.3.0.sql file to setup the default database.
 * Delete the cache created by the existing dashboards. If you open up the console of the VM (or your server) you can remove all cached files with (path may differ):
-  ```text
+  ```
   rm -f /var/www/app/tmp/cache/models/* /var/www/app/tmp/cache/persistent/* /var/www/app/tmp/cache/views/*
   ```
 
