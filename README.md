@@ -9,7 +9,7 @@ To use this application you'll need:
 # Installation
 * Copy the files in this directory into app/Plugin/Autotask.
 * Load the Plugin by editing your app/Config/bootstrap.php like so:
-  ```php
+  ```
   <?php CakePlugin::load( 'Autotask', array(
   'bootstrap' => true
   ,  'routes' => true
