@@ -842,7 +842,7 @@ require_once(dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'Vendor'.DIRECTORY_SE
 				exit();
 			}
 			// setup the atws object
-			$this->oAutotask = new \atws\atws();
+			$this->oAutotask = new atws\atws();
 			if ($this->oAutotask->connect($aLogin['location'],$aLogin['login'],$aLogin['password'])) {
 				if ($this->checkConnectAutotask() === true) {
 					return true;
