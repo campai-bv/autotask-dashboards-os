@@ -228,6 +228,9 @@ require_once(dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'Vendor'.DIRECTORY_SE
 			}
 
 		}
+
+
+
 		private function __saveTicketsToDatabase( $oTickets ) {
 
 			if( !empty( $oTickets ) ) {
@@ -297,40 +300,30 @@ require_once(dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'Vendor'.DIRECTORY_SE
 
 		}
 
-		private function _findOpenInAutotask( Array $aQuery ) {
+		private function _findOpenInAutotask( $query ) {
 
-			$aConditions = array(
-					'NotEqual' => array(
-							'Status' => 5
-					)
-			);
-
-			if( !empty( $aQuery['conditions'] ) ) {
-				$aQuery['conditions'] = array_merge_recursive( $aQuery['conditions'], $aConditions );
-			} else {
-				$aQuery['conditions'] = $aConditions;
+			if (!is_a($query,'atws\atwsquery')) {
+				$query = $this->oAutotask->getNewQuery();
+				$query->FROM('Ticket')->WHERE('Status',$query->NotEqual,5);				
 			}
-
-			return $this->queryAutotask( 'Ticket', $aQuery );
+			return $this->oAutotask->getQueryResults( $query );
+		}
+		
+		private function _findStatusInAutotask( $status ) {
+			
+			$query = $this->oAutotask->getNewQuery();
+			$query->FROM('Ticket')->WHERE('Status',$query->Equals,$status);				
+			return $this->oAutotask->getQueryResults( $query );
 
 		}
 
-
 		private function _findWaitingCustomerInAutotask( Array $aQuery ) {
 
-			$aConditions = array(
-					'Equals' => array(
-							'Status' => 7
-					)
-			);
-
-			if( !empty( $aQuery['conditions'] ) ) {
-				$aQuery['conditions'] = array_merge_recursive( $aQuery['conditions'], $aConditions );
-			} else {
-				$aQuery['conditions'] = $aConditions;
+			if (!is_a($query,'atws\atwsquery')) {
+				$query = $this->oAutotask->getNewQuery();
+				$query->FROM('Ticket')->WHERE('Status',$query->Equals,7);				
 			}
-
-			return $this->queryAutotask( 'Ticket', $aQuery );
+			return $this->oAutotask->getQueryResults( $query );
 
 		}
 		
@@ -363,7 +356,7 @@ require_once(dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'Vendor'.DIRECTORY_SE
 		 * @param  array $aIds - The (referenced) array with the id's of any new records. Helps you prevent duplicate id's.
 		 * @return -
 		 */
-		private function __rebuildAPIResponseToSaveData( $oTicket, &$aQueries, &$aIds ) {
+		private function __rebuildTicketToModelDataArray( $oTicket, &$aQueries, &$aIds ) {
 
 			// Defaults
 			$sCompletedDate = '';
@@ -377,6 +370,9 @@ require_once(dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'Vendor'.DIRECTORY_SE
 			// End
 
 			// Reformat the dates to your own timezone.
+			// @todo: rewrite autotask objects to have dates.
+			// 		  then getQueryResults function can convert date based on time zone so objects
+			// 		  returned automatically have the right date
 			$sCreateDate = $this->TimeConverter->convertToOwnTimezone( $oTicket->CreateDate );
 
 			if( !empty( $oTicket->CompletedDate ) ) {
@@ -651,7 +647,8 @@ require_once(dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'Vendor'.DIRECTORY_SE
 
 		}
 
-// from the behaivour class
+
+// finished below
 
 
 		public function getAutotaskPicklist( $sEntity, $sPicklist ) {
@@ -670,124 +667,6 @@ require_once(dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'Vendor'.DIRECTORY_SE
 				}
 				return false;
 			}
-		}
-
-		public function queryAutotask( Model $oModel, $sEntity, Array $aQuery ) {
-
-			if ($this->connectAutotask() !== true) {
-				return false;
-			}
-			$sXML = '
-				<queryxml>
-					<entity>' . $sEntity . '</entity>
-					<query>
-			';
-
-			if( !empty( $aQuery['conditions'] ) ) {
-
-				// Every query consists of a set of conditions ($aDetails) grouped by the equality ($sEquality),
-				// i.e. 'Equals' or 'NotEqual'.
-				foreach ( $aQuery['conditions'] as $sEquality => $aDetails ) {
-
-					// Every field gets transformed to a proper XML string, i.e.
-					// QueueID ($sField) equals ($sEquality) 2233932 ($sExpression).
-					foreach ( $aDetails as $sField => $mExpressions ) {
-
-						// Multiple values to match.
-						if( is_array( $mExpressions ) ) {
-
-							$sXML .= '<condition>';
-
-								foreach ( $mExpressions as $iKey => $sExpression ) {
-
-									if( 0 == $iKey ) {
-										$sXML .= '<condition>';
-									} else {
-										$sXML .= '<condition operator="OR">';
-									}
-										$sXML .= '<field>' . $sField . '<expression op="' . $sEquality . '">' . $sExpression . '</expression></field>';
-									$sXML .= '</condition>';
-
-								}
-
-							$sXML .= '</condition>';
-
-						// Just one value to match.
-						} else {
-
-							$sXML .= '<condition>';
-								$sXML .= '<field>' . $sField . '<expression op="' . $sEquality . '">' . $mExpressions . '</expression></field>';
-							$sXML .= '</condition>';
-
-						}
-
-					}
-
-				}
-
-			}
-
-			$sXML .= '
-					</query>
-				</queryxml>
-			';
-
-			try {
-				$oResponse = $this->oAutotask->client->query( array( 'sXML' => $sXML ) );
-			} catch ( SoapFault $fault ) {
-				$this->log( ' - Error occured while performing query: "' . $fault->faultcode .' - ' . $fault->faultstring . '"', 'cronjob' );
-				return false;
-			}
-
-			if( !empty( $oResponse->queryResult->EntityResults->Entity ) ) {
-
-				// Only 1 result returned.
-				if( 1 == count( $oResponse->queryResult->EntityResults->Entity ) ) {
-
-					if( !empty( $oResponse->queryResult->EntityResults->Entity->id ) ) {
-						$this->_aResults = $oResponse->queryResult->EntityResults->Entity;
-						$this->_iLastId = $oResponse->queryResult->EntityResults->Entity->id;
-					}
-
-				// Multiple results returned.
-				} else {
-
-					foreach ( $oResponse->queryResult->EntityResults->Entity as $oEntry ) {
-
-						if( !empty( $oEntry->id ) ) {
-
-							$this->_aResults[] = $oEntry;
-							$this->_iLastId = $oEntry->id;
-
-						}
-
-					}
-
-				}
-
-				// The API has a limit of 500 results per request. If you get 500 there's probably some more
-				// to fetch :-)
-				if( 500 == count( $oResponse->queryResult->EntityResults->Entity ) ) {
-
-					$this->log( ' - Whoa, that\'s quite the amount of entries! Going for another 500, hang on..', 'cronjob' );
-					$aQuery['conditions']['GreaterThan']['id'] = $this->_iLastId;
-					return $this->queryAutotask( $oModel, $sEntity, $aQuery );
-
-				} else {
-
-					$aCompleteResults = $this->_aResults;
-
-					$this->_iLastId = 0;
-					$this->_aResults = array();
-
-					return $aCompleteResults;
-
-				}
-
-			} else {
-				return array();
-			}
-
 		}
 
 		private function getAutotaskLogin() {
