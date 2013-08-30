@@ -188,6 +188,20 @@
 			)
 	) );
 
+// Open tickets	
+	echo $this->Form->input( 'Dashboard.show_open_tickets', array(
+			'type' => 'checkbox'
+		,	'div' => array(
+					'class' => 'control-group input checkbox-container'
+			)
+		,	'class' => 'checkbox'
+		,	'label' => array(
+					'class' => 'control-label'
+				,	'text' => 'Show Open Tickets'
+				,	'title' => 'The amount of open tickets'
+			)
+	) );
+	
 	echo $this->Form->input( 'Dashboard.show_unassigned', array(
 			'type' => 'checkbox'
 		,	'div' => array(
@@ -250,6 +264,19 @@
 					'class' => 'control-label'
 				,	'text' => 'Show the clock'
 				,	'title' => 'Do you have the time?'
+			)
+	) );
+// 	tickets_by_source
+	echo $this->Form->input( 'Dashboard.show_tickets_by_source', array(
+			'type' => 'checkbox'
+		,	'div' => array(
+					'class' => 'control-group input checkbox-container'
+			)
+		,	'class' => 'checkbox'
+		,	'label' => array(
+					'class' => 'control-label'
+				,	'text' => 'Show Tickets by Source'
+				,	'title' => 'View of tickets by source.'
 			)
 	) );
 
