@@ -1,4 +1,15 @@
 ====================
+1.3.2 - new widgets
+====================
+
+Note: Run upgrade-any-to-newwidgets.sql to make required changes in database
+
+-	Added new widget "Tickets by source".
+-	Added new widget "Open tickets".
+-	In resource, queue and account widgets names are now sub-stringed to fit into one line.
+
+
+====================
 1.3.2
 ====================
 

@@ -16,6 +16,7 @@
 				'Autotask.Ticket'
 			,	'Autotask.Resource'
 			,	'Autotask.Ticketstatus'
+			,	'Autotask.Ticketsource'
 			,	'Autotask.Queue'
 			,	'Autotask.Account'
 			,	'Autotask.Issuetype'
@@ -27,9 +28,11 @@
 			,	'Autotask.GetTicketsCompletedToday'
 			,	'Autotask.GetTicketsOpenToday'
 			,	'Autotask.CalculateTotalsByTicketStatus'
+			,	'Autotask.CalculateTotalsByTicketSource'
 			,	'Autotask.CalculateTotalsForKillRate'
 			,	'Autotask.CalculateTotalsForQueueHealth'
 			,	'Autotask.CalculateTotalsForTimeEntries'
+			,	'Autotask.CalculateTotalsOpenTickets'
 		);
 
 		public function main() {
@@ -143,6 +146,26 @@
 
 						if( 1 < $this->iLogLevel ) {
 							$this->log( ' ..done.', 'cronjob' );
+						}
+						
+						if( 1 < $this->iLogLevel ) {
+							$this->log( "\t" . '> Calculating tickets by source for all dashboards..', 'cronjob' );
+						}
+
+						$this->CalculateTotalsByTicketSource->execute();
+
+						if( 1 < $this->iLogLevel ) {
+							$this->log( "\t" . '..done.', 'cronjob' );
+						}
+						
+						if( 1 < $this->iLogLevel ) {
+							$this->log( "\t" . '> Calculating total open tickets for all dashboards..', 'cronjob' );
+						}
+
+						$this->CalculateTotalsOpenTickets->execute();
+
+						if( 1 < $this->iLogLevel ) {
+							$this->log( "\t" . '..done.', 'cronjob' );
 						}
 
 						if( 1 < $this->iLogLevel ) {
@@ -323,6 +346,11 @@
 			if( !empty( $oTicket->QueueID ) ) {
 				$iQueueId = $oTicket->QueueID;
 			}
+			
+			$iSourceId = 0;
+			if( !empty( $oTicket->Source ) ) {
+				$iSourceId = $oTicket->Source;
+			}
 
 			if( isset( $oTicket->ServiceLevelAgreementHasBeenMet ) ) {
 				$iHasMetSLA = $oTicket->ServiceLevelAgreementHasBeenMet;
@@ -330,7 +358,7 @@
 
 			// All data is present, let's add it to the query
 			if( empty( $aQueries['Ticket'] ) ) {
-				$aQueries['Ticket'] = "INSERT INTO tickets (id, created, completed, number, title, ticketstatus_id, queue_id, resource_id, account_id, issuetype_id, subissuetype_id, due, priority, has_met_sla ) VALUES ";
+				$aQueries['Ticket'] = "INSERT INTO tickets (id, created, completed, number, title, ticketstatus_id, queue_id, ticketsource_id, resource_id, account_id, issuetype_id, subissuetype_id, due, priority, has_met_sla ) VALUES ";
 			} else {
 				$aQueries['Ticket'] .= ', ';
 			}
@@ -343,6 +371,7 @@
 				$aQueries['Ticket'] .= ",'" . htmlspecialchars( $oTicket->Title, ENT_QUOTES ) . "'";
 				$aQueries['Ticket'] .= ',' . $oTicket->Status;
 				$aQueries['Ticket'] .= ',' . $iQueueId;
+				$aQueries['Ticket'] .= ',' . $iSourceId;
 				$aQueries['Ticket'] .= ',' . $iResourceId;
 				$aQueries['Ticket'] .= ',' . $iAccountId;
 				$aQueries['Ticket'] .= ',' . $iIssueTypeId;
@@ -471,6 +500,35 @@
 			}
 			// End
 			
+			// Save the ticketsource (if new)
+			$aTicketsource = $this->Ticketsource->read( null, $oTicket->Source );
+
+			if(
+				empty( $aTicketsource )
+				&&
+				!in_array( $oTicket->Source, $aIds['Ticketsource'] )
+			) {
+
+				if( empty( $aQueries['Ticketsource'] ) ) {
+					$aQueries['Ticketsource'] = "INSERT INTO ticketsources (id, name ) VALUES ";
+				} else {
+					$aQueries['Ticketsource'] .= ', ';
+				}
+
+				$aQueries['Ticketsource'] .= '(';
+					$aQueries['Ticketsource'] .= $oTicket->Source;
+					$aQueries['Ticketsource'] .= ",'Not yet specified'";
+				$aQueries['Ticketsource'] .= ')';
+
+				$aIds['Ticketsource'][] = $oTicket->Source;
+
+				if( 3 < $this->iLogLevel ) {
+					$this->log( "\t" . '- Found new Ticket Source => Inserted into the database (id ' . $oTicket->Source . ').', 'cronjob' );
+				}
+
+			}
+			// End
+			
 			// Save the account (if new)
 			if( !empty( $oTicket->AccountID ) ) {
 
@@ -498,7 +556,7 @@
 
 					$aQueries['Account'] .= '(';
 						$aQueries['Account'] .= $oTicket->AccountID;
-						$aQueries['Account'] .= ",'" . $oAccount->AccountName . "'";
+						$aQueries['Account'] .= ",'" . mysqli_real_escape_string($oAccount->AccountName) . "'";
 					$aQueries['Account'] .= ')';
 
 					$aIds['Account'][] = $oTicket->AccountID;

@@ -134,6 +134,16 @@
 					,	'widget_id' => 10
 					,	'type' => ''
 				)
+			,	'open_tickets' => array(
+						'database_field' => 'show_open_tickets'
+					,	'widget_id' => 11
+					,	'type' => ''
+				)
+			,	'tickets_by_source' => array(
+						'database_field' => 'show_tickets_by_source'
+					,	'widget_id' => 12
+					,	'type' => ''
+				)
 		);
 
 
@@ -343,6 +353,26 @@
 									) )
 							) );
 
+						break;
+						
+						// Open tickets (could be migrated to case 7 if possible).
+						case 11:
+							App::uses( 'Opentickets', 'Autotask.Model' );
+							$this->Opentickets = new Opentickets();
+
+							$aWidget = array_merge( $aWidget, array(
+									'Widgetdata' => $this->Opentickets->getTotals()
+							) );
+						break;
+						
+						// Tickets by source
+						case 12:
+							App::uses( 'Ticketsource', 'Autotask.Model' );
+							$this->Ticketsource = new Ticketsource();
+
+							$aWidget = array_merge( $aWidget, array(
+									'Widgetdata' => $this->Ticketsource->getTotals()
+							) );
 						break;
 
 						default:

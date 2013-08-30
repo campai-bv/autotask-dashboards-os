@@ -54,6 +54,7 @@ h2 {
 		.status-count h4,
 		.kill-rate-counts h4,
 		.kill-rate-bars h4,
+		.tickets-source-counts h4,
 		.queue-health-counts h4,
 		#resources h2,
 		#resources h4 {
@@ -64,6 +65,7 @@ h2 {
 
 			.kill-rate-counts h4,
 			.kill-rate-bars h4,
+			.tickets-source-counts h4,
 			.queue-health-counts h4 {
 				position: absolute;
 				z-index: 99999;
@@ -120,10 +122,6 @@ h2 {
 				top: 0.15em;
 			}
 
-#resources table td {
-	text-align: center;
-}
-
 .table {
 	color: #fff;
 	background-color: #242527;
@@ -148,7 +146,7 @@ h2 {
 
 	.table td {
 		text-align: left;
-		padding-right: 20px;
+		
 		border-top: 1px dotted #2f3032;
 	}
 
