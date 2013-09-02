@@ -53,11 +53,7 @@ To use this application you'll need:
 After you've installed the plugin and the cronjob has run (at least once) you'll have all data from Autotask present. You know the cronjob has run
 when there's a cronjob.log in your app/tmp/logs folder.
 
-The only thing you'll need to do now is:
-* Specify the names of the queues (/autotask/queues)
-* Specify the names of the Ticket Statuses (/autotask/ticketstatuses)
-
-Now you can go ahead and create your first dashboard at /autotask/dashboards :-)
+The only thing you'll need to do now is: go ahead and create your first dashboard at /autotask/dashboards :-)
 
 # Issues / FAQ
 Please report any issues you have with the plugin to the issue tracker on our website at http://autotask.campai.nl.
