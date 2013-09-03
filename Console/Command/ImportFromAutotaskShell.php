@@ -16,6 +16,7 @@
 				'Autotask.Ticket'
 			,	'Autotask.Resource'
 			,	'Autotask.Ticketstatus'
+			,	'Autotask.Ticketsource'
 			,	'Autotask.Queue'
 			,	'Autotask.Account'
 			,	'Autotask.Issuetype'
@@ -27,9 +28,11 @@
 			,	'Autotask.GetTicketsCompletedToday'
 			,	'Autotask.GetTicketsOpenToday'
 			,	'Autotask.CalculateTotalsByTicketStatus'
+			,	'Autotask.CalculateTotalsByTicketSource'
 			,	'Autotask.CalculateTotalsForKillRate'
 			,	'Autotask.CalculateTotalsForQueueHealth'
 			,	'Autotask.CalculateTotalsForTimeEntries'
+			,	'Autotask.CalculateTotalsOpenTickets'
 		);
 
 
@@ -130,29 +133,31 @@
 
 						$this->CalculateTotalsByTicketStatus->execute();
 
-						$this->log( ' ..done.',1 );
-						$this->log( '> Calculating kill rate totals for all dashboards..' ,1);
+						$this->log( ' ..done.', 'cronjob', 1 );
 
+						$this->log( "\t" . '> Calculating tickets by source for all dashboards..', 1 );
+						$this->CalculateTotalsByTicketSource->execute();
+						$this->log( "\t" . '..done.', 'cronjob' );
+
+						$this->log( "\t" . '> Calculating total open tickets for all dashboards..', 1 );
+						$this->CalculateTotalsOpenTickets->execute();
+						$this->log( "\t" . '..done.', 1 );
+
+						$this->log( '> Calculating kill rate totals for all dashboards..', 1 );
 						$this->CalculateTotalsForKillRate->execute();
-
 						$this->log( ' ..done.',1 );
+
 						$this->log( '> Calculating queue health totals for all dashboards..',1 );
-
 						$this->CalculateTotalsForQueueHealth->execute();
-
 						$this->log( ' ..done.' ,1);
 
 						$this->log( '> Importing time entries..',1 );
-
 						if( !$this->CalculateTotalsForTimeEntries->execute() ) {
 							$bErrorsEncountered = true;
 						}
-
 						$this->log(  ' ..done.',1 );
 
 						$this->log( '> Clearing cache for all dashboards..',1 );
-
-
 						if(
 							clearCache() // Clear the view cache
 							&&
@@ -186,18 +191,23 @@
 		}
 
 		private function __syncPicklistsWithDatabase( ) {
+
 			$aIssueTypes = $this->Ticket->getAutotaskPicklist( 'Ticket', 'IssueType' );
 			$aSubissueTypes = $this->Ticket->getAutotaskPicklist('Ticket','SubIssueType');
 			$aQueues = $this->Ticket->getAutotaskPicklist('Ticket','QueueID');
 			$aTicketstatus = $this->Ticket->getAutotaskPicklist('Ticket','Status');
-			
+			$aTicketsource = $this->Ticket->getAutotaskPicklist('Ticket','Source');
+
 			$this->__savePicklistToModel('Issuetype',$aIssueTypes);
 			$this->__savePicklistToModel('Subissuetype',$aSubissueTypes);
 			$this->__savePicklistToModel('Queue',$aQueues);
 			$this->__savePicklistToModel('Ticketstatus',$aTicketstatus);
+			$this->__savePicklistToModel('Ticketsource',$aTicketsource);
 
 		}
+
 		private function __savePicklistToModel($sModel,$aPicklist) {
+
 			if(!is_array($aPicklist)) {
 				return false;
 			}
@@ -243,6 +253,7 @@
 					,	'Ticketstatus' => array()
 					,	'Issuetype' => array()
 					,	'Subissuetype' => array()
+					,	'Ticketsource' => array()
 				);
 
 				if( 1 == count( $oTickets ) ) {
@@ -333,6 +344,11 @@
 			if( !empty( $oTicket->QueueID ) ) {
 				$iQueueId = $oTicket->QueueID;
 			}
+			
+			$iSourceId = 0;
+			if( !empty( $oTicket->Source ) ) {
+				$iSourceId = $oTicket->Source;
+			}
 
 			if( isset( $oTicket->ServiceLevelAgreementHasBeenMet ) ) {
 				$iHasMetSLA = $oTicket->ServiceLevelAgreementHasBeenMet;
@@ -340,7 +356,7 @@
 
 			// All data is present, let's add it to the query
 			if( empty( $aQueries['Ticket'] ) ) {
-				$aQueries['Ticket'] = "INSERT INTO tickets (`id`, `created`, `completed`, `number`, `title`, `ticketstatus_id`, `queue_id`, `resource_id`, `account_id`, `issuetype_id`, `subissuetype_id`, `due`, `priority`, `has_met_sla` ) VALUES ";
+				$aQueries['Ticket'] = "INSERT INTO tickets (`id`, `created`, `completed`, `number`, `title`, `ticketstatus_id`, `queue_id`, `resource_id`, `account_id`, `issuetype_id`, `subissuetype_id`, `due`, `priority`, `has_met_sla`, `ticketsource_id` ) VALUES ";
 			} else {
 				$aQueries['Ticket'] .= ', ';
 			}
@@ -360,6 +376,7 @@
 				$aQueries['Ticket'] .= ',' . $this->db->value( $sDueDateTime );
 				$aQueries['Ticket'] .= ',' . $this->db->value( $oTicket->Priority );
 				$aQueries['Ticket'] .= ',' . $this->db->value( $iHasMetSLA );
+				$aQueries['Ticket'] .= ',' . $this->db->value( $iSourceId );
 			$aQueries['Ticket'] .= ')';
 			// End
 
@@ -471,6 +488,39 @@
 				$aIds['Ticketstatus'][] = $oTicket->Status;
 
 				$this->log('  - Found new Ticket Status => Inserted into the database (id ' . $oTicket->Status . ').' ,3);
+
+			}
+			// End
+			
+			// Save the ticketsource (if new)
+			if( isset( $oTicket->Source ) ) {
+
+				$aTicketsource = $this->Ticketsource->read( null, $oTicket->Source );
+
+				if(
+					empty( $aTicketsource )
+					&&
+					!in_array( $oTicket->Source, $aIds['Ticketsource'] )
+				) {
+
+					if( empty( $aQueries['Ticketsource'] ) ) {
+						$aQueries['Ticketsource'] = "INSERT INTO ticketsources (id, name ) VALUES ";
+					} else {
+						$aQueries['Ticketsource'] .= ', ';
+					}
+
+					$aQueries['Ticketsource'] .= '(';
+						$aQueries['Ticketsource'] .= $oTicket->Source;
+						$aQueries['Ticketsource'] .= ",'Not yet specified'";
+					$aQueries['Ticketsource'] .= ')';
+
+					$aIds['Ticketsource'][] = $oTicket->Source;
+
+					if( 3 < $this->iLogLevel ) {
+						$this->log( "\t" . '- Found new Ticket Source => Inserted into the database (id ' . $oTicket->Source . ').', 'cronjob' );
+					}
+
+				}
 
 			}
 			// End

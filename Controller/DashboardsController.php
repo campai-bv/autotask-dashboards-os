@@ -310,9 +310,16 @@
 			) {
 
 				// Adjust all widgets
+				$this->recursive = 2;
+				$aBeforeSaveDashboard = $this->Dashboard->find( 'first', array(
+						'conditions' => array(
+								'Dashboard.id' => $this->request->data['Dashboard']['id']
+						)
+				) );
+
 				if( $this->Dashboard->save( $this->request->data['Dashboard'] ) ) {
 
-					$this->Dashboard->createDashboardWidgets( $this->request->data );
+					$this->Dashboard->createDashboardWidgets( $this->request->data, $aBeforeSaveDashboard );
 
 					// Queues
 					$this->Dashboardqueue->deleteAll( array(
