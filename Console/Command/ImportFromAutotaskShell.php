@@ -34,21 +34,27 @@
 
 
 		public function log($sMessage,$iLevel = 0) {
+
 			if( !$this->iLogLevel = Configure::read( 'Import.logLevel' ) ) {
 				$this->iLogLevel = 0;
 				parent::log('log level set to:'.$this->iLogLevel,'cronjob');
-			}			
-			if( $iLevel <= $this->iLogLevel ) {
-				parent::log($sMessage, 'cronjob');	
 			}
+
+			if( $iLevel <= $this->iLogLevel ) {
+				parent::log($sMessage, 'cronjob');
+			}
+
 		}
+
+
 		public function main() {
 
 			$bErrorsEncountered = false;
 
-
 			$this->log( 'Starting with the import.' );
 
+			// Set the database object so we can clean quotes from user input.
+			$this->db = ConnectionManager::getDataSource( 'default' );
 
 			// First we must make sure we can login. We do this by performing an inexpensive call and see what it returns.
 			if( false === $this->Ticket->connectAutotask() ) {
@@ -258,7 +264,7 @@
 					} catch ( Exception $e ) {
 
 						$this->log( '- Could not save the new ' . Inflector::pluralize( $sModel ) . '. MySQL says: "' . $e->errorInfo[2] . '"' );
-						$this->log( '- ' . $sQuery );
+						$this->log( '- ' . $oStatement->queryString );
 						return false;
 
 					}
@@ -334,26 +340,26 @@
 
 			// All data is present, let's add it to the query
 			if( empty( $aQueries['Ticket'] ) ) {
-				$aQueries['Ticket'] = "INSERT INTO tickets (id, created, completed, number, title, ticketstatus_id, queue_id, resource_id, account_id, issuetype_id, subissuetype_id, due, priority, has_met_sla ) VALUES ";
+				$aQueries['Ticket'] = "INSERT INTO tickets (`id`, `created`, `completed`, `number`, `title`, `ticketstatus_id`, `queue_id`, `resource_id`, `account_id`, `issuetype_id`, `subissuetype_id`, `due`, `priority`, `has_met_sla` ) VALUES ";
 			} else {
 				$aQueries['Ticket'] .= ', ';
 			}
 
 			$aQueries['Ticket'] .= '(';
 				$aQueries['Ticket'] .= $oTicket->id;
-				$aQueries['Ticket'] .= ",'" . $sCreateDate . "'";
-				$aQueries['Ticket'] .= ",'" . $sCompletedDate . "'";
-				$aQueries['Ticket'] .= ",'" . $oTicket->TicketNumber . "'";
-				$aQueries['Ticket'] .= ",'" . htmlspecialchars( $oTicket->Title, ENT_QUOTES ) . "'";
-				$aQueries['Ticket'] .= ',' . $oTicket->Status;
-				$aQueries['Ticket'] .= ',' . $iQueueId;
-				$aQueries['Ticket'] .= ',' . $iResourceId;
-				$aQueries['Ticket'] .= ',' . $iAccountId;
-				$aQueries['Ticket'] .= ',' . $iIssueTypeId;
-				$aQueries['Ticket'] .= ',' . $iSubIssueTypeId;
-				$aQueries['Ticket'] .= ",'" . $sDueDateTime . "'";
-				$aQueries['Ticket'] .= ',' . $oTicket->Priority;
-				$aQueries['Ticket'] .= ',' . $iHasMetSLA;
+				$aQueries['Ticket'] .= ',' . $this->db->value( $sCreateDate );
+				$aQueries['Ticket'] .= ',' . $this->db->value( $sCompletedDate );
+				$aQueries['Ticket'] .= ',' . $this->db->value( $oTicket->TicketNumber );
+				$aQueries['Ticket'] .= ',' . $this->db->value( htmlspecialchars( $oTicket->Title, ENT_QUOTES ) );
+				$aQueries['Ticket'] .= ',' . $this->db->value( $oTicket->Status );
+				$aQueries['Ticket'] .= ',' . $this->db->value( $iQueueId );
+				$aQueries['Ticket'] .= ',' . $this->db->value( $iResourceId );
+				$aQueries['Ticket'] .= ',' . $this->db->value( $iAccountId );
+				$aQueries['Ticket'] .= ',' . $this->db->value( $iIssueTypeId );
+				$aQueries['Ticket'] .= ',' . $this->db->value( $iSubIssueTypeId );
+				$aQueries['Ticket'] .= ',' . $this->db->value( $sDueDateTime );
+				$aQueries['Ticket'] .= ',' . $this->db->value( $oTicket->Priority );
+				$aQueries['Ticket'] .= ',' . $this->db->value( $iHasMetSLA );
 			$aQueries['Ticket'] .= ')';
 			// End
 
@@ -389,17 +395,16 @@
 					if( !empty( $oResource->FirstName ) ) {
 						$sResourceName .= $oResource->LastName;
 					}
-					
 
 					if( empty( $aQueries['Resource'] ) ) {
-						$aQueries['Resource'] = "INSERT INTO resources (id, name ) VALUES ";
+						$aQueries['Resource'] = "INSERT INTO resources (`id`, `name` ) VALUES ";
 					} else {
 						$aQueries['Resource'] .= ', ';
 					}
 
 					$aQueries['Resource'] .= '(';
 						$aQueries['Resource'] .= $iResourceId;
-						$aQueries['Resource'] .= ",'" . $sResourceName . "'";
+						$aQueries['Resource'] .= ',' . $this->db->value( $sResourceName );
 					$aQueries['Resource'] .= ')';
 
 					$aIds['Resource'][] = $iResourceId;
@@ -424,7 +429,7 @@
 				) {
 
 					if( empty( $aQueries['Queue'] ) ) {
-						$aQueries['Queue'] = "INSERT INTO queues (id, name ) VALUES ";
+						$aQueries['Queue'] = "INSERT INTO queues (`id`, `name` ) VALUES ";
 					} else {
 						$aQueries['Queue'] .= ', ';
 					}
@@ -453,7 +458,7 @@
 			) {
 
 				if( empty( $aQueries['Ticketstatus'] ) ) {
-					$aQueries['Ticketstatus'] = "INSERT INTO ticketstatuses (id, name ) VALUES ";
+					$aQueries['Ticketstatus'] = "INSERT INTO ticketstatuses (`id`, `name` ) VALUES ";
 				} else {
 					$aQueries['Ticketstatus'] .= ', ';
 				}
@@ -490,14 +495,14 @@
 					) );
 
 					if( empty( $aQueries['Account'] ) ) {
-						$aQueries['Account'] = "INSERT INTO accounts (id, name ) VALUES ";
+						$aQueries['Account'] = "INSERT INTO accounts (`id`, `name` ) VALUES ";
 					} else {
 						$aQueries['Account'] .= ', ';
 					}
 
 					$aQueries['Account'] .= '(';
 						$aQueries['Account'] .= $oTicket->AccountID;
-						$aQueries['Account'] .= ",'" . $oAccount->AccountName . "'";
+						$aQueries['Account'] .= ',' . $this->db->value( $oAccount->AccountName );
 					$aQueries['Account'] .= ')';
 
 					$aIds['Account'][] = $oTicket->AccountID;
@@ -521,7 +526,7 @@
 				) {
 
 					if( empty( $aQueries['Issuetype'] ) ) {
-						$aQueries['Issuetype'] = "INSERT INTO issuetypes (id ) VALUES ";
+						$aQueries['Issuetype'] = "INSERT INTO issuetypes (`id`) VALUES ";
 					} else {
 						$aQueries['Issuetype'] .= ', ';
 					}
@@ -551,7 +556,7 @@
 				) {
 
 					if( empty( $aQueries['Subissuetype'] ) ) {
-						$aQueries['Subissuetype'] = "INSERT INTO subissuetypes (id ) VALUES ";
+						$aQueries['Subissuetype'] = "INSERT INTO subissuetypes (`id`) VALUES ";
 					} else {
 						$aQueries['Subissuetype'] .= ', ';
 					}
