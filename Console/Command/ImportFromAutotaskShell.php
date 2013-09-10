@@ -65,7 +65,7 @@ require_once(dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'Vendor'.DIRECTORY_SE
 			// Apparently we can login, so let's get into action!
 			// may as well do these first so there are none missing
 			// sync picklists
-			$this->__syncPicklistsWithDatabase();
+			$this->SyncPicklists->execute();
 			// Delete any existing records so we have a clean start.
 			$this->log( '> Truncating tickets table..',1 );
 
@@ -184,51 +184,6 @@ require_once(dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'Vendor'.DIRECTORY_SE
 			}
 
 		}
-
-		private function __syncPicklistsWithDatabase( ) {
-			$aIssueTypes = $this->getAutotaskPicklist( 'Ticket', 'IssueType' );
-			$aSubissueTypes = $this->getAutotaskPicklist('Ticket','SubIssueType');
-			$aQueues = $this->getAutotaskPicklist('Ticket','QueueID');
-			$aTicketstatus = $this->getAutotaskPicklist('Ticket','Status');
-			
-			$this->__savePicklistToModel('Issuetype',$aIssueTypes);
-			$this->__savePicklistToModel('Subissuetype',$aSubissueTypes);
-			$this->__savePicklistToModel('Queue',$aQueues);
-			$this->__savePicklistToModel('Ticketstatus',$aTicketstatus);
-
-		}
-		private function __savePicklistToModel($sModel,$aPicklist) {
-			if(!is_array($aPicklist)) {
-				return false;
-			}
-			$aNewModelRecords = array();
-			foreach ($aPicklist as $iId=>$sName) {
-				$this->log('checking model:'.$sModel.' id: '.$iId.' for name:'.$sName,4);
-				$aModelRecord = $this->$sModel->findById($iId);
-				if (empty($aModelRecord)) {
-					$this->log('non existing:'.$sModel.' model so inserting:'.$sName.' with id:'.$iId,3);
-					$aNewModelRecords[] = array($sModel=>array('id'=>$iId,'name'=>$sName));
-				}
-				else {
-					if (empty($aModelRecord[$sModel]['name'])) {
-						$this->log('updating '.$sModel.' with id:'.$iId.' which does not have a name. New name:'.$sName,3);
-						$aNewModelRecords[]=array($sModel=>array('id'=>$iId,'name'=>$sName));
-					}
-					else {
-						// allow dashboard settings to change name of picklist item.
-						// set back to empty to resync on next cronjob run
-						$this->log($sModel.':'.$sName.' exists and has name:'.$aModelRecord[$sModel]['name'],4);
-					}
-				}
-			}
-			
-			if (!empty($aNewModelRecords)) {
-				// batch write our model changes
-				$this->$sModel->saveAll($aNewModelRecords);
-			}
-
-		}
-
 
 
 		private function __saveTicketsToDatabase( $oTickets ) {
