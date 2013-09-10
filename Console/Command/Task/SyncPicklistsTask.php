@@ -10,7 +10,7 @@
 	 * @license       MIT License (http://opensource.org/licenses/mit-license.php)
 	 * @author        Coen Coppens <coen@campai.nl>
 	 */
-	class GetTicketsCompletedTodayTask extends Shell {
+	class SyncPicklistsTask extends Shell {
 
 		public $uses = array(
 				'Autotask.Issuetype'
@@ -20,8 +20,7 @@
 		);
 
 		/**
-		 * Gets all the tickets that have been closed today for all queues
-		 * that are active on any dashboard.
+		 * Updates or inserts new picklist entries
 		 * 
 		 * @return
 		 */
