@@ -50,15 +50,18 @@ class atws {
     	return new $obj();
     	
     }
-
-	public function getPicklist( $entity, $picklist , $attempt = 1 ) {
-
+	public function getPicklistValueFromName($entity, $picklist, $name) {
+		if (!isset($this->picklists[$entity])) {
+			$this->setPicklist($entity);
+		}
 		if (isset($this->picklists[$entity])) {
-			if(isset($this->picklists[$entity][$picklist])) {
-				// we only run one loop per entity resultset
-				return $this->picklists[$entity][$picklist];
+			if (isset($this->picklists[$entity][$picklist])) {
+				return array_search ( $name , $this->picklists[$entity][$picklist]);
 			}
 		}
+		return false;
+	}
+	public function setPicklist( $entity , $attempt=1) {
 		$GetFieldInfo = new GetFieldInfo();
 		$GetFieldInfo->psObjectType = $entity;
 		try {
@@ -71,7 +74,7 @@ class atws {
 			}
 			else {
 				$attempt++;
-				return $this->getPicklist($entity , $picklist, $attempt);
+				$this->setPicklist($entity ,$attempt);
 			}
 		}
 
@@ -95,12 +98,23 @@ class atws {
 					}
 				}
 			}
+		}		
+	}
+	public function getPicklist( $entity, $picklist ) {
+
+		if (isset($this->picklists[$entity])) {
+			if(isset($this->picklists[$entity][$picklist])) {
+				// we only run one loop per entity resultset
+				return $this->picklists[$entity][$picklist];
+			}
 		}
+		$this->setPickList($entity);
 		if(isset ($this->picklists[$entity][$picklist]) ) {
 			return $this->picklists[$entity][$picklist];	
 		}
 		return false;
 	}
+
 
 	public function getAvailablePicklists($entity) {
 		if(!isset($this->picklists[$entity])) {
@@ -187,6 +201,7 @@ class atws {
 			return 	$queryOrResults->queryResult->EntityResults->Entity;
 		}
 		else {
+			// when its just one, they don't wrap it.. we do'
 			return array($queryOrResults->queryResult->EntityResults->Entity);
 		}
 	}
