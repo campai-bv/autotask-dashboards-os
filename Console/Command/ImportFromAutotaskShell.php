@@ -36,15 +36,14 @@
 		);
 
 
-		public function log($sMessage,$iLevel = 0) {
+		public function log( $sMessage, $iLevel = 0 ) {
 
 			if( !$this->iLogLevel = Configure::read( 'Import.logLevel' ) ) {
 				$this->iLogLevel = 0;
-				parent::log('log level set to:'.$this->iLogLevel,'cronjob');
 			}
 
 			if( $iLevel <= $this->iLogLevel ) {
-				parent::log($sMessage, 'cronjob');
+				parent::log( $sMessage, 'cronjob' );
 			}
 
 		}
