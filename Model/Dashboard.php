@@ -625,14 +625,6 @@
 
 				foreach ( $this->__aCalculatedWidgets as $aWidget ) {
 
-					if( 'show_open_tickets' == $aWidget['database_field'] ) {
-
-						debug( $aWidget );
-						debug( $aSubmittedData['Dashboard'][ $aWidget['database_field'] ] );
-						debug( $aBeforeSaveDashboard['Dashboard'][ $aWidget['database_field'] ] );
-
-					}
-
 					// Was '<widget name here>' added?
 					if(
 						1 == $aSubmittedData['Dashboard'][ $aWidget['database_field'] ]
