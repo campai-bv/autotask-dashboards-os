@@ -43,19 +43,11 @@
 
 			$bErrorsEncountered = false;
 
-			if( 2 < $this->iLogLevel ) {
-				$this->log( "\t\t" . '> Truncating timeentries table..', 'cronjob' );
-			}
-
+			$this->log( '> Truncating timeentries table..', 2 );
 			$this->Timeentry->query('TRUNCATE TABLE timeentries;');
+			$this->log( '..done.', 2 );
 
-			if( 2 < $this->iLogLevel ) {
-				$this->log( "\t\t" . '..done.', 'cronjob' );
-			}
-
-			if( 2 < $this->iLogLevel ) {
-				$this->log( "\t\t" . '> Importing time entries into the database for today (' . date( 'Y-m-d' ) . ')..', 'cronjob' );
-			}
+			$this->log( '> Importing time entries into the database for today (' . date( 'Y-m-d' ) . ')..', 2 );
 
 			$oResult = $this->Timeentry->findInAutotask( 'all', array(
 					'conditions' => array(
@@ -96,11 +88,7 @@
 						$bErrorsEncountered = true;
 
 					} else {
-
-						if( 2 < $this->iLogLevel ) {
-							$this->log( "\t\t" . '..imported 1 time entry.', 'cronjob' );
-						}
-
+						$this->log( '..imported 1 time entry.', 2 );
 					}
 
 				} else {
@@ -134,22 +122,14 @@
 					}
 
 					if( !$bErrorsEncountered ) {
-
-						if( 2 < $this->iLogLevel ) {
-							$this->log( "\t\t" . '..imported ' . count( $oResult ) . ' time entries.', 'cronjob' );
-						}
-
+						$this->log( '..imported ' . count( $oResult ) . ' time entries.', 2 );
 					}
 
 				}
 
 
 			} else {
-
-				if( 2 < $this->iLogLevel ) {
-					$this->log( "\t\t" . '..nothing saved - query returned no time entries.', 'cronjob' );
-				}
-
+				$this->log( '..nothing saved - query returned no time entries.', 2 );
 			}
 
 			if( $bErrorsEncountered ) {

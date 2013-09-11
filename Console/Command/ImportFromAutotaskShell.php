@@ -43,7 +43,16 @@
 			}
 
 			if( $iLevel <= $this->iLogLevel ) {
-				parent::log( $sMessage, 'cronjob' );
+
+				// Auto indent the messages based on their level.
+				$sIdentation = '';
+
+				for( $i=1; $i <= $iLevel; $i++ ) {
+					$sIdentation .= "  ";
+				}
+
+				parent::log( $sIdentation . $sMessage, 'cronjob' );
+
 			}
 
 		}
@@ -114,13 +123,9 @@
 					} else {
 
 						if( !$this->__saveTicketsToDatabase( $oTickets ) ) {
-
 							$bErrorsEncountered = true;
-
 						} else {
-
-								$this->log(  ' ..imported ' . count( $oTickets ) . ' ticket(s).' ,1);
-
+							$this->log(  ' ..imported ' . count( $oTickets ) . ' ticket(s).' ,1);
 						}
 
 					}
@@ -132,29 +137,29 @@
 
 						$this->CalculateTotalsByTicketStatus->execute();
 
-						$this->log( ' ..done.', 'cronjob', 1 );
+						$this->log( '..done.', 'cronjob', 1 );
 
-						$this->log( "\t" . '> Calculating tickets by source for all dashboards..', 1 );
+						$this->log( '> Calculating tickets by source for all dashboards..', 1 );
 						$this->CalculateTotalsByTicketSource->execute();
-						$this->log( "\t" . '..done.', 'cronjob' );
+						$this->log( '..done.', 'cronjob' );
 
-						$this->log( "\t" . '> Calculating total open tickets for all dashboards..', 1 );
+						$this->log( '> Calculating total open tickets for all dashboards..', 1 );
 						$this->CalculateTotalsOpenTickets->execute();
-						$this->log( "\t" . '..done.', 1 );
+						$this->log( '..done.', 1 );
 
 						$this->log( '> Calculating kill rate totals for all dashboards..', 1 );
 						$this->CalculateTotalsForKillRate->execute();
-						$this->log( ' ..done.',1 );
+						$this->log( '..done.',1 );
 
 						$this->log( '> Calculating queue health totals for all dashboards..',1 );
 						$this->CalculateTotalsForQueueHealth->execute();
-						$this->log( ' ..done.' ,1);
+						$this->log( '..done.' ,1);
 
 						$this->log( '> Importing time entries..',1 );
 						if( !$this->CalculateTotalsForTimeEntries->execute() ) {
 							$bErrorsEncountered = true;
 						}
-						$this->log(  ' ..done.',1 );
+						$this->log(  '..done.',1 );
 
 						$this->log( '> Clearing cache for all dashboards..',1 );
 						if(
@@ -163,12 +168,12 @@
 							Cache::clear( null ,'1_hour' ) // Clear the model cache
 						) {
 
-							$this->log(  ' ..done.',1 );
+							$this->log(  '..done.',1 );
 
 						} else {
 
 							$bErrorsEncountered = true;
-							$this->log( ' ..could not delete view cache!' );
+							$this->log( '..could not delete view cache!' );
 
 						}
 
@@ -207,27 +212,37 @@
 
 		private function __savePicklistToModel($sModel,$aPicklist) {
 
-			if(!is_array($aPicklist)) {
+			if( !is_array( $aPicklist ) ) {
 				return false;
 			}
+
 			$aNewModelRecords = array();
-			foreach ($aPicklist as $iId=>$sName) {
-				$this->log('checking model:'.$sModel.' for name:'.$sName,4);
+
+			foreach ( $aPicklist as $iId => $sName ) {
+
+				$this->log( '> Checking model: ' . $sModel . ' for name: ' . $sName . '..', 4 );
+
 				$aModelRecord = $this->$sModel->findByid($iId);
+
 				if (empty($aModelRecord)) {
-					$this->log('non existing:'.$sModel.' model so inserting:'.$sName.' with id:'.$iId,3);
+
+					$this->log('..Non existing: ' . $sModel . ' model so inserting: "' . $sName . '" with id '. $iId , 4 );
 					$aNewModelRecords[] = array($sModel=>array('id'=>$iId,'name'=>$sName));
-				}
-				else {
+
+				} else {
+
 					if (empty($aModelRecord[$sModel]['name'])) {
-						$this->log('updating '.$sModel.' with id:'.$iId.' which does not have a name. New name:'.$sName,3);
+
+						$this->log( '..Updating ' . $sModel . ' with id ' . $iId . ' which does not have a name. New name: "' . $sName . '"', 4 );
 						$aNewModelRecords[]=array($sModel=>array('id'=>$iId,'name'=>$sName));
-					}
-					else {
+
+					} else {
 						// allow dashboard settings to change name of picklist item.
 						// set back to empty to resync on next cronjob run
-						$this->log($sModel.':'.$sName.' exists and has name:'.$aModelRecord[$sModel]['name'],4);
+						$this->log( '..' . $sModel . ' "' . $sName . '" exists and has name "' . $aModelRecord[$sModel]['name'] . '"' , 4 );
+
 					}
+
 				}
 			}
 			
@@ -425,7 +440,7 @@
 
 					$aIds['Resource'][] = $iResourceId;
 
-					$this->log( '  - Found new Resource => Inserted into the database ("' . $sResourceName . '").' ,3);
+					$this->log( '- Found new Resource => Inserted into the database ("' . $sResourceName . '").' ,3);
 
 				}
 
@@ -457,7 +472,7 @@
 
 					$aIds['Queue'][] = $iQueueId;
 
-					$this->log( '  - Found new Queue => Inserted into the database (id ' . $iQueueId . ').' ,3);
+					$this->log( '- Found new Queue => Inserted into the database (id ' . $iQueueId . ').' ,3);
 
 				}
 
@@ -486,7 +501,7 @@
 
 				$aIds['Ticketstatus'][] = $oTicket->Status;
 
-				$this->log('  - Found new Ticket Status => Inserted into the database (id ' . $oTicket->Status . ').' ,3);
+				$this->log( '- Found new Ticket Status => Inserted into the database (id ' . $oTicket->Status . ').' ,3);
 
 			}
 			// End
@@ -516,7 +531,7 @@
 					$aIds['Ticketsource'][] = $oTicket->Source;
 
 					if( 3 < $this->iLogLevel ) {
-						$this->log( "\t" . '- Found new Ticket Source => Inserted into the database (id ' . $oTicket->Source . ').', 'cronjob' );
+						$this->log( '- Found new Ticket Source => Inserted into the database (id ' . $oTicket->Source . ').', 'cronjob' );
 					}
 
 				}
@@ -556,7 +571,7 @@
 
 					$aIds['Account'][] = $oTicket->AccountID;
 
-					$this->log( '  - Found new Account => Inserted into the database ("' . $oAccount->AccountName . '").' ,3);
+					$this->log( '- Found new Account => Inserted into the database ("' . $oAccount->AccountName . '").' ,3);
 
 				}
 
@@ -586,7 +601,7 @@
 
 					$aIds['Issuetype'][] = $oTicket->IssueType;
 
-						$this->log(  '  - Found new Issue Type => Inserted into the database (id ' . $oTicket->IssueType . ').',3 );
+						$this->log(  '- Found new Issue Type => Inserted into the database (id ' . $oTicket->IssueType . ').',3 );
 
 				}
 
@@ -616,7 +631,7 @@
 
 					$aIds['Subissuetype'][] = $oTicket->SubIssueType;
 
-					$this->log( '  - Found new Sub Issue Type => Inserted into the database (id ' . $oTicket->SubIssueType . ').' ,3);
+					$this->log( '- Found new Sub Issue Type => Inserted into the database (id ' . $oTicket->SubIssueType . ').' ,3);
 
 				}
 
