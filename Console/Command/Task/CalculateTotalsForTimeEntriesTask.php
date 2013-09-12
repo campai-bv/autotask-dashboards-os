@@ -74,13 +74,23 @@
 						$sStartDateTime = $oResult->CreateDateTime;
 					}
 
+					$dHoursToBill = 0.00;
+					if( isset( $oResult->HoursToBill ) ) {
+						$dHoursToBill = $oResult->HoursToBill;
+					}
+
+					$dHoursWorked = 0.00;
+					if( isset( $oResult->HoursWorked ) ) {
+						$dHoursWorked = $oResult->HoursWorked;
+					}
+
 					$this->Timeentry->create();
 					if( !$this->Timeentry->save( array(
 							'created' => $this->TimeConverter->convertToOwnTimezone( $sStartDateTime )
 						,	'resource_id' => $oResult->ResourceID
 						,	'ticket_id' => $iTicketId
-						,	'hours_to_bill' => $oResult->HoursToBill
-						,	'hours_worked' => $oResult->HoursWorked
+						,	'hours_to_bill' => $dHoursToBill
+						,	'hours_worked' => $dHoursWorked
 						,	'non_billable' => $oResult->NonBillable
 						,	'offset_hours' => $oResult->OffsetHours
 					) ) ) {
@@ -106,13 +116,23 @@
 							$sStartDateTime = $oTimeentry->CreateDateTime;
 						}
 
+						$dHoursToBill = 0.00;
+						if( isset( $oTimeentry->HoursToBill ) ) {
+							$dHoursToBill = $oTimeentry->HoursToBill;
+						}
+
+						$dHoursWorked = 0.00;
+						if( isset( $oTimeentry->HoursWorked ) ) {
+							$dHoursWorked = $oTimeentry->HoursWorked;
+						}
+
 						$this->Timeentry->create();
 						if( !$this->Timeentry->save( array(
 								'created' => $this->TimeConverter->convertToOwnTimezone( $sStartDateTime )
 							,	'resource_id' => $oTimeentry->ResourceID
 							,	'ticket_id' => $iTicketId
-							,	'hours_to_bill' => $oTimeentry->HoursToBill
-							,	'hours_worked' => $oTimeentry->HoursWorked
+							,	'hours_to_bill' => $dHoursToBill
+							,	'hours_worked' => $dHoursWorked
 							,	'non_billable' => $oTimeentry->NonBillable
 							,	'offset_hours' => $oTimeentry->OffsetHours
 						) ) ) {
