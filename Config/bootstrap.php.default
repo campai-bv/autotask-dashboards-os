@@ -33,18 +33,6 @@
 	) );
 
 	/**
-	 * Uncomment this line and correct your server timezone to fix any date & time related errors.
-	 * See http://www.php.net/manual/en/timezones.php for a list of supported timezones.
-	 * 
-	 * To correct your server timezone, run
-	 * dpkg-reconfigure tzdata
-	 * from the console.
-	 * 
-	 * Originally from /app/Config/core.php but moved into here for your convenience.
-	 */
-	//date_default_timezone_set('Europe/Amsterdam');
-
-	/**
 	 * When we get new tickets through the Email 2 Autotask system it automatically
 	 * gets assigned subissuetype ID 69 (ATES). That way we know the ticket hasn't been
 	 * taken care of properly and things like issue type and work type are missing.

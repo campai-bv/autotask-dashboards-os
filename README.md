@@ -20,6 +20,18 @@ To use this application you'll need:
   Configure::write('Cache.check', true);
   ```
   Uncomment if commented.
+* Set your timezone. In the core, line 232:
+  ```
+  /**
+  * Uncomment this line and correct your server timezone to fix
+  * any date & time related errors.
+  */
+  date_default_timezone_set('Europe/Amsterdam');
+  ```
+  To correct your server timezone, run the following command from the console:
+  ```
+  dpkg-reconfigure tzdata
+  ```
 * Copy
   ```
   app/Plugin/Autotask/Config/bootstrap.php.default
@@ -56,7 +68,7 @@ when there's a cronjob.log in your app/tmp/logs folder.
 The only thing you'll need to do now is: go ahead and create your first dashboard at /autotask/dashboards :-)
 
 # Issues / FAQ
-Please report any issues you have with the plugin to the issue tracker on our website at http://autotask.campai.nl.
+Please report any issues you have with the plugin to the issue tracker on [GitHub](https://github.com/coencoppens/autotask-dashboards/issues).
 
 # License
 Autotask Dashboards is offered under the MIT License (http://opensource.org/licenses/mit-license.php).
