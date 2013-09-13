@@ -9,7 +9,7 @@
 
 				<div class="item active">
 
-					<table class="<?php echo implode( ' ', $aClasses ); ?>" style="width:100%;">
+					<table class="<?php echo implode( ' ', $aClasses ); ?>">
 						<thead>
 							<tr>
 								<th class="jeditable_setting" id="title_resource"><?php
@@ -22,7 +22,7 @@
 									}
 
 								?></th>
-								<th class="jeditable_setting" id="title_active_tickets" style="width:100px;"><?php
+								<th class="jeditable_setting" id="title_active_tickets"><?php
 									$aSetting = Hash::extract( $aSettings, '{n}[name=title_active_tickets].value' );
 									
 									if( isset( $aSetting[0] ) ) {
@@ -79,22 +79,12 @@
 									?>
 
 										<tr class="<?php echo $sClass; ?>">
-											<td class="first" nowrap><?php
+											<td class="first" style="text-align: left;"><?php
 
-											
-												if (strlen($aResourceDetails['name']) > 16 )
-												{
-													$truncated_str = "";
-													$useAppendStr = (strlen($aResourceDetails['name']) > intval(14))? true:false;
-													$truncated_str = substr($aResourceDetails['name'],0,14);
-													$truncated_str .= ($useAppendStr)? "...":"";
-												}
-												else {$truncated_str = $aResourceDetails['name'];}
-											
 												if( 1 == $iPointer ) {
-													echo ' <i class="icon-trophy"></i> ' . $truncated_str;
+													echo ' <i class="icon-trophy"></i> ' . $aResourceDetails['name'];
 												} else {
-													echo $iPointer . '. ' . $truncated_str;
+													echo $iPointer . '. ' . $aResourceDetails['name'];
 												}
 											?></td>
 											<td class="number"><?php echo $aResourceDetails['count']; ?></td>

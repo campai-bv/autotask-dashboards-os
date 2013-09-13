@@ -50,22 +50,12 @@
 						?>
 
 							<tr class="<?php echo $sClass; ?> account">
-								<td class="first" nowrap><?php
-								
-								
-									if (strlen($aAccountDetails['name']) > 26 )
-									{
-										$truncated_str = "";
-										$useAppendStr = (strlen($aAccountDetails['name']) > intval(24))? true:false;
-										$truncated_str = substr($aAccountDetails['name'],0,24);
-										$truncated_str .= ($useAppendStr)? "...":"";
-									}
-									else {$truncated_str = $aAccountDetails['name'];}
+								<td class="first"><?php
 
 									if( 1 == $iPointer ) {
-										echo ' <i class="icon-ambulance"></i> ' . $truncated_str;
+										echo ' <i class="icon-ambulance"></i> ' . $aAccountDetails['name'];
 									} else {
-										echo $truncated_str;
+										echo $aAccountDetails['name'];
 									}
 
 								?></td>

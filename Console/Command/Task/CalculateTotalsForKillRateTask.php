@@ -45,9 +45,13 @@
 						,	$aKillRate['created']
 						,	$aKillRate['completed']
 					) ) {
-						$this->log( '- Saved kill rate history for dashboard "' . $aDashboard['Dashboard']['name'] . '" (' . $aKillRate['created'] . ' new, ' . $aKillRate['completed'] . ' completed)', 4 );
+
+						if( 3 < $this->iLogLevel ) {
+							$this->log( '  - Saved kill rate history for dashboard "' . $aDashboard['Dashboard']['name'] . '" (' . $aKillRate['created'] . ' new, ' . $aKillRate['completed'] . ' completed)', 'cronjob' );
+						}
+
 					} else {
-						$this->log( '- Could not save kill rate history for dashboard "' . $aDashboard['Dashboard']['name'] . '"', 4 );
+						$this->log( '  - Could not save kill rate history for dashboard "' . $aDashboard['Dashboard']['name'] . '"', 'cronjob' );
 					}
 
 				}

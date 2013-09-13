@@ -210,24 +210,6 @@
 									) );
 								?>
 							</li>
-							<li class="divider"></li>
-
-							<?php
-								if( !file_exists( APP . 'Plugin/Autotask/.git/HEAD' ) ) {
-
-									$aFile = file( APP . 'Plugin/Autotask/.git/HEAD' );
-									$sLine = $aFile[0];
-									$aShrapnel = explode( '/', $sLine );
-									$sVersion = $aShrapnel[2];
-
-								} else {
-
-									$aFile = file( APP . 'Plugin/Autotask/VERSION.txt' );
-									$sVersion = array_pop( $aFile );
-
-								}
-							?>
-							<li class="nav-header"><?php echo $sVersion; ?></li>
 						</ul>
 					</li>
 

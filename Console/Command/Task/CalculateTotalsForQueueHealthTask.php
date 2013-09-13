@@ -48,9 +48,13 @@
 								,	$aQueueHealth['id']
 								,	$aQueueHealth['average_days_open']
 							) ) {
-								$this->log( '- Saved queue health history for dashboard "' . $aDashboard['Dashboard']['name'] . '", queue "' . $aQueueHealth['name'] . '".', 2 );
+
+								if( 3 < $this->iLogLevel ) {
+									$this->log( '  - Saved queue health history for dashboard "' . $aDashboard['Dashboard']['name'] . '", queue "' . $aQueueHealth['name'] . '".', 'cronjob' );
+								}
+
 							} else {
-								$this->log( '- Could not save queue health history for dashboard "' . $aDashboard['Dashboard']['name'] . '", queue "' . $aQueueHealth['name'] . '".', 2 );
+								$this->log( '  - Could not save queue health history for dashboard "' . $aDashboard['Dashboard']['name'] . '", queue "' . $aQueueHealth['name'] . '".', 'cronjob' );
 							}
 
 						}
