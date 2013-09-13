@@ -196,7 +196,7 @@
 			)
 	) );
 
-	echo $this->Form->input( 'Dashboard.show_open_tickets', array(
+	echo $this->Form->input( 'Dashboard.show_open', array(
 			'type' => 'checkbox'
 		,	'div' => array(
 					'class' => 'control-group input checkbox-container'

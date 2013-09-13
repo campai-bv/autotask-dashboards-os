@@ -69,7 +69,7 @@ CREATE TABLE `dashboards` (
   `show_sla_violations` tinyint(1) NOT NULL,
   `show_tickets_top_x` tinyint(1) NOT NULL DEFAULT '0',
   `show_clock` tinyint(1) NOT NULL DEFAULT '0',
-  `show_open_tickets` tinyint(1) NOT NULL DEFAULT '0',
+  `show_open` tinyint(1) NOT NULL DEFAULT '0',
   `show_tickets_by_source` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=COMPACT;
@@ -294,7 +294,7 @@ CREATE TABLE `widgets` (
 --  Records of `widgets`
 -- ----------------------------
 BEGIN;
-INSERT INTO `widgets` VALUES ('1', 'Kill Rate', '3', '1', 'Widgets/kill_rate'), ('2', 'New vs. Closed', '3', '1', 'Widgets/kill_rate_graph'), ('3', 'Average Days Open', '3', '1', 'Widgets/queue_health_graph'), ('4', 'Account Top X', '2', '2', 'Widgets/accounts'), ('5', 'Queue Health', '2', '0', 'Widgets/queues'), ('6', 'Resources', '2', '0', 'Widgets/resources'), ('7', 'Ticket Status', '1', '1', 'Widgets/ticketstatus'), ('8', 'New vs. Closed', '3', '1', 'Widgets/kill_rate_bars'), ('9', 'Latest tickets', '3', '2', 'Widgets/tickets_top_x'), ('10', 'Clock', '1', '1', 'Widgets/clock'), ('11', 'Open', '1', '1', 'Widgets/opentickets'), ('12', 'Tickets by source', '3', '2', 'Widgets/tickets_by_source');
+INSERT INTO `widgets` VALUES ('1', 'Kill Rate', '3', '1', 'Widgets/kill_rate'), ('2', 'New vs. Closed', '3', '1', 'Widgets/kill_rate_graph'), ('3', 'Average Days Open', '3', '1', 'Widgets/queue_health_graph'), ('4', 'Account Top X', '2', '2', 'Widgets/accounts'), ('5', 'Queue Health', '2', '0', 'Widgets/queues'), ('6', 'Resources', '2', '0', 'Widgets/resources'), ('7', 'Ticket Status', '1', '1', 'Widgets/ticketstatus'), ('8', 'New vs. Closed', '3', '1', 'Widgets/kill_rate_bars'), ('9', 'Latest tickets', '3', '2', 'Widgets/tickets_top_x'), ('10', 'Clock', '1', '1', 'Widgets/clock'), ('12', 'Tickets by source', '3', '2', 'Widgets/tickets_by_source');
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;

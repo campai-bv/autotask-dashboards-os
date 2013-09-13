@@ -32,7 +32,6 @@
 			,	'Autotask.CalculateTotalsForKillRate'
 			,	'Autotask.CalculateTotalsForQueueHealth'
 			,	'Autotask.CalculateTotalsForTimeEntries'
-			,	'Autotask.CalculateTotalsOpenTickets'
 		);
 
 
@@ -142,10 +141,6 @@
 						$this->log( '> Calculating tickets by source for all dashboards..', 1 );
 						$this->CalculateTotalsByTicketSource->execute();
 						$this->log( '..done.', 'cronjob' );
-
-						$this->log( '> Calculating total open tickets for all dashboards..', 1 );
-						$this->CalculateTotalsOpenTickets->execute();
-						$this->log( '..done.', 1 );
 
 						$this->log( '> Calculating kill rate totals for all dashboards..', 1 );
 						$this->CalculateTotalsForKillRate->execute();
