@@ -14,44 +14,82 @@
 
 		private $_iLastId = 0;
 		private $_aResults = array();
-
-
-		public function queryAutotask( Model $oModel, $sEntity, Array $aQuery ) {
-
+		private $_aPicklistResult = array();
+		private $_aPicklist = array();
+		
+		public function __construct() {
 			if( !$this->iLogLevel = Configure::read( 'Import.logLevel' ) ) {
 				$this->iLogLevel = 0;
 			}
+		}
 
-			if ( !extension_loaded( 'soap' ) ) {
-
-				$this->log( 'SOAP is not available, unable to perform requests to the Autotask API.', 'cronjob' );
-				$this->log( 'SOAP is not available, unable to perform requests to the Autotask API.', 'error' );
-				exit();
-
+		public function getAutotaskPicklist( Model $oModel, $sEntity, $sPicklist ) {
+			/*
+			 *  Current Picklists Available on Ticket Entity:
+			 *  AccountID
+			 *	ContactID
+			 *	ContractID
+			 *	InstalledProductID
+			 *	IssueType
+			 *	Priority
+			 *	QueueID
+			 *	Source
+			 *	Status
+			 *	SubIssueType
+			 *	ServiceLevelAgreementID
+			 *	TicketType
+			 *
+			 */
+			if (isset($this->_aPicklist[$sEntity])) {
+				if(isset($this->_aPicklist[$sEntity][$sPicklist])) {
+					// we only run one loop per entity resultset
+					return $this->_aPicklist[$sEntity][$sPicklist];
+				}
 			}
-
-			$aLogin = array(
-					'login' => Configure::read( 'Autotask.username' )
-				,	'password' => Configure::read( 'Autotask.password' )
-				,	'location' => Configure::read( 'Autotask.asmx' )
-			);
-
-			if(
-				empty( $aLogin['login'] )
-				||
-				empty( $aLogin['password'] )
-				||
-				empty( $aLogin['location'] )
-			) {
-
-				$this->log( 'I\'m not able to use the Autotask API if you don\'t provide your credentials (/var/www/app/Plugin/Autotask/Config/bootstrap.php).', 'cronjob' );
-				$this->log( 'I\'m not able to use the Autotask API if you don\'t provide your credentials (/var/www/app/Plugin/Autotask/Config/bootstrap.php).', 'error' );
+			if (!isset($this->_aPicklistResult[$sEntity])) {
+				if ($this->connectAutotask() !== true) {
+					$this->log('could not connect to autotask');
+				}
+				try {
+					$this->_aPicklistResult[$sEntity] = $this->oAutotask->getFieldInfo((object) array('psObjectType' => $sEntity));
+				} catch ( SoapFault $fault ) {
+					$this->log( ' - Error occured while performing query: "' . $fault->faultcode .' - ' . $fault->faultstring . '"', 'cronjob' );
+					return false;
+				}
+			}
+	
+			if (!is_array($this->_aPicklistResult[$sEntity]->GetFieldInfoResult->Field)) {
 				return false;
-
 			}
+			foreach ($this->_aPicklistResult[$sEntity]->GetFieldInfoResult->Field as $oField) {
+				if(!empty($oField->IsPickList)) {
+					if($oField->IsPickList == true) {
+						$sCurrentPicklist = $oField->Name;
+						if (isset($oField->PicklistValues->PickListValue)) {
+							if (!empty($oField->PicklistValues->PickListValue)) {
+								foreach ($oField->PicklistValues->PickListValue as $oPicklistValue) {
+									if (is_object($oPicklistValue)) {
+										if(isset($oPicklistValue->Value) && isset($oPicklistValue->Label)) {
+											$this->_aPicklist[$sEntity][$sCurrentPicklist][$oPicklistValue->Value]=$oPicklistValue->Label;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			if(isset ($this->_aPicklist[$sEntity][$sPicklist]) ) {
+				return $this->_aPicklist[$sEntity][$sPicklist];	
+			}
+			return false;
+		}
+		
+		public function queryAutotask( Model $oModel, $sEntity, Array $aQuery ) {
 
-			$this->oAutotask = new SoapClient( Configure::read( 'Autotask.wsdl' ), $aLogin );
-
+			if ($this->connectAutotask() !== true) {
+				$this->log('could not connect to autotask');
+			}
 			$sXML = '
 				<queryxml>
 					<entity>' . $sEntity . '</entity>
@@ -165,4 +203,66 @@
 
 		}
 
+		private function getAutotaskLogin() {
+			
+			$aLogin = array(
+					'login' => Configure::read( 'Autotask.username' )
+				,	'password' => Configure::read( 'Autotask.password' )
+				,	'location' => Configure::read( 'Autotask.asmx' )
+			);
+
+			if(
+				empty( $aLogin['login'] )
+				||
+				empty( $aLogin['password'] )
+				||
+				empty( $aLogin['location'] )
+			) {
+
+				$this->log( 'I\'m not able to use the Autotask API if you don\'t provide your credentials (/var/www/app/Plugin/Autotask/Config/bootstrap.php).', 'cronjob' );
+				$this->log( 'I\'m not able to use the Autotask API if you don\'t provide your credentials (/var/www/app/Plugin/Autotask/Config/bootstrap.php).', 'error' );
+				return false;
+
+			}
+			return $aLogin;
+			
+		}
+		public function checkConnectAutotask() {
+			
+			$oResponse = $this->oAutotask->getThresholdAndUsageInfo();
+			if(empty($oResponse->getThresholdAndUsageInfoResult->EntityReturnInfoResults->EntityReturnInfo->Message)) {
+				return false;
+			}
+			if(strpos($oResponse->getThresholdAndUsageInfoResult->EntityReturnInfoResults->EntityReturnInfo->Message, 'TimeframeOfLimitation')) {
+				return true;
+			}
+			return false;
+		}
+		public function connectAutotask() {
+			if(isset($this->oAutotask)) {
+				if(is_object($this->oAutotask)) {
+					return true;
+				}
+			}
+			
+			$aLogin = $this->getAutotaskLogin();
+			if ($aLogin == false) { 
+				return false;
+			}
+			if ( !extension_loaded( 'soap' ) ) {
+				$this->log( 'SOAP is not available, unable to perform requests to the Autotask API.', 'cronjob' );
+				$this->log( 'SOAP is not available, unable to perform requests to the Autotask API.', 'error' );
+				exit();
+			}
+
+			$this->oAutotask = new SoapClient( Configure::read( 'Autotask.wsdl' ), $aLogin );
+			if ($this->checkConnectAutotask() === true) {
+				return true;
+			}
+			else {
+				unset($this->oAutotask);
+				return false;
+			}
+		}
+		
 	}

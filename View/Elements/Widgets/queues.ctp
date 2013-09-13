@@ -58,11 +58,22 @@
 				?>
 
 				<tr class="<?php echo $sClass; ?>">
-					<td class="first"><?php
+					<td class="first" nowrap><?php
+					
+						if (strlen($aQueueDetails['name']) > 20 )
+						{
+							$truncated_str = "";
+							$useAppendStr = (strlen($aQueueDetails['name']) > intval(18))? true:false;
+							$truncated_str = substr($aQueueDetails['name'],0,18);
+							$truncated_str .= ($useAppendStr)? "...":"";
+						}
+						else {$truncated_str = $aQueueDetails['name'];}
+					
+					
 						if( 1 == $iPointer ) {
-							echo ' <i class="icon-trophy"></i> ' . $aQueueDetails['name'];
+							echo ' <i class="icon-trophy"></i> ' . $truncated_str;
 						} else {
-							echo $aQueueDetails['name'];
+							echo $truncated_str;
 						}
 					?></td>
 					<td class="number"><?php echo $aQueueDetails['count']; ?></td>
