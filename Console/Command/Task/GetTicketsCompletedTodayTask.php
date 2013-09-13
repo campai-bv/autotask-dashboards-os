@@ -21,6 +21,9 @@
 		 * Gets all the tickets that have been closed today for all queues
 		 * that are active on any dashboard.
 		 * 
+		 * An additional day is fetched to make sure you're not missing out on any data when
+		 * in certain timezones.
+		 * 
 		 * @return
 		 */
 		public function execute() {
@@ -28,7 +31,10 @@
 			$oResult = $this->Ticket->findInAutotask( 'closed', array(
 					'conditions' => array(
 							'IsThisDay' => array(
-								'CompletedDate' => date( 'Y-m-d' )
+								'CompletedDate' => array(
+										date( 'Y-m-d', strtotime( '-1 days' ) )
+									,	date( 'Y-m-d' )
+								)
 							)
 						,	'Equals' => array(
 								'QueueID' => Hash::extract( $this->Dashboardqueue->find( 'all' ), '{n}.Dashboardqueue.queue_id' )

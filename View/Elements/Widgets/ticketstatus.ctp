@@ -68,10 +68,14 @@
 				echo '<span class="jeditable_setting" id="goal_description">';
 				$aSetting = Hash::extract( $aSettings, '{n}[name=goal_description].value' );
 
-				if( isset( $aSetting[0] ) ) {
-					echo $aSetting[0];
+				if(isset( $aData['average_days_open']) && $aData['name'] == "Open")	{
+					echo "Avg. Days Open ".$aData['average_days_open'];
 				} else {
-					echo 'Should be 0';
+					if( isset( $aSetting[0] ) ) {
+						echo $aSetting[0];
+					} else {
+						echo 'Should be 0';
+					}
 				}
 
 				echo '</span>';

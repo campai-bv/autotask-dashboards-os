@@ -22,7 +22,6 @@
 			$iNumberOfTicketsInQueue = $this->Ticket->find( 'count', array(
 					'conditions' => array(
 							'Ticket.ticketstatus_id !=' => 5
-						//,	'Ticket.queue_id !=' => 29683354
 					)
 			) );
 

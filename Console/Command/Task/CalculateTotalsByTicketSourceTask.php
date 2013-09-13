@@ -54,10 +54,12 @@
 				} else {
 
 					$this->Ticketsourcecount->create();
-					$this->Ticketsourcecount->save( array(
+					if( $this->Ticketsourcecount->save( array(
 							'ticketsource_id' => $iSourceId
 						,	'count' => $iNumberOfTicketsInQueue
-					) );
+					) ) ) {
+						$this->log( '- Saved source count for source "' . $iSourceId .'"', 2 );
+					}
 				}
 			}
 			// End

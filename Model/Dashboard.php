@@ -98,6 +98,11 @@
 							'goal_description' => 'Should be 0'
 						)
 				)
+			,	'open' => array(
+						'database_field' => 'show_open'
+					,	'widget_id' => 7
+					,	'type' => 'open'
+				)
 			,	'sla_violations' => array(
 						'database_field' => 'show_sla_violations'
 					,	'widget_id' => 7
@@ -134,17 +139,45 @@
 					,	'widget_id' => 10
 					,	'type' => ''
 				)
-			,	'open_tickets' => array(
-						'database_field' => 'show_open_tickets'
-					,	'widget_id' => 11
-					,	'type' => ''
-				)
 			,	'tickets_by_source' => array(
 						'database_field' => 'show_tickets_by_source'
 					,	'widget_id' => 12
 					,	'type' => ''
 				)
 		);
+
+		var $validate = array(
+			'slug' => array(
+					'notEmpty' => array(
+							'rule' => 'notEmpty'
+						,	'required' => true
+						,	'message' => 'required_field'
+						,	'on' => 'create'
+					)
+				,	'unique' => array(
+							'rule' => array( 'checkUniqueSlug' )
+						,	'message' => 'URL is already in use.'
+					)
+			)
+		);
+
+		public function checkUniqueSlug( $check ) {
+
+			$aResult = $this->find( 'count', array(
+					'conditions' => array(
+							'Dashboard.slug' => $check['slug']
+						,	'Dashboard.id <>' => $this->data['Dashboard']['id']
+					)
+				)
+			);
+
+			if( 0 == $aResult ) {
+				return true;
+			}
+
+			return false;
+
+		}
 
 
 		public function getWidgetData( $iDashboardId ) {
@@ -310,6 +343,14 @@
 										) );
 
 									break;
+									
+									case 'open':
+
+										$aWidget = array_merge( $aWidget, array(
+												'Widgetdata' => $this->Ticket->getOpenTotals( $aQueueIds )
+										) );
+
+									break;
 
 									case 'sla_violations':
 
@@ -354,17 +395,7 @@
 							) );
 
 						break;
-						
-						// Open tickets (could be migrated to case 7 if possible).
-						case 11:
-							App::uses( 'Opentickets', 'Autotask.Model' );
-							$this->Opentickets = new Opentickets();
 
-							$aWidget = array_merge( $aWidget, array(
-									'Widgetdata' => $this->Opentickets->getTotals()
-							) );
-						break;
-						
 						// Tickets by source
 						case 12:
 							App::uses( 'Ticketsource', 'Autotask.Model' );
@@ -391,6 +422,10 @@
 
 							case 'unassigned':
 								$aWidget['display_name'] = 'Unassigned';
+							break;
+							
+							case 'open':
+								$aWidget['display_name'] = 'Open';
 							break;
 
 							default:
@@ -425,7 +460,7 @@
 		 * @param  integer $iDashboardId - The ID of the dashboard you're editing
 		 * @return -
 		 */
-		public function createDashboardWidgets( Array $aSubmittedData ) {
+		public function createDashboardWidgets( Array $aSubmittedData, $aBeforeSaveDashboard = array() ) {
 
 			App::uses( 'Dashboardwidget', 'Autotask.Model' );
 			$this->Dashboardwidget = new Dashboardwidget();
@@ -436,20 +471,11 @@
 			App::uses( 'Ticketstatus', 'Autotask.Model' );
 			$this->Ticketstatus = new Ticketstatus();
 
-			$iDashboardId = $aSubmittedData['Dashboard']['id'];
-
-			$this->recursive = 2;
-			$aExistingDashboard = $this->find( 'first', array(
-					'conditions' => array(
-							'Dashboard.id' => $iDashboardId
-					)
-			) );
-
-			if( !$this->__updateTicketstatuses( $aSubmittedData, $aExistingDashboard ) ) {
+			if( !$this->__updateTicketstatuses( $aSubmittedData, $aBeforeSaveDashboard ) ) {
 				return false;
 			}
 
-			if( !$this->__updateCalculatedWidgets( $aSubmittedData, $aExistingDashboard ) ) {
+			if( !$this->__updateCalculatedWidgets( $aSubmittedData, $aBeforeSaveDashboard ) ) {
 				return false;
 			}
 
@@ -476,22 +502,26 @@
 		 * ticketstatus widgets (added or removed ones).
 		 * 
 		 * @param  Array  $aSubmittedData - Data of the updated dashboard
-		 * @param  mixed $aExistingDashboard - The data of the (possible) existing dashboard
+		 * @param  Array $aBeforeSaveDashboard - The data of the (possible) existing dashboard
 		 * @return -
 		 */
-		private function __updateTicketstatuses( Array $aSubmittedData, $aExistingDashboard ) {
+		private function __updateTicketstatuses( Array $aSubmittedData, Array $aBeforeSaveDashboard ) {
 
 			// You've created a new dashboard
-			if( empty( $aExistingDashboard['Dashboardwidget'] ) ) {
+			if( empty( $aBeforeSaveDashboard ) ) {
+
+				$iDashboardId = $aSubmittedData['Dashboard']['id'];
 
 				$aTicketstatusIdsBefore = array();
-				$aTicketstatusIdsAfter = Hash::extract( $aExistingDashboard, 'Dashboardticketstatus.{n}.ticketstatus_id' );
+				$aTicketstatusIdsAfter = Hash::extract( $aSubmittedData, 'Dashboardticketstatus.{n}.ticketstatus_id' );
 
 			// You're updating an existing one
 			} else {
 
-				if( !empty( $aExistingDashboard['Dashboardticketstatus'] ) ) {
-					$aTicketstatusIdsBefore = Hash::extract( $aExistingDashboard, 'Dashboardticketstatus.{n}.ticketstatus_id' );
+				$iDashboardId = $aBeforeSaveDashboard['Dashboard']['id'];
+
+				if( !empty( $aBeforeSaveDashboard['Dashboardticketstatus'] ) ) {
+					$aTicketstatusIdsBefore = Hash::extract( $aBeforeSaveDashboard, 'Dashboardticketstatus.{n}.ticketstatus_id' );
 				} else {
 					$aTicketstatusIdsBefore = array();
 				}
@@ -512,7 +542,7 @@
 					if( !in_array( $iTicketstatusId, $aTicketstatusIdsAfter ) ) { // Removed
 
 						if( !$this->Dashboardwidget->deleteAll( array(
-								'dashboard_id' => $aExistingDashboard['Dashboard']['id']
+								'dashboard_id' => $iDashboardId
 							,	'ticketstatus_id' => $iTicketstatusId
 							,	'widget_id' => 7
 						) ) ) {
@@ -542,7 +572,7 @@
 						$this->Dashboardwidget->create();
 
 						if( !$this->Dashboardwidget->save( array(
-								'dashboard_id' => $aExistingDashboard['Dashboard']['id']
+								'dashboard_id' => $iDashboardId
 							,	'widget_id' => 7
 							,	'ticketstatus_id' => $aTicketstatus['Ticketstatus']['id']
 							,	'display_name' => $aTicketstatus['Ticketstatus']['name']
@@ -565,20 +595,22 @@
 		 * Adds or removes the 'calculated' widgets like the kill rates and queue health.
 		 * 
 		 * @param  Array  $aSubmittedData - Data of the updated dashboard
-		 * @param  mixed $aExistingDashboard - The data of the (possible) existing dashboard
+		 * @param  mixed $aBeforeSaveDashboard - The data of the (possible) existing dashboard
 		 * @return -
 		 */
-		private function __updateCalculatedWidgets( Array $aSubmittedData, $aExistingDashboard ) {
+		private function __updateCalculatedWidgets( Array $aSubmittedData, Array $aBeforeSaveDashboard ) {
 
 			// You've created a new dashboard
-			if( empty( $aExistingDashboard['Dashboardwidget'] ) ) {
+			if( empty( $aBeforeSaveDashboard ) ) {
+
+				$iDashboardId = $aSubmittedData['Dashboard']['id'];
 
 				foreach ( $this->__aCalculatedWidgets as $aWidget ) {
 
 					// Was '<widget name here>' added?
 					if( 1 == $aSubmittedData['Dashboard'][ $aWidget['database_field'] ] ) {
 
-						if( !$this->__updateCalculatedWidget( $aExistingDashboard['Dashboard']['id'], $aWidget ) ) {
+						if( !$this->__updateCalculatedWidget( $iDashboardId, $aWidget ) ) {
 							return false;
 						}
 
@@ -589,16 +621,27 @@
 			// You're updating an existing one
 			} else {
 
+				$iDashboardId = $aBeforeSaveDashboard['Dashboard']['id'];
+
 				foreach ( $this->__aCalculatedWidgets as $aWidget ) {
 
+					if( 'show_open' == $aWidget['database_field'] ) {
+
+						debug( $aWidget );
+						//debug( $aSubmittedData['Dashboard'][ $aWidget['database_field'] ] );
+						debug( $aBeforeSaveDashboard['Dashboard'][ $aWidget['database_field'] ] );
+
+					}
+				
+				
 					// Was '<widget name here>' added?
 					if(
 						1 == $aSubmittedData['Dashboard'][ $aWidget['database_field'] ]
 						&&
-						false == $aExistingDashboard['Dashboard'][ $aWidget['database_field'] ]
+						false == $aBeforeSaveDashboard['Dashboard'][ $aWidget['database_field'] ]
 					) {
 
-						if( !$this->__updateCalculatedWidget( $aExistingDashboard['Dashboard']['id'], $aWidget ) ) {
+						if( !$this->__updateCalculatedWidget( $iDashboardId, $aWidget ) ) {
 							return false;
 						}
 
@@ -606,12 +649,12 @@
 					} elseif(
 						0 == $aSubmittedData['Dashboard'][ $aWidget['database_field'] ]
 						&&
-						true == $aExistingDashboard['Dashboard'][ $aWidget['database_field'] ]
+						true == $aBeforeSaveDashboard['Dashboard'][ $aWidget['database_field'] ]
 					) {
 
 						// Cascade deletes the old widget
 						if( !$this->Dashboardwidget->deleteAll( array(
-								'dashboard_id' => $aExistingDashboard['Dashboard']['id']
+								'dashboard_id' => $iDashboardId
 							,	'widget_id' => $aWidget['widget_id']
 						) ) ) {
 							return false;

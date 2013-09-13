@@ -4,7 +4,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 --  Table structure for `dashboards`
 -- ----------------------------
-ALTER TABLE `dashboards` ADD COLUMN `show_open` tinyint(1) NOT NULL DEFAULT '0';
+ALTER TABLE `dashboards` ADD COLUMN `show_open_tickets` tinyint(1) NOT NULL DEFAULT '0';
 ALTER TABLE `dashboards` ADD COLUMN `show_tickets_by_source` tinyint(1) NOT NULL DEFAULT '0';
 
 -- ----------------------------
@@ -34,8 +34,7 @@ CREATE TABLE IF NOT EXISTS `ticketsourcecounts` (
 --  Records of `widgets`
 -- ----------------------------
 BEGIN;
-INSERT INTO `widgets` VALUES ('12', 'Tickets by source', '3', '2', 'Widgets/tickets_by_source');
-DELETE FROM `widgets` WHERE `id` = 11 AND default_name = 'Open Tickets';
+INSERT INTO `widgets` VALUES ('11', 'Open', '1', '1', 'Widgets/opentickets'), ('12', 'Tickets by source', '3', '2', 'Widgets/tickets_by_source');
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;

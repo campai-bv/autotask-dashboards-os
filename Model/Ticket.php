@@ -121,6 +121,65 @@
 			return $aUnassignedTotals;
 
 		}
+		
+		
+		public function getOpenTotals( $aQueueIds = array() ) {
+
+			if( !empty( $aQueueIds ) ) {
+
+				$aOpenTickets = $this->find( 'all', array(
+						'conditions' => array(
+								'Ticket.queue_id' => $aQueueIds
+							,	'Ticket.ticketstatus_id !=' => 5 // Completed
+						)
+				) );
+
+			} else {
+
+				$aOpenTickets = $this->find( 'all', array(
+						'conditions' => array(
+								'Ticket.ticketstatus_id !=' => 5 // Completed
+						)
+				) );
+
+			}
+
+			$iTotalDaysOpen = 0;
+
+			foreach ( $aOpenTickets as $aTicket ) {
+
+				$start = strtotime( $aTicket['Ticket']['created'] );
+				$end = strtotime( date( 'Y-m-d h:I:s' ) );
+				$iTotalDaysOpen += round( abs( $end - $start ) / 86400,0 );
+
+			}
+
+			if( 0 == count( $aOpenTickets ) ) {
+				
+				$aOpenTotals = array(
+						'name' => 'Open'
+					,	'count' => 0
+					,	'average_days_open' => 0
+				);
+
+			} else {
+
+				$aOpenTotals = array(
+						'name' => 'Open'
+					,	'count' => count( $aOpenTickets )
+					,	'average_days_open' => number_format( $iTotalDaysOpen/ count( $aOpenTickets ), 0, ',', '.' )
+				);
+
+			}
+
+			
+			// End
+			
+			return $aOpenTotals;
+
+		}
+		
+		
 
 
 		public function getAtes( $aQueueIds = array() ) {
@@ -234,33 +293,50 @@
 					'conditions' => $aConditions['completed']
 			) );
 
-			$iFullWidth = 100;
-
-			$iKillRateDivider = $iTicketsCreatedToday;
-			if( 0 == $iTicketsCreatedToday ) {
-				$iKillRateDivider = 1;
-			}
-
+			// Set the default width of the progress bar to 0. That way the bars appear empty when no tickets have been created or completed.
 			$aKillRate = array(
 					'created' => $iTicketsCreatedToday
 				,	'completed' => $iTicketsCompletedToday
-				,	'kill_rate' => number_format( ( ( 100*$iTicketsCompletedToday ) / $iKillRateDivider ), 0, ',', '.' )
-				,	'new_progress_width_%' => $iFullWidth
-				,	'killed_progress_width_%' => $iFullWidth
+				,	'kill_rate' => 0
+				,	'new_progress_width_%' => 0
+				,	'killed_progress_width_%' => 0
 			);
 
-			if( 0 == $iTicketsCompletedToday ) {
-				$iTicketsCompletedToday = 1;
-			}
+			// When there are tickets created and/or completed we calculate the proper progress bar width and kill rate percentage.
+			if( $iTicketsCreatedToday > 0 || $iTicketsCompletedToday > 0 ) {
 
-			if( 0 == $iTicketsCreatedToday ) {
-				$iTicketsCreatedToday = 1;
-			}
+				// 1. There are new tickets but no completed ones yet.
+				if( $iTicketsCreatedToday > 0 && 0 == $iTicketsCompletedToday ) {
 
-			if( $iTicketsCreatedToday > $iTicketsCompletedToday ) {
-				$aKillRate['killed_progress_width_%'] = $iFullWidth * ( ( ( 100*$iTicketsCompletedToday ) / $iTicketsCreatedToday ) / 100 );
-			} else {
-				$aKillRate['new_progress_width_%'] = $iFullWidth * ( ( ( 100*$iTicketsCreatedToday ) / $iTicketsCompletedToday ) / 100 );
+					$aKillRate['new_progress_width_%'] = 100;
+
+				// 2. There are completed tickets but no new ones yet.
+				} elseif( $iTicketsCompletedToday > 0 && 0 == $iTicketsCreatedToday ) {
+
+					$aKillRate['killed_progress_width_%'] = 100;
+					$aKillRate['kill_rate'] = $iTicketsCompletedToday * 100;
+
+				// 3. There's been quite the activity! Both new and completed tickets are available.
+				} elseif( $iTicketsCreatedToday > 0 && $iTicketsCompletedToday > 0 ) {
+
+					$aKillRate['kill_rate'] = number_format( 100 * ( ( ( 100*$iTicketsCompletedToday ) / $iTicketsCreatedToday ) / 100 ), '0', '.', ',' );
+
+					// We're catching up on all those new tickets
+					if( $iTicketsCreatedToday > $iTicketsCompletedToday ) {
+
+						$aKillRate['new_progress_width_%'] = 100;
+						$aKillRate['killed_progress_width_%'] = 100 * ( ( ( 100*$iTicketsCompletedToday ) / $iTicketsCreatedToday ) / 100 );
+
+					// We're ahead of things, sweet!
+					} else {
+
+						$aKillRate['new_progress_width_%'] = 100 * ( ( ( 100*$iTicketsCreatedToday ) / $iTicketsCompletedToday ) / 100 );
+						$aKillRate['killed_progress_width_%'] = 100;
+
+					}
+
+				}
+
 			}
 
 			return $aKillRate;
