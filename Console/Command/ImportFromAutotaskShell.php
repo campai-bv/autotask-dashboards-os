@@ -385,7 +385,7 @@
 				$aQueries['Ticket'] .= ',' . $this->db->value( $sCreateDate );
 				$aQueries['Ticket'] .= ',' . $this->db->value( $sCompletedDate );
 				$aQueries['Ticket'] .= ',' . $this->db->value( $oTicket->TicketNumber );
-				$aQueries['Ticket'] .= ',' . $this->db->value( htmlspecialchars( $oTicket->Title, ENT_QUOTES ) );
+				$aQueries['Ticket'] .= ',' . $this->db->value( $oTicket->Title );
 				$aQueries['Ticket'] .= ',' . $this->db->value( $oTicket->Status );
 				$aQueries['Ticket'] .= ',' . $this->db->value( $iQueueId );
 				$aQueries['Ticket'] .= ',' . $this->db->value( $iResourceId );
