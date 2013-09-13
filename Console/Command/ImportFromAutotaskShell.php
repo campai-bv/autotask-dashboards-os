@@ -325,6 +325,8 @@
 			$iSubIssueTypeId = 0;
 			$iQueueId = 0;
 			$iHasMetSLA = 0;
+			$iPriority = 0;
+			$iSourceId = 0;
 			// End
 
 			// Reformat the dates to your own timezone.
@@ -358,10 +360,13 @@
 			if( !empty( $oTicket->QueueID ) ) {
 				$iQueueId = $oTicket->QueueID;
 			}
-			
-			$iSourceId = 0;
+
 			if( !empty( $oTicket->Source ) ) {
 				$iSourceId = $oTicket->Source;
+			}
+
+			if( !empty( $oTicket->Priority ) ) {
+				$iPriority = $oTicket->Priority;
 			}
 
 			if( isset( $oTicket->ServiceLevelAgreementHasBeenMet ) ) {
@@ -388,7 +393,7 @@
 				$aQueries['Ticket'] .= ',' . $this->db->value( $iIssueTypeId );
 				$aQueries['Ticket'] .= ',' . $this->db->value( $iSubIssueTypeId );
 				$aQueries['Ticket'] .= ',' . $this->db->value( $sDueDateTime );
-				$aQueries['Ticket'] .= ',' . $this->db->value( $oTicket->Priority );
+				$aQueries['Ticket'] .= ',' . $this->db->value( $iPriority );
 				$aQueries['Ticket'] .= ',' . $this->db->value( $iHasMetSLA );
 				$aQueries['Ticket'] .= ',' . $this->db->value( $iSourceId );
 			$aQueries['Ticket'] .= ')';
