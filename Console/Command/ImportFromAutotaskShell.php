@@ -35,6 +35,7 @@ class ImportFromAutotaskShell extends AppShell {
 		,	'Autotask.CalculateTotalsForQueueHealth'
 		,	'Autotask.CalculateTotalsForTimeEntries'
 		,	'Autotask.SyncPicklists'
+		, 	'Autotask.SyncTickets'
 	);
 
 
