@@ -36,6 +36,7 @@ class ImportFromAutotaskShell extends AppShell {
 		,	'Autotask.CalculateTotalsForTimeEntries'
 		,	'Autotask.SyncPicklists'
 		, 	'Autotask.SyncTickets'
+		,	'Autotask.GetAutotaskObject'
 	);
 
 
@@ -51,11 +52,11 @@ class ImportFromAutotaskShell extends AppShell {
 	public function main() {
 		
 		$bErrorsEncountered = false;
-		$this->connectAutotask();
-		$this->checkConnectAutotask();
+		$this->oAutotask = &$this->GetAutotaskObject->execute();
+		//$this->connectAutotask();
+		//$this->checkConnectAutotask();
 
 		$this->log( 'Starting with the import.' );
-
 
 		// First we must make sure we can login. 
 		//We do this by performing an inexpensive call and see what it returns.
@@ -69,87 +70,5 @@ class ImportFromAutotaskShell extends AppShell {
 		// sync picklists
 		$this->SyncPicklists->execute();
 
-
-
-
 	}
-
-
-
-// finished below
-
-
-	private function getAutotaskLogin() {
-		
-		$aLogin = array(
-				'login' => Configure::read( 'Autotask.username' )
-			,	'password' => Configure::read( 'Autotask.password' )
-			,	'location' => Configure::read( 'Autotask.wsdl' )
-		);
-
-		if(
-			empty( $aLogin['login'] )
-			||
-			empty( $aLogin['password'] )
-			||
-			empty( $aLogin['location'] )
-		) {
-
-			$this->log( 'I\'m not able to use the Autotask API if you don\'t provide your credentials (/var/www/app/Plugin/Autotask/Config/bootstrap.php).', 'cronjob' );
-			$this->log( 'I\'m not able to use the Autotask API if you don\'t provide your credentials (/var/www/app/Plugin/Autotask/Config/bootstrap.php).', 'error' );
-			return false;
-
-		}
-		return $aLogin;
-		
-	}
-	public function checkConnectAutotask() {
-		
-		$oResponse = $this->oAutotask->client->getThresholdAndUsageInfo();
-		if(empty($oResponse->getThresholdAndUsageInfoResult->EntityReturnInfoResults->EntityReturnInfo->Message)) {
-			return false;
-		}
-		if(strpos($oResponse->getThresholdAndUsageInfoResult->EntityReturnInfoResults->EntityReturnInfo->Message, 'TimeframeOfLimitation')) {
-			return true;
-		}
-		return false;
-	}
-	public function connectAutotask() {
-		if(isset($this->oAutotask)) {
-			if(is_object($this->oAutotask)) {
-				return true;
-			}
-		}
-		
-		$aLogin = $this->getAutotaskLogin();
-		if ($aLogin == false) { 
-			return false;
-		}
-		if ( !extension_loaded( 'soap' ) ) {
-			$this->log( 'SOAP is not available, unable to perform requests to the Autotask API.', 'cronjob' );
-			$this->log( 'SOAP is not available, unable to perform requests to the Autotask API.', 'error' );
-			exit();
-		}
-		// setup the atws object
-		$this->oAutotask = new atws\atws();
-		if ($this->oAutotask->connect($aLogin['location'],$aLogin['login'],$aLogin['password'])) {
-			if ($this->checkConnectAutotask() === true) {
-				return true;
-			}
-			else {
-				unset($this->oAutotask);
-				$this->log('autotask connected but simple check failed');
-				return false;
-			}				
-		}
-		else {
-			$this->log('could not connect to autotask');
-			if(isset($this->oAutotask->last_connect_fault)) {
-				$this->log($this->oAutotask->last_connect_fault);
-			}
-		}
-
-	}
-
-
 }
