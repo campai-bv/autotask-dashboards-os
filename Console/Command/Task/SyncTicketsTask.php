@@ -71,10 +71,7 @@
 		public function execute() {
 			App::uses('CakeTime', 'Utility');
 			//echo CakeTime::convert(time(), new DateTimeZone('Asia/Jakarta'));
-
 			$this->__UpdateTicketsFromAutotask();
-
-
 		}
 		private function __UpdateTicketsFromAutotask() {
 			// get the entities from autotask
@@ -89,11 +86,21 @@
 			}
 		}
 
-		private function __ConvertEntityResultToModelArray($oTicketEntity) {
+		// @todo:can probably overload the autotask classmap for ticket 
+		// to have a function which returns the model...
+		// but that should come later
+		private function __ConvertEntityResultsToModelArray($oTicketEntity) {
 			foreach($oTicketEntity as $sField => $uValue) {
 				// ignore udfs (for now)
 				if (!is_array($oTicketEntity->$sField)) {
-					$aModelData[$sField] = $uValue;
+					if ($this->aTicketModelMap[$sField]['sync'] === TRUE)
+					if (isset($this->aTicketModelMap[$sField]['dbhook'])){
+						$value = $this->aTicketModelMap[$sField]['dbhook']($uValue);
+					}
+					else {
+						$value = $uValue;
+					}
+					$aModelData[$this->aTicketModelMap[$sField]['field']] = $value;
 				}
 			}
 			return $aModelData;
