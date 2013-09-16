@@ -10,7 +10,7 @@
 	 * @license       MIT License (http://opensource.org/licenses/mit-license.php)
 	 * @author        Coen Coppens <coen@campai.nl>
 	 */
-	class SyncPicklistsTask extends Shell {
+	class GetAutotaskObjectTask extends Shell {
 
 		public $uses = array(
 				'Autotask.Issuetype'
