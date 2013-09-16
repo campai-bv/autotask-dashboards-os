@@ -44,15 +44,15 @@
 			if ($this->__GetTicketsToSyncFromAutotask() === FALSE) {
 				return FALSE;
 			}
-			// results are 
+			// results are insert or replace added
 			foreach($this->syncResults as $oTicketEntity) {
-				$aModelData = $this->__convertEntityResultsToModelArray($oTicketEntity);
+				$aModelData = $this->__ConvertEntityResultsToModelArray($oTicketEntity);
 				$aNewModelRecords[] = array('Ticket' => $aModelData);
 				$this->log('Queued ticket data for sync with tnumber:'.$aModelData['TicketNumber'],4);
 			}
 		}
 
-		private function __convertEntityResultToModelArray($oTicketEntity) {
+		private function __ConvertEntityResultToModelArray($oTicketEntity) {
 			foreach($oTicketEntity as $sField => $uValue) {
 				// ignore udfs (for now)
 				if (!is_array($oTicketEntity->$sField)) {
@@ -62,7 +62,7 @@
 			return $aModelData;
 		}
 
-		private function __setLastActivityDate() {
+		private function __SetLastActivityDate() {
 			// gets the last update date
 			// if not found, works out the date to use
 			// from the bootstrap settings
@@ -81,7 +81,7 @@
 		}
 		private function __GetTicketsToSyncFromAutotask( ) {
 			if (!isset($this->sSyncFromActivityDate)) {
-				$this->__setLastActivityDate();
+				$this->__SetLastActivityDate();
 			}
 			if ($this->bInitialSync === TRUE) {
 				$this->query = $this->__GetInitialSyncQuery();
@@ -119,36 +119,4 @@
 			$query->qAND('Status',$query->NotEquals,$this->oAutotask->getPicklistValueFromName('Completed'));
 			return $query;
 		}
-		
-		private function __savePicklistToModel($sModel,$aPicklist) {
-			if(!is_array($aPicklist)) {
-				return false;
-			}
-			$aNewModelRecords = array();
-			foreach ($aPicklist as $iId=>$sName) {
-				$this->log('checking model:'.$sModel.' for name:'.$sName,4);
-				$aModelRecord = $this->$sModel->findByid($iId);
-				if (empty($aModelRecord)) {
-					$this->log('non existing:'.$sModel.' model so inserting:'.$sName.' with id:'.$iId,3);
-					$aNewModelRecords[] = array($sModel=>array('id'=>$iId,'name'=>$sName));
-				}
-				else {
-					if (empty($aModelRecord[$sModel]['name'])) {
-						$this->log('updating '.$sModel.' with id:'.$iId.' which does not have a name. New name:'.$sName,3);
-						$aNewModelRecords[]=array($sModel=>array('id'=>$iId,'name'=>$sName));
-					}
-					else {
-						// allow dashboard settings to change name of picklist item.
-						// set back to empty to resync on next cronjob run
-						$this->log($sModel.':'.$sName.' exists and has name:'.$aModelRecord[$sModel]['name'],4);
-					}
-				}
-			}
-			
-			if (!empty($aNewModelRecords)) {
-				// batch write our model changes
-				$this->$sModel->saveAll($aNewModelRecords);
-			}
-		}
-
 	}
