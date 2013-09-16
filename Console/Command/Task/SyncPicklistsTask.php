@@ -18,14 +18,14 @@
 			,	'Autotask.Queue'
 			,	'Autotask.Ticketstatus'			
 		);
-
+		public $tasks = array('Autotask.GetAutotaskObject');
 		/**
 		 * Updates or inserts new picklist entries
 		 * 
 		 * @return
 		 */
 		public function execute() {
-
+			$this->oAutotask = & $this->GetAutotaskObject->execute();
 			$this->__syncPicklistWithDatabase();
 
 		}

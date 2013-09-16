@@ -12,22 +12,10 @@
 	 */
 	class GetAutotaskObjectTask extends Shell {
 
-		public $uses = array(
-				'Autotask.Issuetype'
-			,	'Autotask.Subissuetype'
-			,	'Autotask.Queue'
-			,	'Autotask.Ticketstatus'			
-		);
-
-		/**
-		 * Updates or inserts new picklist entries
-		 * 
-		 * @return
-		 */
 		public function execute() {
 
 			$this->connectAutotask();
-			return $this->oAutotask();
+			return $this->oAutotask;
 
 		}
 

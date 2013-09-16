@@ -58,13 +58,6 @@ class ImportFromAutotaskShell extends AppShell {
 
 		$this->log( 'Starting with the import.' );
 
-		// First we must make sure we can login. 
-		//We do this by performing an inexpensive call and see what it returns.
-		if( false === $this->connectAutotask() ) {
-			$this->log('Failed to connect to autotask');
-			return;
-		} 
-
 		// Apparently we can login, so let's get into action!
 		// may as well do these first so there are none missing
 		// sync picklists
