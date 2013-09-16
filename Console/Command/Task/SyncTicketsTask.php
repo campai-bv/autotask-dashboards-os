@@ -20,6 +20,43 @@
 			,	'Autotask.Tickets'	
 		);
 
+		public $aTicketModelMap = array(
+			'id'=>array(TRUE,'field'=>'id')
+			,'AccountID'=>array('sync'=>TRUE,'field'=>'account_id')
+			,'AllocationCodeID'=>array('sync'=>FALSE)
+			,'CompletedDate'=>array('sync'=>TRUE,'field'=>'completed','dbhook'=>'dateToDb')
+			,'ContactID'=>array('sync'=>FALSE)
+			,'ContractID'=>array('sync'=>FALSE)
+			,'CreateDate'=>array('sync'=>TRUE,'field'=>'created','dbhook'=>'dateToDb')
+			,'CreatorResourceID'=>array('sync'=>FALSE)
+			,'Description'=>array('sync'=>FALSE)
+			,'DueDateTime'=>array('sync'=>TRUE,'field'=>'due','dbhook'=>'dateToDb')
+			,'EstimatedHours'=>array('sync'=>FALSE)
+			,'InstalledProductID'=>array('sync'=>FALSE)
+			,'IssueType'=>array('sync'=>TRUE,'field'=>'issuetype_id')
+			,'LastActivityDate'=>array('sync'=>FALSE)
+			,'Priority'=>array('sync'=>TRUE,'field'=>'priority')
+			,'QueueID'=>array('sync'=>TRUE,'field'=>'queue_id')
+			,'AssignedResourceID'=>array('sync'=>TRUE,'field'=>'resource_id')
+			,'AssignedResourceRoleID'=>array('sync'=>FALSE)
+			,'Source'=>array('sync'=>TRUE,'field'=>'ticketsource_id')
+			,'Status'=>array('sync'=>TRUE,'field'=>'ticketstatus_id')
+			,'SubIssueType'=>array('sync'=>TRUE,'field'=>'subissuetype_id')
+			,'TicketNumber'=>array('sync'=>TRUE,'field'=>'number')
+			,'Title'=>array('sync'=>TRUE,'field'=>'title')
+			,'FirstResponseDateTime'=>array('sync'=>FALSE)
+			,'ResolutionPlanDateTime'=>array('sync'=>FALSE)
+			,'ResolvedDateTime'=>array('sync'=>FALSE)
+			,'FirstResponseDueDateTime'=>array('sync'=>FALSE)
+			,'ResolutionPlanDueDateTime'=>array('sync'=>FALSE)
+			,'ResolvedDueDateTime'=>array('sync'=>FALSE)
+			,'ServiceLevelAgreementID'=>array('sync'=>FALSE)
+			,'ServiceLevelAgreementHasBeenMet'=>array('sync'=>TRUE,'field'=>'has_met_sla')
+			,'Resolution'=>array('sync'=>FALSE)
+			,'PurchaseOrderNumber'=>array('sync'=>FALSE)
+			,'TicketType'=>array('sync'=>FALSE)
+		);
+	
 		/**
 		 * 
 
