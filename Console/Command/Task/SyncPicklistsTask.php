@@ -24,11 +24,9 @@
 		 * 
 		 * @return
 		 */
-		public function execute(&$oAutotask) {
-			$this->oAutotask = &$oAutotask;
-			$this->__syncPicklistWithDatabase();
-			
+		public function execute() {
 
+			$this->__syncPicklistWithDatabase();
 
 		}
 
