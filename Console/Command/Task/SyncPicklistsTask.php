@@ -31,7 +31,7 @@
 
 		}
 
-		public function __syncPicklistsWithDatabase() {
+		public function __syncPicklistWithDatabase() {
 			$aIssueTypes = $this->__getAutotaskPicklist( 'Ticket', 'IssueType' );
 			$aSubissueTypes = $this->__getAutotaskPicklist('Ticket','SubIssueType');
 			$aQueues = $this->__getAutotaskPicklist('Ticket','QueueID');
