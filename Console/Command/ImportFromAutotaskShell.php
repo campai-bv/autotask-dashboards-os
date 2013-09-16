@@ -34,6 +34,7 @@ class ImportFromAutotaskShell extends AppShell {
 		,	'Autotask.CalculateTotalsForKillRate'
 		,	'Autotask.CalculateTotalsForQueueHealth'
 		,	'Autotask.CalculateTotalsForTimeEntries'
+		,	'Autotask.SyncPicklists'
 	);
 
 
