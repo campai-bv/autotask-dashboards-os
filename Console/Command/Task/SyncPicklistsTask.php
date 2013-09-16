@@ -31,7 +31,7 @@
 
 		}
 
-		private function __syncPicklistsWithDatabase( ) {
+		public function __syncPicklistsWithDatabase() {
 			$aIssueTypes = $this->__getAutotaskPicklist( 'Ticket', 'IssueType' );
 			$aSubissueTypes = $this->__getAutotaskPicklist('Ticket','SubIssueType');
 			$aQueues = $this->__getAutotaskPicklist('Ticket','QueueID');
@@ -43,7 +43,7 @@
 			$this->__savePicklistToModel('Ticketstatus',$aTicketstatus);
 
 		}
-		private function __savePicklistToModel($sModel,$aPicklist) {
+		public function __savePicklistToModel($sModel,$aPicklist) {
 			if(!is_array($aPicklist)) {
 				return false;
 			}
@@ -74,7 +74,7 @@
 			}
 		}
 
-		private function __getAutotaskPicklist( $sEntity, $sPicklist ) {
+		public function __getAutotaskPicklist( $sEntity, $sPicklist ) {
 			if($this->oAutotask->connectAutotask() !== true ) {
 				return false;
 			}
