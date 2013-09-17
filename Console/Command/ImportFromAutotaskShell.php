@@ -52,7 +52,7 @@ class ImportFromAutotaskShell extends AppShell {
 	public function main() {
 		
 		$bErrorsEncountered = false;
-		$this->oAutotask = &$this->GetAutotaskObject->execute();
+		$this->oAutotask = $this->GetAutotaskObject->execute();
 		//$this->connectAutotask();
 		//$this->checkConnectAutotask();
 
