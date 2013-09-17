@@ -56,7 +56,7 @@
 			,'PurchaseOrderNumber'=>array('sync'=>FALSE)
 			,'TicketType'=>array('sync'=>FALSE)
 		);
-	
+		private $bInitialSync = false;
 		/**
 		 * 
 
@@ -111,8 +111,8 @@
 			// gets the last update date
 			// if not found, works out the date to use
 			// from the bootstrap settings
-			$this->sSyncFromActivityDate = $this->Ticket->field(
-				'last_activity', array(), 'last_activity DESC');
+			$this->sSyncFromActivityDate = $this->Ticket->field('first',
+				array('conditions'=>(array('last_activity is not null')),'order'=>array('last_activity DESC')));
 			
 			if (!isset($this->sSyncFromActivityDate)) {
 				// lets just start with today for now
