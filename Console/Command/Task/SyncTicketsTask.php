@@ -114,9 +114,10 @@
 			$this->sSyncFromActivityDate = $this->Ticket->field('last_activity',
 				array('last_activity is not null'),'last_activity DESC');
 			
-			if (!isset($this->sSyncFromActivityDate)) {
+			
+			if ($this->sSyncFromActivityDate == '0000-00-00 00:00:00') {
 				// lets just start with today for now
-				$this->sSyncFromActivityDate = CakeTime::dayAsSql(date('y-m-d'));
+				$this->sSyncFromActivityDate = date_create()->format('Y-m-d H:i:s');
 				$this->bInitialSync = TRUE; // get all open tickets + tickets modified today
 				$this->log('Initial Sync');
 			}
