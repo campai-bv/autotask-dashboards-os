@@ -112,7 +112,7 @@
 			// if not found, works out the date to use
 			// from the bootstrap settings
 			$this->sSyncFromActivityDate = $this->Ticket->field('last_activity',
-				array('conditions'=>array('last_activity is not null')),'last_activity DESC');
+				array('last_activity is not null'),'last_activity DESC');
 			
 			if (!isset($this->sSyncFromActivityDate)) {
 				// lets just start with today for now
