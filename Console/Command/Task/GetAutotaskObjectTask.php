@@ -10,41 +10,15 @@
 	 * @license       MIT License (http://opensource.org/licenses/mit-license.php)
 	 * @author        Coen Coppens <coen@campai.nl>
 	 */
-	class GetAutotaskObjectTask extends Shell {
+class GetAutotaskObjectTask extends Shell {
 
-		public function &execute() {
+	public function &execute() {
 
-			$this->connectAutotask();
-			return $this->oAutotask;
+		$this->connectAutotask();
+		return $this->oAutotask;
 
-		}
-
-
-
-	private function getAutotaskLogin() {
-		
-		$aLogin = array(
-				'login' => Configure::read( 'Autotask.username' )
-			,	'password' => Configure::read( 'Autotask.password' )
-			,	'location' => Configure::read( 'Autotask.wsdl' )
-		);
-
-		if(
-			empty( $aLogin['login'] )
-			||
-			empty( $aLogin['password'] )
-			||
-			empty( $aLogin['location'] )
-		) {
-
-			$this->log( 'I\'m not able to use the Autotask API if you don\'t provide your credentials (/var/www/app/Plugin/Autotask/Config/bootstrap.php).', 'cronjob' );
-			$this->log( 'I\'m not able to use the Autotask API if you don\'t provide your credentials (/var/www/app/Plugin/Autotask/Config/bootstrap.php).', 'error' );
-			return false;
-
-		}
-		return $aLogin;
-		
 	}
+
 	public function checkConnectAutotask() {
 		
 		$oResponse = $this->oAutotask->client->getThresholdAndUsageInfo();
@@ -63,10 +37,10 @@
 			}
 		}
 		
-		$aLogin = $this->getAutotaskLogin();
-		if ($aLogin == false) { 
-			return false;
-		}
+		$sLogin = Configure::read( 'Autotask.username' );
+		$sPassword = Configure::read( 'Autotask.password' );
+		$sLocation = Configure::read( 'Autotask.wsdl' ) ;
+
 		if ( !extension_loaded( 'soap' ) ) {
 			$this->log( 'SOAP is not available, unable to perform requests to the Autotask API.', 'cronjob' );
 			$this->log( 'SOAP is not available, unable to perform requests to the Autotask API.', 'error' );
@@ -74,7 +48,7 @@
 		}
 		// setup the atws object
 		$this->oAutotask = new atws\atws();
-		if ($this->oAutotask->connect($aLogin['location'],$aLogin['login'],$aLogin['password'])) {
+		if ($this->oAutotask->connect($sLocation,$sLogin,$sPassword)) {
 			if ($this->checkConnectAutotask() === true) {
 				return true;
 			}
