@@ -34,7 +34,7 @@
 			,'EstimatedHours'=>array('sync'=>FALSE)
 			,'InstalledProductID'=>array('sync'=>FALSE)
 			,'IssueType'=>array('sync'=>TRUE,'field'=>'issuetype_id')
-			,'LastActivityDate'=>array('sync'=>FALSE)
+			,'LastActivityDate'=>array('sync'=>TRUE,'field'=>'last_activity','dbhook'=>'datetoDb')
 			,'Priority'=>array('sync'=>TRUE,'field'=>'priority')
 			,'QueueID'=>array('sync'=>TRUE,'field'=>'queue_id')
 			,'AssignedResourceID'=>array('sync'=>TRUE,'field'=>'resource_id')
