@@ -19,7 +19,7 @@
 			,	'Autotask.Ticketstatus'		
 			,	'Autotask.Tickets'	
 		);
-
+		public $tasks = array('Autotask.GetAutotaskObject');
 		public $aTicketModelMap = array(
 			'id'=>array(TRUE,'field'=>'id')
 			,'AccountID'=>array('sync'=>TRUE,'field'=>'account_id')
@@ -71,6 +71,7 @@
 		public function execute() {
 			App::uses('CakeTime', 'Utility');
 			//echo CakeTime::convert(time(), new DateTimeZone('Asia/Jakarta'));
+			$this->oAutotask = $this->GetAutotaskObject->execute();
 			$this->__UpdateTicketsFromAutotask();
 		}
 		private function __UpdateTicketsFromAutotask() {

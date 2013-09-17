@@ -62,6 +62,7 @@ class ImportFromAutotaskShell extends AppShell {
 		// may as well do these first so there are none missing
 		// sync picklists
 		$this->SyncPicklists->execute();
+		$this->SyncTickets->execute();
 
 	}
 }
