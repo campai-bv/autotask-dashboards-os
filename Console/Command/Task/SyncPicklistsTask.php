@@ -25,7 +25,7 @@
 		 * @return
 		 */
 		public function execute() {
-			$this->oAutotask = & $this->GetAutotaskObject->execute();
+			$this->oAutotask = $this->GetAutotaskObject->execute();
 			$this->__syncPicklistWithDatabase();
 
 		}
@@ -74,7 +74,7 @@
 		}
 
 		public function __getAutotaskPicklist( $sEntity, $sPicklist ) {
-			if($this->oAutotask->connectAutotask() !== true ) {
+			if($this->oAutotask->connected() !== true ) {
 				return false;
 			}
 			$aPicklistResult = $this->oAutotask->getPicklist($sEntity, $sPicklist);
