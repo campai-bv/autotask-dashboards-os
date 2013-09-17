@@ -12,7 +12,7 @@
 	 */
 	class GetAutotaskObjectTask extends Shell {
 
-		public function execute() {
+		public function &execute() {
 
 			$this->connectAutotask();
 			return $this->oAutotask;
