@@ -162,7 +162,7 @@
 			$query->qOR('LastActivityDateTime',$query->GreaterThanorEquals,$this->sSyncFromActivityDate);
 			//@todo: we should have a config table with names of certain identifiers - like completed for closed 
 			// tickets
-			$query->qAND('Status',$query->NotEqual,$this->oAutotask->getPicklistValueFromName('Ticket','Completed'));
+			$query->qAND('Status',$query->NotEqual,$this->oAutotask->getPicklistValueFromName('Ticket','Status','Completed'));
 			return $query;
 		}
 	}
