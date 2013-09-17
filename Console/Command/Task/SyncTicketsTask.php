@@ -17,7 +17,7 @@
 			,	'Autotask.Subissuetype'
 			,	'Autotask.Queue'
 			,	'Autotask.Ticketstatus'		
-			,	'Autotask.Tickets'	
+			,	'Autotask.Ticket'	
 		);
 		public $tasks = array('Autotask.GetAutotaskObject');
 		public $aTicketModelMap = array(
