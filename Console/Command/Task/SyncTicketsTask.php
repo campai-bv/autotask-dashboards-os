@@ -84,41 +84,57 @@
 			foreach($this->syncResults as $oTicketEntity) {
 				$aModelData = $this->__ConvertEntityResultsToModelArray($oTicketEntity);
 				$aNewModelRecords[] = array('Ticket' => $aModelData);
-				$this->log('Queued ticket data for sync with tnumber:'.$aModelData['TicketNumber'],4);
+				$this->log('Queued ticket data for sync with tnumber:'.$aModelData['number'],4);
 			}
+			$this->log($aNewModelRecords);
 		}
 
 		// @todo:can probably overload the autotask classmap for ticket 
 		// to have a function which returns the model...
 		// but that should come later
 		private function __ConvertEntityResultsToModelArray($oTicketEntity) {
+			$aModelData = false;
 			foreach($oTicketEntity as $sField => $uValue) {
+				$this->log('checking field'+$sField);
 				// ignore udfs (for now)
 				if (is_array($sField)) {
+					$this->log($sField + ' is a UDF field');
 					break;
 				}
 				if (!isset($this->aTicketModelMap[$sField])) {
+					$this->log($sField + ' is not in ticket map');
 					// not in ticket map
 					break;	
 				}
 				$map = $this->aTicketModelMap[$sField];
 				if (!is_array($map)) {
+					$this->log($sField + ' has ticket map entry but not configured correctly');
 					// ticket map not configured correctly
 					break;
 				}
 				if (!isset($map['sync'])) {
+					$this->log($sField + ' is not to be synced with database');
 					// not syncing
 					break;
 				}
-				if ($this->aTicketModelMap[$sField]['sync'] === TRUE)
-				if (isset($this->aTicketModelMap[$sField]['dbhook'])){
-					$value = $this->aTicketModelMap[$sField]['dbhook']($uValue);
+				if ($map['sync'] !== TRUE) {
+					$this->log($sField + ' is not to be synced with database');
+					// not syncing
+					break;
+				}
+				if (isset($map['dbhook'])){
+					$this->log($sField + ' is to be converted with:'+$map['dbhook']);
+					$value = $map['dbhook']($uValue);
 				}
 				else {
 					$value = $uValue;
 				}
-				$aModelData[$this->aTicketModelMap[$sField]['field']] = $value;
-
+				if (!isset($value)) {
+					$value = "";
+				}
+				if (isset($map['field'])) {
+					$aModelData[$map['field']] = $value;	
+				}
 			}
 			return $aModelData;
 		}
