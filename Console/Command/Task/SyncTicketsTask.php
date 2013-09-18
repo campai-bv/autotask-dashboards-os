@@ -77,7 +77,7 @@
 		private function __UpdateTicketsFromAutotask() {
 			// get the entities from autotask
 			if ($this->__GetTicketsToSyncFromAutotask() === FALSE) {
-				$this->log('not tickets to update');
+				$this->log('no tickets to update',0);
 				return FALSE;
 			}
 			// results are insert or replace added
@@ -85,7 +85,7 @@
 				$aModelData = $this->__ConvertEntityResultsToModelArray($oTicketEntity);
 				$this->log($aModelData);
 				$aNewModelRecords[] = array('Ticket' => $aModelData);
-				$this->log('Queued ticket data for sync with tnumber:'.$aModelData['number'],4);
+				$this->log('Queued ticket data for sync with tnumber:'.$aModelData['number'],3);
 			}
 			if (!empty($aNewModelRecords)) {
 				// batch write our model changes
@@ -99,7 +99,7 @@
 		private function __ConvertEntityResultsToModelArray($oTicket) {
 			$aModelData = false;
 
-			$this->log('Converting ticket id:'.$oTicket->id);
+			$this->log('Converting ticket id:'.$oTicket->id,3);
 			foreach($oTicket as $sField => $uValue) {
 				$this->log('checking field:'.$sField);
 				// ignore udfs (for now)
@@ -185,7 +185,7 @@
 			else {
 				$this->query = $this->__GetSyncQuery();
 			}
-			$this->log('at query:'.$this->query->getQueryXml(),4);
+			$this->log('at query:'.$this->query->getQueryXml(),3);
 			
 			$this->syncResults = $this->oAutotask->getQueryResults($this->query);
 			
@@ -193,18 +193,18 @@
 				
 				$this->log($this->oAutotask->getLastQueryError());
 				$this->log($this->oAutotask->getLastQueryFault());
-				$this->Log('No tickets to update');
+				$this->Log('No tickets to update',0);
 				return FALSE;
 			}
 			if (count($this->syncResults == 500)) {
 				$results[]=$this->syncResults;
-				$this->log('getting results greater than id:'.end($this->syncResults)->id);
+				$this->log('getting results greater than id:'.end($this->syncResults)->id,3);
 				$this->query->qField('id',$this->query->GreaterThan,end($this->syncResults)->id);
 				while (count($this->syncResults=$this->oAutotask->getQueryResults($this->query)) == 500) {
 					if($this->syncResults === FALSE) {
 						break;
 					}
-					$this->log('getting more results greater than id:'.end($this->syncResults)->id);
+					$this->log('getting more results greater than id:'.end($this->syncResults)->id,3);
 					$results[]=$this->syncResults;
 				}
 				if(is_array($this->syncResults)) {
@@ -216,7 +216,7 @@
 				}
 			}
 			
-			$this->Log('Updating or adding '.count($this->syncResults).' Tickets');
+			$this->Log('Updating or adding '.count($this->syncResults).' Tickets',3);
 			return TRUE;
 			
 		}
@@ -240,7 +240,7 @@
 			$query->closeBracket();
 			return $query;
 		}
-		public function log($sMessage,$iLevel = 0) {
+		public function log($sMessage,$iLevel = 4) {
 			if( !$this->iLogLevel = Configure::read( 'Import.logLevel' ) ) {
 				$this->iLogLevel = 4;
 				parent::log('log level set to:'.$this->iLogLevel,'cronjob');
