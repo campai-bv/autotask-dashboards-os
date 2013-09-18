@@ -117,7 +117,7 @@
 			
 			if ($this->sSyncFromActivityDate == '0000-00-00 00:00:00') {
 				// lets just start with today for now
-				$this->sSyncFromActivityDate = date_create()->format('Y-m-d H:i:s');
+				$this->sSyncFromActivityDate = date_create()->format('Y-m-d 00:00:00');// start of today
 				$this->bInitialSync = TRUE; // get all open tickets + tickets modified today
 				$this->log('Initial Sync');
 			}
@@ -151,18 +151,18 @@
 		private function __GetSyncQuery() {
 			$query = $this->oAutotask->getNewQuery();
 			$query->qFROM('Ticket');
-			$query->qWHERE('LastActivityDateTime',$query->GreaterThanorEquals,$this->sSyncFromActivityDate);
+			$query->qField('LastActivityDateTime',$query->GreaterThanorEquals,$this->sSyncFromActivityDate);
 			return $query;
 		}
 		
 		private function __GetInitialSyncQuery() {
 			$query = $this->__GetSyncQuery();
-			$query->qWHERE('LastActivityDateTime',$query->GreaterThanorEquals,$this->sSyncFromActivityDate);
-			$query->openBracket();
-			$query->qOR('LastActivityDateTime',$query->GreaterThanorEquals,$this->sSyncFromActivityDate);
+			$query->openBracket('OR');
+			$query->qField('LastActivityDateTime',$query->GreaterThanorEquals,$this->sSyncFromActivityDate);
 			//@todo: we should have a config table with names of certain identifiers - like completed for closed 
 			// tickets
-			$query->qAND('Status',$query->NotEqual,$this->oAutotask->getPicklistValueFromName('Ticket','Status','Completed'));
+			$query->qField('Status',$query->NotEqual,$this->oAutotask->getPicklistValueFromName('Ticket','Status','Completed'));
+			$query->closeBracket();
 			return $query;
 		}
 	}
