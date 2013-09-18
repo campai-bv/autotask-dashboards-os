@@ -87,6 +87,10 @@
 				$aNewModelRecords[] = array('Ticket' => $aModelData);
 				$this->log('Queued ticket data for sync with tnumber:'.$aModelData['number'],4);
 			}
+			if (!empty($aNewModelRecords)) {
+				// batch write our model changes
+				$this->Ticket->saveAll($aNewModelRecords);
+			}
 		}
 
 		// @todo:can probably overload the autotask classmap for ticket 
