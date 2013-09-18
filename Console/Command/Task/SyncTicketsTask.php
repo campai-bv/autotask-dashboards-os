@@ -125,7 +125,7 @@
 			$this->log('Sync from LastActivityDate:'.$this->sSyncFromActivityDate);
 			
 		}
-		private function __GetTicketsToSyncFromAutotask( ) {
+		private function __GetTicketsToSyncFromAutotask() {
 			if (!isset($this->sSyncFromActivityDate)) {
 				$this->__SetLastActivityDate();
 			}

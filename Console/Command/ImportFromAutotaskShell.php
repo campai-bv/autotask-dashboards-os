@@ -36,7 +36,6 @@ class ImportFromAutotaskShell extends AppShell {
 		,	'Autotask.CalculateTotalsForTimeEntries'
 		,	'Autotask.SyncPicklists'
 		, 	'Autotask.SyncTickets'
-		,	'Autotask.GetAutotaskObject'
 	);
 
 
@@ -52,7 +51,7 @@ class ImportFromAutotaskShell extends AppShell {
 	public function main() {
 		
 		$bErrorsEncountered = false;
-		$this->oAutotask = $this->GetAutotaskObject->execute();
+
 		//$this->connectAutotask();
 		//$this->checkConnectAutotask();
 
@@ -61,8 +60,6 @@ class ImportFromAutotaskShell extends AppShell {
 		// Apparently we can login, so let's get into action!
 		// may as well do these first so there are none missing
 		// sync picklists
-		$this->SyncPicklists->execute();
-		$this->SyncTickets->execute();
 
 	}
 }
