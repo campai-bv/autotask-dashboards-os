@@ -55,13 +55,12 @@ class atws {
     	
     }
 	public function getPicklistValueFromName($entity, $picklist, $name) {
-		if (!isset($this->picklists[$entity])) {
-			$this->setPicklist($entity);
-		}
-		if (isset($this->picklists[$entity])) {
-			if (isset($this->picklists[$entity][$picklist])) {
-				return array_search ( $name , $this->picklists[$entity][$picklist]);
-			}
+		$result = $this->getPicklist($entity,$picklist);
+		if ($result === false) {
+			return false;
+		}		
+		if (is_array($result)) {
+			return array_search( $name , $result);
 		}
 		return false;
 	}
