@@ -198,7 +198,7 @@
 			}
 			if (count($this->syncResults == 500)) {
 				$results[]=$this->syncResults;
-				$this->log('getting results greater than id:'.end($this->syncResults)->id)
+				$this->log('getting results greater than id:'.end($this->syncResults)->id);
 				$this->query->qField('id',$this->query->GreaterThan,end($this->syncResults)->id);
 				while (count($this->syncResults=$this->oAutotask->getQueryResults($this->query)) == 500) {
 					if($this->syncResults === FALSE) {
