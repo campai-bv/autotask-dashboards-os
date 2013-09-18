@@ -94,20 +94,40 @@
 		private function __ConvertEntityResultsToModelArray($oTicketEntity) {
 			foreach($oTicketEntity as $sField => $uValue) {
 				// ignore udfs (for now)
-				if (!is_array($oTicketEntity->$sField)) {
-					if ($this->aTicketModelMap[$sField]['sync'] === TRUE)
-					if (isset($this->aTicketModelMap[$sField]['dbhook'])){
-						$value = $this->aTicketModelMap[$sField]['dbhook']($uValue);
-					}
-					else {
-						$value = $uValue;
-					}
-					$aModelData[$this->aTicketModelMap[$sField]['field']] = $value;
+				if (is_array($sField)) {
+					break;
 				}
+				if (!isset($this->aTicketModelMap[$sField])) {
+					// not in ticket map
+					break;	
+				}
+				$map = $this->aTicketModelMap[$sField];
+				if (!is_array($map)) {
+					// ticket map not configured correctly
+					break;
+				}
+				if (!isset($map['sync'])) {
+					// not syncing
+					break;
+				}
+				if ($this->aTicketModelMap[$sField]['sync'] === TRUE)
+				if (isset($this->aTicketModelMap[$sField]['dbhook'])){
+					$value = $this->aTicketModelMap[$sField]['dbhook']($uValue);
+				}
+				else {
+					$value = $uValue;
+				}
+				$aModelData[$this->aTicketModelMap[$sField]['field']] = $value;
+
 			}
 			return $aModelData;
 		}
-
+		private function __dateToDb($api_date) {
+			if (!isset($this->oApiTimeZone)) {
+				$this->oApiTimeZone = new DateTimeZone('US/Eastern');
+			}
+			$oDate = date_create($api_date,$this->oApiTimeZone);
+		}
 		private function __SetLastActivityDate() {
 			// gets the last update date
 			// if not found, works out the date to use
