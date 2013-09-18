@@ -259,7 +259,11 @@ class atwsquery {
     		// for the api
     		$value = $this->formatDateStamp($value);
     	}
+    	
 
+		if( !isset( $value ) ) {
+			$value = $field_value;
+		}
         $this->_addFieldCriteria($field_name, $field_condition, $value,$udf);
     }
     public function openBracket($operator = '') {
