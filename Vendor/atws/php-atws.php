@@ -254,7 +254,7 @@ class atwsquery {
     
     public function qField($field_name,$field_condition,$field_value,$udf=false) {
 
-    	if($field_value instanceof DateTime) {
+    	if($field_value instanceof \DateTime) {
     		// automatically convert to the correct timestamp format
     		// for the api
     		$value = $this->formatDateStamp($value);
