@@ -206,7 +206,9 @@
 					$this->log('getting more results');
 					$results[]=$this->syncResults;
 				}
-				$results[]=$this->syncResults;
+				if(is_array($this->syncResults)) {
+					$results[]=$this->syncResults;					
+				}
 				$this->syncResults=array();
 				foreach($results as $result) {
 					$this->syncResults = array_merge($this->syncResults,$result);
