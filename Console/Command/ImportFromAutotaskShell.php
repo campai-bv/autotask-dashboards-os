@@ -25,8 +25,8 @@
 
 		public $tasks = array(
 				'Autotask.TimeConverter'
-			,	'Autotask.GetTicketsCompletedToday'
-			,	'Autotask.GetTicketsOpenToday'
+			,	'Autotask.GetTicketsCompleted'
+			,	'Autotask.GetTicketsOpen'
 			,	'Autotask.CalculateTotalsByTicketStatus'
 			,	'Autotask.CalculateTotalsByTicketSource'
 			,	'Autotask.CalculateTotalsForKillRate'
@@ -36,22 +36,22 @@
 		);
 
 
-		public function log( $sMessage, $iLevel = 0 ) {
+		public function log($sMessage, $iLevel = 0) {
 
-			if( !$this->iLogLevel = Configure::read( 'Import.logLevel' ) ) {
+			if (!$this->iLogLevel = Configure::read('Import.logLevel')) {
 				$this->iLogLevel = 0;
 			}
 
-			if( $iLevel <= $this->iLogLevel ) {
+			if ($iLevel <= $this->iLogLevel) {
 
 				// Auto indent the messages based on their level.
 				$sIdentation = '';
 
-				for( $i=1; $i <= $iLevel; $i++ ) {
-					$sIdentation .= "  ";
+				for( $i=2; $i <= $iLevel; $i++ ) {
+					$sIdentation .= "   ";
 				}
 
-				parent::log( $sIdentation . $sMessage, 'cronjob' );
+				parent::log($sIdentation . $sMessage, 'cronjob');
 
 			}
 
@@ -62,7 +62,7 @@
 
 			$bErrorsEncountered = false;
 
-			$this->log( 'Starting with the import.' );
+			$this->log('Starting with the import..', 1);
 
 			// Set the database object so we can clean quotes from user input.
 			$this->db = ConnectionManager::getDataSource( 'default' );
@@ -78,21 +78,21 @@
 				// sync issue types
 				$this->__syncPicklistsWithDatabase();
 				// Delete any existing records so we have a clean start.
-				$this->log( '> Truncating tickets table..',1 );
+				$this->log( '> Truncating tickets table..', 1);
 
 				$this->Ticket->query('TRUNCATE TABLE tickets;');
 
-				$this->log(  ' ..done.',1);
+				$this->log('..done.', 1);
 				// End
 
 				// Import completed tickets
-				$this->log(  '> Importing completed tickets (today) into the database..',1 );
+				$this->log('> Importing completed tickets into the database..', 1);
 
-				$oTickets = $this->GetTicketsCompletedToday->execute();
+				$oTickets = $this->GetTicketsCompleted->execute();
 
 				if( empty( $oTickets ) ) {
 
-					$this->log( ' ..nothing saved - query returned no tickets.',1 );
+					$this->log('..nothing saved - query returned no tickets.', 1);
 
 				} else {
 
@@ -102,7 +102,7 @@
 
 					} else {
 
-						$this->log(  ' ..imported ' . count( $oTickets ) . ' ticket(s).' ,1);
+						$this->log('..imported ' . count( $oTickets ) . ' ticket(s).' , 1);
 
 					}
 
@@ -112,20 +112,20 @@
 				if( !$bErrorsEncountered ) {
 
 					// Import the tickets that have any other status then 'completed'.
-					$this->log(  '> Importing open tickets (today) into the database..',1);
+					$this->log(  '> Importing open tickets into the database..',1);
 
-					$oTickets = $this->GetTicketsOpenToday->execute();
+					$oTickets = $this->GetTicketsOpen->execute();
 
 					if( empty( $oTickets ) ) {
 
-						$this->log( ' ..nothing saved - query returned no tickets.',1 );
+						$this->log('..nothing saved - query returned no tickets.', 1);
 
 					} else {
 
 						if( !$this->__saveTicketsToDatabase( $oTickets ) ) {
 							$bErrorsEncountered = true;
 						} else {
-							$this->log(  ' ..imported ' . count( $oTickets ) . ' ticket(s).' ,1);
+							$this->log('..imported ' . count( $oTickets ) . ' ticket(s).' , 1);
 						}
 
 					}
@@ -133,47 +133,49 @@
 					if( !$bErrorsEncountered ) {
 
 						// Processing of the tickets data into totals for kill rates, queue healths etc.
-						$this->log('> Calculating ticket status totals for all dashboards..',1 );
+						$this->log('> Processing the tickets data into totals for all dashboards..', 1);
 
-						$this->CalculateTotalsByTicketStatus->execute();
+							$this->log('> Calculating ticket status totals for all dashboards..', 2);
+							$this->CalculateTotalsByTicketStatus->execute();
+							$this->log('..done.', 2);
+	
+							$this->log('> Calculating tickets by source for all dashboards..', 2);
+							$this->CalculateTotalsByTicketSource->execute();
+							$this->log('..done.', 2);
+	
+							$this->log('> Calculating total open tickets for all dashboards..', 2);
+							$this->CalculateTotalsOpenTickets->execute();
+							$this->log('..done.', 2);
+	
+							$this->log('> Calculating kill rate totals for all dashboards..', 2);
+							$this->CalculateTotalsForKillRate->execute();
+							$this->log('..done.', 2);
+	
+							$this->log('> Calculating queue health totals for all dashboards..',2);
+							$this->CalculateTotalsForQueueHealth->execute();
+							$this->log('..done.' , 2);
+	
+							$this->log('> Importing time entries..', 2);
+							if( !$this->CalculateTotalsForTimeEntries->execute() ) {
+								$bErrorsEncountered = true;
+							}
+							$this->log('..done.', 2);
+							
+						$this->log('..done.', 1);
 
-						$this->log( '..done.', 'cronjob', 1 );
-
-						$this->log( '> Calculating tickets by source for all dashboards..', 1 );
-						$this->CalculateTotalsByTicketSource->execute();
-						$this->log( '..done.', 'cronjob' );
-
-						$this->log( '> Calculating total open tickets for all dashboards..', 1 );
-						$this->CalculateTotalsOpenTickets->execute();
-						$this->log( '..done.', 1 );
-
-						$this->log( '> Calculating kill rate totals for all dashboards..', 1 );
-						$this->CalculateTotalsForKillRate->execute();
-						$this->log( '..done.',1 );
-
-						$this->log( '> Calculating queue health totals for all dashboards..',1 );
-						$this->CalculateTotalsForQueueHealth->execute();
-						$this->log( '..done.' ,1);
-
-						$this->log( '> Importing time entries..',1 );
-						if( !$this->CalculateTotalsForTimeEntries->execute() ) {
-							$bErrorsEncountered = true;
-						}
-						$this->log(  '..done.',1 );
-
-						$this->log( '> Clearing cache for all dashboards..',1 );
+						$this->log('> Clearing cache for all dashboards..', 1);
 						if(
 							clearCache() // Clear the view cache
 							&&
-							Cache::clear( null ,'1_hour' ) // Clear the model cache
+							Cache::clear( null, '1_hour' ) // Clear the model cache
 						) {
 
-							$this->log(  '..done.',1 );
+							$this->log('..done.', 1);
 
 						} else {
 
 							$bErrorsEncountered = true;
-							$this->log( '..could not delete view cache!' );
+							$this->log('..could not delete view cache!', 1);
 
 						}
 
@@ -185,10 +187,10 @@
 			// End
 
 			if( $bErrorsEncountered ) {
-				$this->log( 'Failed: we\'ve encountered some errors while running the import script.' );
+				$this->log( 'Failed: we\'ve encountered some errors while running the import script.', 1);
 			} else {
 
-				$this->log( 'Success: everything imported correctly.' );
+				$this->log( 'Success! Everything imported correctly.', 1);
 
 			}
 

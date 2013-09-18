@@ -10,7 +10,7 @@
 	 * @license       MIT License (http://opensource.org/licenses/mit-license.php)
 	 * @author        Coen Coppens <coen@campai.nl>
 	 */
-	class CalculateTotalsOpenTicketsTask extends Shell {
+	class CalculateTotalsOpenTicketsTask extends ImportFromAutotaskShell {
 
 		public $uses = array(
 				'Autotask.Ticket'

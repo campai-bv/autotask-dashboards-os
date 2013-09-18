@@ -10,7 +10,7 @@
 	 * @license       MIT License (http://opensource.org/licenses/mit-license.php)
 	 * @author        Coen Coppens <coen@campai.nl>
 	 */
-	class CalculateTotalsForTimeEntriesTask extends Shell {
+	class CalculateTotalsForTimeEntriesTask extends ImportFromAutotaskShell {
 
 		public $uses = array(
 				'Autotask.Timeentry'
@@ -43,11 +43,11 @@
 
 			$bErrorsEncountered = false;
 
-			$this->log( '> Truncating timeentries table..', 2 );
+			$this->log( '> Truncating timeentries table..', 4 );
 			$this->Timeentry->query('TRUNCATE TABLE timeentries;');
-			$this->log( '..done.', 2 );
+			$this->log( '..done.', 4 );
 
-			$this->log( '> Importing time entries into the database for today (' . date( 'Y-m-d' ) . ')..', 2 );
+			$this->log( '> Importing time entries into the database for today (' . date( 'Y-m-d' ) . ')..', 4 );
 
 			$oResult = $this->Timeentry->findInAutotask( 'all', array(
 					'conditions' => array(
@@ -98,7 +98,7 @@
 						$bErrorsEncountered = true;
 
 					} else {
-						$this->log( '..imported 1 time entry.', 2 );
+						$this->log( '..imported 1 time entry.', 4 );
 					}
 
 				} else {
@@ -142,14 +142,14 @@
 					}
 
 					if( !$bErrorsEncountered ) {
-						$this->log( '..imported ' . count( $oResult ) . ' time entries.', 2 );
+						$this->log( '..imported ' . count( $oResult ) . ' time entries.', 4 );
 					}
 
 				}
 
 
 			} else {
-				$this->log( '..nothing saved - query returned no time entries.', 2 );
+				$this->log( '..nothing saved - query returned no time entries.', 4 );
 			}
 
 			if( $bErrorsEncountered ) {
