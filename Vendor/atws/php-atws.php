@@ -279,17 +279,6 @@ class atwsquery {
 			);
     }
             
-    private function _startNestedCondition($operator='AND') {
-        
-        $this->_operations[]=array('TYPE'=>'NEST','OPERATOR'=>$operator,'STATUS'=>true);    	
-    }
-
-
-    private function _endNestedCondition() {
-        
-        $this->_operations[]=array('TYPE'=>'NEST','STATUS'=>false);
-    }
-
         
     public function getQueryXml() {
     	$this->_buildXml();
@@ -331,21 +320,6 @@ class atwsquery {
     	
     }
 
-
-    private function _buildNEST($operation) {
-        if ($operation['STATUS'] === false) {
-            $this->_spaces--;
-            $cspacer=str_repeat(" ",$this->_spaces);
-            $this->_xml.="\n$cspacer</condition>";        	
-        }
-        else {
-            $cspacer=str_repeat(" ",$this->_spaces);
-            $cxml="\n$cspacer<condition operator='${operation['OPERATOR']}'>";
-            $this->_xml.=$cxml;
-            $this->_spaces++; 	
-        }
-    }
-
     private function _buildBRACKET($operation) {
     	if ($operation['STATUS'] === false) {
             $this->_spaces--;
@@ -353,14 +327,15 @@ class atwsquery {
             $this->_xml.="\n$cspacer</condition>";   		
     	}
 		else {
-			if ($operation['OPERATOR'] == '') {
-				$operator = "";
+			if ($operation['OPERATOR'] == 'OR') {
+				$operator = ' operator="OR"';
+				
 			}
 			else {
-				$operator = ' operator="' + $operation['OPERATOR'] + '"';
+				$operator = "";
 			}
             $cspacer=str_repeat(" ",$this->_spaces);
-            $cxml="\n$cspacer<condition$operator>";
+            $cxml="\n$cspacer<condition{$operator}>";
             $this->_xml.=$cxml;
             $this->_spaces++;
 		}
