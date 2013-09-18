@@ -171,7 +171,22 @@ class atws {
 		$this->last_query_xml=$ATWSQuery->sXML;
 		return $result;
 	}
-	
+	public function getLastQueryFault() {
+		if (isset($this->last_query_fault)) {
+			return $this->last_query_fault;
+		}
+		else {
+			return false;
+		}
+	}
+	public function getLastQueryError() {
+		if (isset($this->last_query_error)) {
+			return $this->last_query_error;
+		}
+		else {
+			return false;
+		}
+	}
 	public function getQueryResults($queryOrResults) {
 		if (is_a($queryOrResults,'atws\atwsquery')) {
 			return $this->getQueryResults($this->query($queryOrResults));
@@ -262,7 +277,7 @@ class atwsquery {
     private function _addFieldCriteria($name,$condition,$value,$udf=false) {
         
         if(is_object($value)) {
-        	if(get_class($value) == "DateTime") {
+        	if($value instanceof DateTime) {
         		// automatically convert to the correct timestamp format
         		// for the api
         		$value = $this->formatDateStamp($value);
@@ -340,23 +355,11 @@ class atwsquery {
 		}
     }
 	private function formatDateStamp($datetime=false) {
-		// this function formats the date correctly for the api
-		// date fields.
-		// input is either datetime object or unixtimestamp
-		
-		// @todo: build in timezone adjustment, as the API is wonky
-		if($datetime === false) {
-			$datetime = new DateTime();
+		if(!isset($this->ApiTimeZone)) {
+			$this->ApiTimeZone = new DateTimeZone('US/Eastern');
 		}
-		if(is_object($datetime)) {
-			if(get_class($datetime) == "DateTime") {
-				return $datetime->format("Y-m-d H:i:s");			
-			}
-		}
-		if(is_int($datetime)) {
-			//assume this is a unix timestamp
-			return date('Y-m-d H:i:s',$datetime);
-		}
+		return $datetime->setTimezone($this->ApiTimeZone)->format("Y-m-d H:i:s");
+					
 	}
 }
  

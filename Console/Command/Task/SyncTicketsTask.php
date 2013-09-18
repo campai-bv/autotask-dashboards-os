@@ -77,7 +77,7 @@
 		private function __UpdateTicketsFromAutotask() {
 			// get the entities from autotask
 			if ($this->__GetTicketsToSyncFromAutotask() === FALSE) {
-				$this->log('not tickets to update to update');
+				$this->log('not tickets to update');
 				return FALSE;
 			}
 			$this->log(var_dump($this->syncResults));
@@ -145,8 +145,11 @@
 			$this->syncResults = $this->oAutotask->getQueryResults($this->query);
 			
 			if ($this->syncResults === FALSE) {
-				return FALSE;
+				
+				$this->log($this->oAutotask->getLastQueryError());
+				$this->log($this->oAutotask->getLastQueryFault());
 				$this->Log('No tickets to update');
+				return FALSE;
 			}
 			$this->Log('Updating or adding '.count($this->syncResults.' Tickets'));
 			return TRUE;
