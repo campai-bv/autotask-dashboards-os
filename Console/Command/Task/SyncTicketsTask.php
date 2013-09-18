@@ -80,7 +80,6 @@
 				$this->log('not tickets to update');
 				return FALSE;
 			}
-			$this->log(var_dump($this->syncResults));
 			// results are insert or replace added
 			foreach($this->syncResults as $oTicketEntity) {
 				$aModelData = $this->__ConvertEntityResultsToModelArray($oTicketEntity);
