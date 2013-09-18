@@ -71,8 +71,6 @@
 		 * @return
 		 */
 		public function execute() {
-			App::uses('CakeTime', 'Utility');
-			//echo CakeTime::convert(time(), new DateTimeZone('Asia/Jakarta'));
 			$this->oAutotask = $this->GetAutotaskObject->execute();
 			$this->__UpdateTicketsFromAutotask();
 		}
@@ -88,7 +86,7 @@
 				$aModelData = $this->__ConvertEntityResultsToModelArray($oTicketEntity);
 				$this->log($aModelData);
 				$aNewModelRecords[] = array('Ticket' => $aModelData);
-				$this->log('Queued ticket data for sync with tnumber:'.$aModelData['number'],3);
+				$this->log('Queued ticket data for sync with tnumber:'.$aModelData['number']);
 			}
 			if (!empty($aNewModelRecords)) {
 				// batch write our model changes
