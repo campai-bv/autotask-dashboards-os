@@ -196,6 +196,23 @@
 				$this->Log('No tickets to update');
 				return FALSE;
 			}
+			if (count($this->syncResults == 500)) {
+				$results[]=$this->syncResults;
+				$this->query->qField('id',$this->query->GreaterThan,end($this->syncResults)->id);
+				while (count($this->syncResults=$this->oAutotask->getQueryResults($this->query)) == 500) {
+					if($this->syncResults === FALSE) {
+						break;
+					}
+					$this->log('getting more results');
+					$results[]=$this->syncResults;
+				}
+				$results[]=$this->syncResults;
+				$this->syncResults=array();
+				foreach($results as $result) {
+					$this->syncResults = array_merge($this->syncResults,$result);
+				}
+			}
+			
 			$this->Log('Updating or adding '.count($this->syncResults).' Tickets');
 			return TRUE;
 			
@@ -220,4 +237,5 @@
 			$query->closeBracket();
 			return $query;
 		}
+
 	}
