@@ -16,25 +16,25 @@ require_once(dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'Vendor'.DIRECTORY_SE
 
 class ImportFromAutotaskShell extends AppShell {
 
-	public $uses = array(
-			'Autotask.Ticket'
-		,	'Autotask.Resource'
-		,	'Autotask.Ticketstatus'
-		,	'Autotask.Queue'
-		,	'Autotask.Account'
-		,	'Autotask.Issuetype'
-		,	'Autotask.Subissuetype'
-	);
+	//public $uses = array(
+		//	'Autotask.Ticket'
+		//,	'Autotask.Resource'
+		//,	'Autotask.Ticketstatus'
+		//,	'Autotask.Queue'
+		//,	'Autotask.Account'
+		//,	'Autotask.Issuetype'
+		//,	'Autotask.Subissuetype'
+	//);
 
 	public $tasks = array(
-			'Autotask.TimeConverter'
-		,	'Autotask.GetTicketsCompletedToday'
-		,	'Autotask.GetTicketsOpenToday'
-		,	'Autotask.CalculateTotalsByTicketStatus'
-		,	'Autotask.CalculateTotalsForKillRate'
-		,	'Autotask.CalculateTotalsForQueueHealth'
-		,	'Autotask.CalculateTotalsForTimeEntries'
-		,	'Autotask.SyncPicklists'
+		//	'Autotask.TimeConverter'
+		//,	'Autotask.GetTicketsCompletedToday'
+		//,	'Autotask.GetTicketsOpenToday'
+		//,	'Autotask.CalculateTotalsByTicketStatus'
+		//,	'Autotask.CalculateTotalsForKillRate'
+		//,	'Autotask.CalculateTotalsForQueueHealth'
+		//,	'Autotask.CalculateTotalsForTimeEntries'
+			'Autotask.SyncPicklists'
 		, 	'Autotask.SyncTickets'
 	);
 
@@ -50,16 +50,11 @@ class ImportFromAutotaskShell extends AppShell {
 	}
 	public function main() {
 		
-		$bErrorsEncountered = false;
-
-		//$this->connectAutotask();
-		//$this->checkConnectAutotask();
-
 		$this->log( 'Starting with the import.' );
 
-		// Apparently we can login, so let's get into action!
-		// may as well do these first so there are none missing
-		// sync picklists
+		$this->SyncPicklists->execute();
+		$this->SyncTickets->execute();
+
 
 	}
 }
