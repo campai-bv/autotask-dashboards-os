@@ -121,7 +121,7 @@ class atws {
 
 	public function getAvailablePicklists($entity) {
 		if(!isset($this->picklists[$entity])) {
-			$this->getPicklist($entity,'DummyPicklist');
+			$this->setPicklist($entity);
 		}
 		if(!isset($this->picklists[$entity])) {
 			// some kind of error
