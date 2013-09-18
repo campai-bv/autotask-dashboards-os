@@ -83,18 +83,19 @@
 			// results are insert or replace added
 			foreach($this->syncResults as $oTicketEntity) {
 				$aModelData = $this->__ConvertEntityResultsToModelArray($oTicketEntity);
+				$this->log($aModelData);
 				$aNewModelRecords[] = array('Ticket' => $aModelData);
 				$this->log('Queued ticket data for sync with tnumber:'.$aModelData['number'],4);
 			}
-			$this->log($aNewModelRecords);
 		}
 
 		// @todo:can probably overload the autotask classmap for ticket 
 		// to have a function which returns the model...
 		// but that should come later
-		private function __ConvertEntityResultsToModelArray($oTicketEntity) {
+		private function __ConvertEntityResultsToModelArray($oTicket) {
 			$aModelData = false;
-			foreach($oTicketEntity as $sField => $uValue) {
+			$this->log('Converting ticket id'.$oTicket.id);
+			foreach($oTicket as $sField => $uValue) {
 				$this->log('checking field'+$sField);
 				// ignore udfs (for now)
 				if (is_array($sField)) {
@@ -186,7 +187,7 @@
 				$this->Log('No tickets to update');
 				return FALSE;
 			}
-			$this->Log('Updating or adding '.count($this->syncResults.' Tickets'));
+			$this->Log('Updating or adding '.count($this->syncResults).' Tickets');
 			return TRUE;
 			
 		}
