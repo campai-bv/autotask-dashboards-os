@@ -158,7 +158,7 @@
 		private function __GetSyncQuery() {
 			$query = $this->oAutotask->getNewQuery();
 			$query->qFROM('Ticket');
-			$query->qField('LastActivityDateTime',$query->GreaterThanorEquals,$this->oSyncFromActivityDate);
+			$query->qField('LastActivityDate',$query->GreaterThanorEquals,$this->oSyncFromActivityDate);
 			return $query;
 		}
 		
