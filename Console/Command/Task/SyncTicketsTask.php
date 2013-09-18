@@ -77,8 +77,10 @@
 		private function __UpdateTicketsFromAutotask() {
 			// get the entities from autotask
 			if ($this->__GetTicketsToSyncFromAutotask() === FALSE) {
+				$this->log('not tickets to update to update');
 				return FALSE;
 			}
+			$this->log(var_dump($this->syncResults));
 			// results are insert or replace added
 			foreach($this->syncResults as $oTicketEntity) {
 				$aModelData = $this->__ConvertEntityResultsToModelArray($oTicketEntity);
@@ -111,22 +113,25 @@
 			// gets the last update date
 			// if not found, works out the date to use
 			// from the bootstrap settings
-			$this->sSyncFromActivityDate = $this->Ticket->field('last_activity',
+			$this->oSyncFromActivityDate = $this->Ticket->field('last_activity',
 				array('last_activity is not null'),'last_activity DESC');
 			
 			
-			if ($this->sSyncFromActivityDate == '0000-00-00 00:00:00') {
+			if ($this->oSyncFromActivityDate == '0000-00-00 00:00:00') {
 				// lets just start with today for now
-				$this->sSyncFromActivityDate = date_create()->format('Y-m-d 00:00:00');// start of today
+				$this->oSyncFromActivityDate = date_create(date_create()->format('Y-m-d 00:00:00'));// start of today
 				$this->bInitialSync = TRUE; // get all open tickets + tickets modified today
 				$this->log('Initial Sync');
 			}
-			
-			$this->log('Sync from LastActivityDate:'.$this->sSyncFromActivityDate);
+			if (! $this->oSyncFromActivityDate instanceof DateTime) {
+				$this->oSyncFromActivityDate = date_create($this->oSyncFromActvityDate);
+			}
+		
+			$this->log('Sync from LastActivityDate:'.$this->oSyncFromActivityDate->format('Y-m-d H:i:s'));
 			
 		}
 		private function __GetTicketsToSyncFromAutotask() {
-			if (!isset($this->sSyncFromActivityDate)) {
+			if (!isset($this->oSyncFromActivityDate)) {
 				$this->__SetLastActivityDate();
 			}
 			if ($this->bInitialSync === TRUE) {
@@ -151,7 +156,7 @@
 		private function __GetSyncQuery() {
 			$query = $this->oAutotask->getNewQuery();
 			$query->qFROM('Ticket');
-			$query->qField('LastActivityDateTime',$query->GreaterThanorEquals,$this->sSyncFromActivityDate);
+			$query->qField('LastActivityDateTime',$query->GreaterThanorEquals,$this->oSyncFromActivityDate);
 			return $query;
 		}
 		
