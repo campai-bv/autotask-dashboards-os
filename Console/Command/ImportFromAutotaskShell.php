@@ -16,16 +16,6 @@ require_once(dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'Vendor'.DIRECTORY_SE
 
 class ImportFromAutotaskShell extends AppShell {
 
-	//public $uses = array(
-		//	'Autotask.Ticket'
-		//,	'Autotask.Resource'
-		//,	'Autotask.Ticketstatus'
-		//,	'Autotask.Queue'
-		//,	'Autotask.Account'
-		//,	'Autotask.Issuetype'
-		//,	'Autotask.Subissuetype'
-	//);
-
 	public $tasks = array(
 		//	'Autotask.TimeConverter'
 		//,	'Autotask.GetTicketsCompletedToday'
