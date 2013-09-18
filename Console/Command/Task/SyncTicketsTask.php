@@ -21,7 +21,7 @@
 		);
 		public $tasks = array('Autotask.GetAutotaskObject');
 		public $aTicketModelMap = array(
-			'id'=>array(TRUE,'field'=>'id')
+			'id'=>array('sync'=>TRUE,'field'=>'id')
 			,'AccountID'=>array('sync'=>TRUE,'field'=>'account_id')
 			,'AllocationCodeID'=>array('sync'=>FALSE)
 			,'CompletedDate'=>array('sync'=>TRUE,'field'=>'completed','dbhook'=>'dateToDb')
@@ -97,32 +97,32 @@
 
 			$this->log('Converting ticket id:'.$oTicket->id);
 			foreach($oTicket as $sField => $uValue) {
-				$this->log('checking field'.$sField);
+				$this->log('checking field:'.$sField);
 				// ignore udfs (for now)
-				if (is_array($sField)) {
+				if (is_array($uValue)) {
 					$this->log($sField . ' is a UDF field');
-					break;
+					continue;
 				}
 				if (!isset($this->aTicketModelMap[$sField])) {
 					$this->log($sField . ' is not in ticket map');
 					// not in ticket map
-					break;	
+					continue;
 				}
 				$map = $this->aTicketModelMap[$sField];
 				if (!is_array($map)) {
 					$this->log($sField . ' has ticket map entry but not configured correctly');
 					// ticket map not configured correctly
-					break;
+					continue;
 				}
 				if (!isset($map['sync'])) {
 					$this->log($sField . ' is not to be synced with database');
 					// not syncing
-					break;
+					continue;
 				}
 				if ($map['sync'] !== TRUE) {
 					$this->log($sField . ' is not to be synced with database');
 					// not syncing
-					break;
+					continue;
 				}
 				if (isset($map['dbhook'])){
 					$this->log($sField . ' is to be converted with:'.$map['dbhook']);
