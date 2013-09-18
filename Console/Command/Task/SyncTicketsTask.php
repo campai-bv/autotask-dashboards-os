@@ -58,6 +58,7 @@
 		);
 		private $oSyncFromActivityDate = null;
 		private $bInitialSync = false;
+		private $syncResults = array();
 		/**
 		 * 
 
@@ -179,19 +180,19 @@
 			}
 			$this->log('Sync from LastActivityDate:'.$this->oSyncFromActivityDate->format('Y-m-d H:i:s'));
 		}
-		private function __GetTicketsToSyncFromAutotask() {
-			if (!isset($this->oSyncFromActivityDate)) {
-				$this->__SetLastActivityDate();
-			}
-			if ($this->bInitialSync === TRUE) {
-				$this->query = $this->__GetInitialSyncQuery();
-			}
-			else {
-				$this->query = $this->__GetSyncQuery();
+		private function __GetTicketsToSyncFromAutotask($i=0) {
+			if ($i==0) {
+				if (!isset($this->oSyncFromActivityDate)) {
+					$this->__SetLastActivityDate();
+				}
+				if ($this->bInitialSync === TRUE) {
+					$this->query = $this->__GetInitialSyncQuery();
+				}
+				else {
+					$this->query = $this->__GetSyncQuery();
+				}
 			}
 			$this->log('at query:'.$this->query->getQueryXml(),3);
-			
-			$this->syncResults = $this->oAutotask->getQueryResults($this->query);
 			
 			if ($this->syncResults === FALSE) {
 				
@@ -200,29 +201,15 @@
 				$this->Log('No tickets to update',0);
 				return FALSE;
 			}
-			if (count($this->syncResults == 500)) {
-				$results[]=$this->syncResults;
-				$this->log('getting results greater than id:'.end($this->syncResults)->id,3);
-				$this->query->qField('id',$this->query->GreaterThan,end($this->syncResults)->id);
-				while (count($this->syncResults=$this->oAutotask->getQueryResults($this->query)) == 500) {
-					if($this->syncResults === FALSE) {
-						break;
-					}
-					$this->log('getting more results greater than id:'.end($this->syncResults)->id,3);
-					$results[]=$this->syncResults;
-				}
-				if(is_array($this->syncResults)) {
-					$results[]=$this->syncResults;					
-				}
-				$this->syncResults=array();
-				foreach($results as $result) {
-					$this->syncResults = array_merge($this->syncResults,$result);
-				}
+			$results = $this->oAutotask->getQueryResults($this->query);
+			$this->syncResults = array_merge($this->syncResults,$results);
+			if (count($results == 500)) {
+				$this->log('getting more results greater than id:'.end($results)->id,3);
+				$this->query->qField('id',$this->query->GreaterThan,end($results)->id);
+				$this->__GetTicketsToSyncFromAutotask($i++);
 			}
-			
 			$this->Log('Updating or adding '.count($this->syncResults).' Tickets',3);
 			return TRUE;
-			
 		}
 		
 		private function __GetSyncQuery() {
