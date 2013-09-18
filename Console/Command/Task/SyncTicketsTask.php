@@ -148,7 +148,7 @@
 			if (!isset($this->oApiTimeZone)) {
 				$this->oApiTimeZone = new DateTimeZone('US/Eastern');
 			}
-			$oDate = date_create($api_date,$this->oApiTimeZone);
+			$oDate = date_create($api_date,$this->oApiTimeZone)->format('Y-m-d H:i:s');
 		}
 		private function __SetLastActivityDate() {
 			// gets the last update date
