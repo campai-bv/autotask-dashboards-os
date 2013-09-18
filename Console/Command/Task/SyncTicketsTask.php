@@ -162,7 +162,7 @@
 				array('last_activity is not null'),'last_activity DESC');
 			
 			if(!isset($this->oSyncFromActivityDate)) {
-				$this->oSyncFromActivityDate == '0000-00-00 00:00:00';
+				$this->oSyncFromActivityDate = '0000-00-00 00:00:00';
 			}
 			if ($this->oSyncFromActivityDate == '0000-00-00 00:00:00') {
 				// lets just start with today for now
