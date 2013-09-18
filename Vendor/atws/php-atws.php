@@ -257,7 +257,7 @@ class atwsquery {
     	if($field_value instanceof \DateTime) {
     		// automatically convert to the correct timestamp format
     		// for the api
-    		$value = $this->formatDateStamp($value);
+    		$value = $this->formatDateStamp($field_value);
     	}
     	
 
@@ -360,7 +360,7 @@ class atwsquery {
     }
 	private function formatDateStamp($datetime) {
 		if(!isset($this->ApiTimeZone)) {
-			$this->ApiTimeZone = new DateTimeZone('US/Eastern');
+			$this->ApiTimeZone = new \DateTimeZone('US/Eastern');
 		}
 		return $datetime->setTimezone($this->ApiTimeZone)->format("Y-m-d H:i:s");
 	}
