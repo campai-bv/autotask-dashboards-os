@@ -56,6 +56,7 @@
 			,'PurchaseOrderNumber'=>array('sync'=>FALSE)
 			,'TicketType'=>array('sync'=>FALSE)
 		);
+		private $oSyncFromActivityDate = null;
 		private $bInitialSync = false;
 		/**
 		 * 
@@ -164,6 +165,9 @@
 			if(!isset($this->oSyncFromActivityDate)) {
 				$this->oSyncFromActivityDate = '0000-00-00 00:00:00';
 			}
+			if($this->oSyncFromActivityDate == null) {
+				$this->oSyncFromActivityDate = '0000-00-00 00:00:00';
+			}
 			if ($this->oSyncFromActivityDate == '0000-00-00 00:00:00') {
 				// lets just start with today for now
 				$this->oSyncFromActivityDate = date_create(date_create()->format('Y-m-d 00:00:00'));// start of today
@@ -173,9 +177,7 @@
 			if (! $this->oSyncFromActivityDate instanceof DateTime) {
 				$this->oSyncFromActivityDate = date_create($this->oSyncFromActvityDate);
 			}
-		
 			$this->log('Sync from LastActivityDate:'.$this->oSyncFromActivityDate->format('Y-m-d H:i:s'));
-			
 		}
 		private function __GetTicketsToSyncFromAutotask() {
 			if (!isset($this->oSyncFromActivityDate)) {
