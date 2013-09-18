@@ -48,21 +48,21 @@
 			}
 			$aNewModelRecords = array();
 			foreach ($aPicklist as $iId=>$sName) {
-				$this->log('checking model:'.$sModel.' for name:'.$sName,4);
+				$this->log('checking model:'.$sModel.' for name:'.$sName);
 				$aModelRecord = $this->$sModel->findByid($iId);
 				if (empty($aModelRecord)) {
-					$this->log('non existing:'.$sModel.' model so inserting:'.$sName.' with id:'.$iId,3);
+					$this->log('non existing:'.$sModel.' model so inserting:'.$sName.' with id:'.$iId,0);
 					$aNewModelRecords[] = array($sModel=>array('id'=>$iId,'name'=>$sName));
 				}
 				else {
 					if (empty($aModelRecord[$sModel]['name'])) {
-						$this->log('updating '.$sModel.' with id:'.$iId.' which does not have a name. New name:'.$sName,3);
+						$this->log('updating '.$sModel.' with id:'.$iId.' which does not have a name. New name:'.$sName);
 						$aNewModelRecords[]=array($sModel=>array('id'=>$iId,'name'=>$sName));
 					}
 					else {
 						// allow dashboard settings to change name of picklist item.
 						// set back to empty to resync on next cronjob run
-						$this->log($sModel.':'.$sName.' exists and has name:'.$aModelRecord[$sModel]['name'],4);
+						$this->log($sModel.':'.$sName.' exists and has name:'.$aModelRecord[$sModel]['name']);
 					}
 				}
 			}
@@ -90,7 +90,7 @@
 				return false;
 			}
 		}
-		public function log($sMessage,$iLevel = 0) {
+		public function log($sMessage,$iLevel = 5) {
 			if( !$this->iLogLevel = Configure::read( 'Import.logLevel' ) ) {
 				$this->iLogLevel = 4;
 				parent::log('log level set to:'.$this->iLogLevel,'cronjob');

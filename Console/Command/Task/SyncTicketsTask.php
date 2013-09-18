@@ -156,12 +156,14 @@
 		}
 		private function __SetLastActivityDate() {
 			// gets the last update date
-			// if not found, works out the date to use
-			// from the bootstrap settings
+			// if not found, gets everything modified since the start of the day
+			// and everything not "complete"
 			$this->oSyncFromActivityDate = $this->Ticket->field('last_activity',
 				array('last_activity is not null'),'last_activity DESC');
 			
-			
+			if(!isset($this->oSyncFromActivityDate)) {
+				$this->oSyncFromActivityDate == '0000-00-00 00:00:00';
+			}
 			if ($this->oSyncFromActivityDate == '0000-00-00 00:00:00') {
 				// lets just start with today for now
 				$this->oSyncFromActivityDate = date_create(date_create()->format('Y-m-d 00:00:00'));// start of today
@@ -240,7 +242,7 @@
 			$query->closeBracket();
 			return $query;
 		}
-		public function log($sMessage,$iLevel = 4) {
+		public function log($sMessage,$iLevel = 5) {
 			if( !$this->iLogLevel = Configure::read( 'Import.logLevel' ) ) {
 				$this->iLogLevel = 4;
 				parent::log('log level set to:'.$this->iLogLevel,'cronjob');
