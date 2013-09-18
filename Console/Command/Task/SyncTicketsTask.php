@@ -156,12 +156,14 @@
 		}
 		
 		private function __GetInitialSyncQuery() {
+			$complete=$this->oAutotask->getPicklistValueFromName('Ticket','Status','Complete');
 			$query = $this->__GetSyncQuery();
 			$query->openBracket('OR');
-			$query->qField('LastActivityDateTime',$query->GreaterThanorEquals,$this->sSyncFromActivityDate);
 			//@todo: we should have a config table with names of certain identifiers - like completed for closed 
 			// tickets
-			$query->qField('Status',$query->NotEqual,$this->oAutotask->getPicklistValueFromName('Ticket','Status','Completed'));
+			if ($complete !== false) {
+				$query->qField('Status',$query->NotEqual,$complete);
+			}
 			$query->closeBracket();
 			return $query;
 		}
