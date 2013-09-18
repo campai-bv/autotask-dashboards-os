@@ -94,37 +94,38 @@
 		// but that should come later
 		private function __ConvertEntityResultsToModelArray($oTicket) {
 			$aModelData = false;
-			$this->log('Converting ticket id'.$oTicket.id);
+
+			$this->log('Converting ticket id:'.$oTicket->id);
 			foreach($oTicket as $sField => $uValue) {
-				$this->log('checking field'+$sField);
+				$this->log('checking field'.$sField);
 				// ignore udfs (for now)
 				if (is_array($sField)) {
-					$this->log($sField + ' is a UDF field');
+					$this->log($sField . ' is a UDF field');
 					break;
 				}
 				if (!isset($this->aTicketModelMap[$sField])) {
-					$this->log($sField + ' is not in ticket map');
+					$this->log($sField . ' is not in ticket map');
 					// not in ticket map
 					break;	
 				}
 				$map = $this->aTicketModelMap[$sField];
 				if (!is_array($map)) {
-					$this->log($sField + ' has ticket map entry but not configured correctly');
+					$this->log($sField . ' has ticket map entry but not configured correctly');
 					// ticket map not configured correctly
 					break;
 				}
 				if (!isset($map['sync'])) {
-					$this->log($sField + ' is not to be synced with database');
+					$this->log($sField . ' is not to be synced with database');
 					// not syncing
 					break;
 				}
 				if ($map['sync'] !== TRUE) {
-					$this->log($sField + ' is not to be synced with database');
+					$this->log($sField . ' is not to be synced with database');
 					// not syncing
 					break;
 				}
 				if (isset($map['dbhook'])){
-					$this->log($sField + ' is to be converted with:'+$map['dbhook']);
+					$this->log($sField . ' is to be converted with:'.$map['dbhook']);
 					$value = $map['dbhook']($uValue);
 				}
 				else {
