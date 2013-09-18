@@ -95,9 +95,11 @@
 				$this->Ticket->saveAll($aNewModelRecords);
 			}
 			if (count($results === 500)) {
+				$this->log('Running another import run as 500 results returned',0);
 				$iLastId = end($results)->id;
 				return $this->__UpdateTicketsFromAutotask($iLastId);
 			}
+			return true;
 		}
 
 		// @todo:can probably overload the autotask classmap for ticket 
@@ -198,7 +200,7 @@
 				}
 			}
 			else {
-				$query->qField('id',$query->GreaterThan,$more);
+				$this->query->qField('id',$this->query->GreaterThan,$more);
 			}
 			$this->log('at query:'.$this->query->getQueryXml(),3);
 			$results = $this->oAutotask->getQueryResults($this->query);			
