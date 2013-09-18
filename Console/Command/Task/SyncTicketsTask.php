@@ -76,14 +76,15 @@
 			$this->oAutotask = $this->GetAutotaskObject->execute();
 			$this->__UpdateTicketsFromAutotask();
 		}
-		private function __UpdateTicketsFromAutotask() {
+		private function __UpdateTicketsFromAutotask($more=false) {
 			// get the entities from autotask
-			if ($this->__GetTicketsToSyncFromAutotask() === FALSE) {
+			$results = $this->__GetTicketsToSyncFromAutotask($more);
+			if ($results === FALSE) {
 				$this->log('no tickets to update',0);
 				return FALSE;
 			}
 			// results are insert or replace added
-			foreach($this->syncResults as $oTicketEntity) {
+			foreach($results as $oTicketEntity) {
 				$aModelData = $this->__ConvertEntityResultsToModelArray($oTicketEntity);
 				$this->log($aModelData);
 				$aNewModelRecords[] = array('Ticket' => $aModelData);
@@ -92,6 +93,10 @@
 			if (!empty($aNewModelRecords)) {
 				// batch write our model changes
 				$this->Ticket->saveAll($aNewModelRecords);
+			}
+			if (count($results === 500)) {
+				$iLastId = end($results)->id;
+				return $this->__UpdateTicketsFromAutotask($iLastId);
 			}
 		}
 
@@ -180,8 +185,8 @@
 			}
 			$this->log('Sync from LastActivityDate:'.$this->oSyncFromActivityDate->format('Y-m-d H:i:s'));
 		}
-		private function __GetTicketsToSyncFromAutotask($i=0) {
-			if ($i==0) {
+		private function __GetTicketsToSyncFromAutotask($more=false) {
+			if ($more===false) {
 				if (!isset($this->oSyncFromActivityDate)) {
 					$this->__SetLastActivityDate();
 				}
@@ -192,24 +197,19 @@
 					$this->query = $this->__GetSyncQuery();
 				}
 			}
+			else {
+				$query->qField('id',$query->GreaterThan,$more);
+			}
 			$this->log('at query:'.$this->query->getQueryXml(),3);
-			
-			if ($this->syncResults === FALSE) {
-				
+			$results = $this->oAutotask->getQueryResults($this->query);			
+			if ($results === FALSE) {
 				$this->log($this->oAutotask->getLastQueryError());
 				$this->log($this->oAutotask->getLastQueryFault());
 				$this->Log('No tickets to update',0);
 				return FALSE;
 			}
-			$results = $this->oAutotask->getQueryResults($this->query);
-			$this->syncResults = array_merge($this->syncResults,$results);
-			if (count($results == 500)) {
-				$this->log('getting more results greater than id:'.end($results)->id,3);
-				$this->query->qField('id',$this->query->GreaterThan,end($results)->id);
-				$this->__GetTicketsToSyncFromAutotask($i++);
-			}
-			$this->Log('Updating or adding '.count($this->syncResults).' Tickets',3);
-			return TRUE;
+			$this->Log('Retrieved '.count($results).' Tickets',3);
+			return $results;
 		}
 		
 		private function __GetSyncQuery() {
