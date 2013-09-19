@@ -83,7 +83,6 @@
 				$this->log('no tickets to update',0);
 				return FALSE;
 			}
-			$this->log('retrieved '.count($results).' tickets from autotask',0);
 			// results are insert or replace added
 			foreach($results as $oTicketEntity) {
 				$aModelData = $this->__ConvertEntityResultsToModelArray($oTicketEntity);
