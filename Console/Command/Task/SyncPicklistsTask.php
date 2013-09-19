@@ -25,8 +25,10 @@
 		 * @return
 		 */
 		public function execute() {
+			$this->log('Starting picklist sync',0);
 			$this->oAutotask = $this->GetAutotaskObject->execute();
 			$this->__syncPicklistWithDatabase();
+			$this->log('Finished picklist sync',0);
 
 		}
 
