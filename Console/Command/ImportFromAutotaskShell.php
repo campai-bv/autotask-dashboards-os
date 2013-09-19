@@ -40,11 +40,11 @@ class ImportFromAutotaskShell extends AppShell {
 	}
 	public function main() {
 		
-		$this->log( 'Starting with the import.' );
+		$this->log( 'Starting CRONJOB run.' , 0 );
 
 		$this->SyncPicklists->execute();
 		$this->SyncTickets->execute();
 
-
+		$this->log( 'Finished CRONJOB run.' , 0 );
 	}
 }
