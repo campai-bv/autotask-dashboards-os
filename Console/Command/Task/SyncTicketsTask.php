@@ -165,7 +165,7 @@
 		}
 		private function __SetLastActivityDate() {
 			// gets the last update date
-			// if not found, gets everything modified since the start of the day
+			// if not found, gets everything modified for 7 days.
 			// and everything not "complete"
 			$this->oSyncFromActivityDate = $this->Ticket->field('last_activity',
 				array('last_activity is not null'),'last_activity DESC');
@@ -177,8 +177,10 @@
 				$this->oSyncFromActivityDate = '0000-00-00 00:00:00';
 			}
 			if ($this->oSyncFromActivityDate == '0000-00-00 00:00:00') {
-				// lets just start with today for now
+				// lets just start 7 days ago for now
+				
 				$this->oSyncFromActivityDate = date_create(date_create()->format('Y-m-d 00:00:00'));// start of today
+				$this->oSyncFromActivityDate.sub(new DateInterval('P7D'));
 				$this->bInitialSync = TRUE; // get all open tickets + tickets modified today
 				$this->log('Initial Sync');
 			}
