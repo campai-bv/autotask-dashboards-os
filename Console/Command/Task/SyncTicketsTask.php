@@ -71,8 +71,10 @@
 		 * @return
 		 */
 		public function execute() {
+			$this->log('Starting ticket import',0);
 			$this->oAutotask = $this->GetAutotaskObject->execute();
 			$this->__UpdateTicketsFromAutotask();
+			$this->log('Finished ticket import',0);
 		}
 		private function __UpdateTicketsFromAutotask($more=false) {
 			// get the entities from autotask
