@@ -74,14 +74,14 @@
 			// Appearantly we can login, so let's get into action!
 			// @comment removing this indent.
 			} else {
+
 				// may as well do these first so there are none missing
 				// sync issue types
 				$this->__syncPicklistsWithDatabase();
+
 				// Delete any existing records so we have a clean start.
 				$this->log( '> Truncating tickets table..', 1);
-
 				$this->Ticket->query('TRUNCATE TABLE tickets;');
-
 				$this->log('..done.', 1);
 				// End
 
@@ -91,19 +91,13 @@
 				$oTickets = $this->GetTicketsCompleted->execute();
 
 				if( empty( $oTickets ) ) {
-
 					$this->log('..nothing saved - query returned no tickets.', 1);
-
 				} else {
 
 					if( !$this->__saveTicketsToDatabase( $oTickets ) ) {
-
 						$bErrorsEncountered = true;
-
 					} else {
-
 						$this->log('..imported ' . count( $oTickets ) . ' ticket(s).' , 1);
-
 					}
 
 				}
@@ -112,7 +106,7 @@
 				if( !$bErrorsEncountered ) {
 
 					// Import the tickets that have any other status then 'completed'.
-					$this->log(  '> Importing open tickets into the database..',1);
+					$this->log('> Importing open tickets into the database..', 1);
 
 					$oTickets = $this->GetTicketsOpen->execute();
 
@@ -135,32 +129,16 @@
 						// Processing of the tickets data into totals for kill rates, queue healths etc.
 						$this->log('> Processing the tickets data into totals for all dashboards..', 1);
 
-							$this->log('> Calculating ticket status totals for all dashboards..', 2);
 							$this->CalculateTotalsByTicketStatus->execute();
-							$this->log('..done.', 2);
-	
-							$this->log('> Calculating tickets by source for all dashboards..', 2);
 							$this->CalculateTotalsByTicketSource->execute();
-							$this->log('..done.', 2);
-	
-							$this->log('> Calculating total open tickets for all dashboards..', 2);
 							$this->CalculateTotalsOpenTickets->execute();
-							$this->log('..done.', 2);
-	
-							$this->log('> Calculating kill rate totals for all dashboards..', 2);
 							$this->CalculateTotalsForKillRate->execute();
-							$this->log('..done.', 2);
-	
-							$this->log('> Calculating queue health totals for all dashboards..',2);
 							$this->CalculateTotalsForQueueHealth->execute();
-							$this->log('..done.' , 2);
-	
-							$this->log('> Importing time entries..', 2);
+
 							if( !$this->CalculateTotalsForTimeEntries->execute() ) {
 								$bErrorsEncountered = true;
 							}
-							$this->log('..done.', 2);
-							
+
 						$this->log('..done.', 1);
 
 						$this->log('> Clearing cache for all dashboards..', 1);
@@ -291,7 +269,7 @@
 					} catch ( Exception $e ) {
 
 						$this->log( '- Could not save the new ' . Inflector::pluralize( $sModel ) . '. MySQL says: "' . $e->errorInfo[2] . '"' );
-						$this->log( '- ' . $oStatement->queryString );
+						$this->log('- Query executed: "' . $sQuery . '"');
 						return false;
 
 					}

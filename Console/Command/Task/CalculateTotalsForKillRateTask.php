@@ -21,13 +21,13 @@
 
 		public function execute() {
 
-			if( !$this->iLogLevel = Configure::read( 'Import.logLevel' ) ) {
-				$this->iLogLevel = 0;
-			}
+			$this->log('> Calculating kill rate totals for all dashboards..', 2);
 
 			$aDashboards = $this->Dashboard->find( 'all' );
 
-			if( !empty( $aDashboards ) ) {
+			if( empty( $aDashboards ) ) {
+				$this->log('..done - no dashboards available.', 2);
+			} else {
 
 				foreach ( $aDashboards as $aDashboard ) {
 
@@ -36,7 +36,6 @@
 									'Dashboardqueue.dashboard_id' => $aDashboard['Dashboard']['id']
 							)
 					) );
-
 
 					$aKillRate = $this->Ticket->getKillRate( $aQueueIds );
 
@@ -51,6 +50,8 @@
 					}
 
 				}
+
+				$this->log('..done.', 2);
 
 			}
 

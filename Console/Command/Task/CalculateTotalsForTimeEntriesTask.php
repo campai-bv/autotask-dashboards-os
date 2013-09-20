@@ -24,11 +24,7 @@
 
 		public function execute() {
 
-			if( !$this->iLogLevel = Configure::read( 'Import.logLevel' ) ) {
-				$this->iLogLevel = 0;
-			}
-
-			$this->TimeConverter = $this->Tasks->load( 'Autotask.TimeConverter' );
+			$this->TimeConverter = $this->Tasks->load('Autotask.TimeConverter');
 
 			if( !$this->__importTimeEntries() ) {
 				return false;
@@ -41,13 +37,15 @@
 
 		private function __importTimeEntries() {
 
+			$this->log('> Importing time entries..', 2);
+
 			$bErrorsEncountered = false;
 
 			$this->log( '> Truncating timeentries table..', 4 );
 			$this->Timeentry->query('TRUNCATE TABLE timeentries;');
-			$this->log( '..done.', 4 );
+			$this->log('..done.', 4);
 
-			$this->log( '> Importing time entries into the database for today (' . date( 'Y-m-d' ) . ')..', 4 );
+			$this->log('> Importing time entries into the database for today (' . date( 'Y-m-d' ) . ')..', 4);
 
 			$oResult = $this->Timeentry->findInAutotask( 'all', array(
 					'conditions' => array(
@@ -98,7 +96,7 @@
 						$bErrorsEncountered = true;
 
 					} else {
-						$this->log( '..imported 1 time entry.', 4 );
+						$this->log('..done - imported 1 time entry.', 2);
 					}
 
 				} else {
@@ -142,14 +140,13 @@
 					}
 
 					if( !$bErrorsEncountered ) {
-						$this->log( '..imported ' . count( $oResult ) . ' time entries.', 4 );
+						$this->log('..done - imported ' . count( $oResult ) . ' time entries.', 4);
 					}
 
 				}
 
-
 			} else {
-				$this->log( '..nothing saved - query returned no time entries.', 4 );
+				$this->log('..done - nothing saved because query returned no time entries.', 4);
 			}
 
 			if( $bErrorsEncountered ) {

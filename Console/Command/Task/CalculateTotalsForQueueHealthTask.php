@@ -21,13 +21,13 @@
 
 		public function execute() {
 
-			if( !$this->iLogLevel = Configure::read( 'Import.logLevel' ) ) {
-				$this->iLogLevel = 0;
-			}
+			$this->log('> Calculating queue health totals for all dashboards..',2);
 
 			$aDashboards = $this->Dashboard->find( 'all' );
 
-			if( !empty( $aDashboards ) ) {
+			if(empty( $aDashboards )) {
+				$this->log('..done - no queue health totals to save.' , 2);
+			} else {
 
 				foreach ( $aDashboards as $aDashboard ) {
 
@@ -48,9 +48,9 @@
 								,	$aQueueHealth['id']
 								,	$aQueueHealth['average_days_open']
 							) ) {
-								$this->log( '- Saved queue health history for dashboard "' . $aDashboard['Dashboard']['name'] . '", queue "' . $aQueueHealth['name'] . '".', 2 );
+								$this->log( '- Saved queue health history for dashboard "' . $aDashboard['Dashboard']['name'] . '", queue "' . $aQueueHealth['name'] . '".', 4);
 							} else {
-								$this->log( '- Could not save queue health history for dashboard "' . $aDashboard['Dashboard']['name'] . '", queue "' . $aQueueHealth['name'] . '".', 2 );
+								$this->log( '- Could not save queue health history for dashboard "' . $aDashboard['Dashboard']['name'] . '", queue "' . $aQueueHealth['name'] . '".', 4);
 							}
 
 						}
@@ -58,6 +58,8 @@
 					}
 
 				}
+
+				$this->log('..done.' , 2);
 
 			}
 

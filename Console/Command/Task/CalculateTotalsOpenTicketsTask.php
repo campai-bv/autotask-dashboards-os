@@ -19,6 +19,8 @@
 
 		public function execute() {
 
+			$this->log('> Calculating total open tickets for all dashboards..', 2);
+
 			$iNumberOfTicketsInQueue = $this->Ticket->find( 'count', array(
 					'conditions' => array(
 							'Ticket.ticketstatus_id !=' => 5
@@ -34,20 +36,31 @@
 
 			if( !empty( $aExistingCount ) ) {
 
-				$this->Ticketstatuscount->save( array(
+				if( $this->Ticketstatuscount->save( array(
 						'id' => $aExistingCount['Ticketstatuscount']['id']
 					,	'ticketstatus_id' => 2 //empty status using for Open tickets
 					,	'count' => $iNumberOfTicketsInQueue
-				) );
+				) ) ) {
+					$this->log('- Updated total open tickets count (' . $iNumberOfTicketsInQueue . ')', 4);
+				} else {
+					$this->log('- Could not update total open tickets count (' . $iNumberOfTicketsInQueue . ')', 4);
+				}
 
 			} else {
 
 				$this->Ticketstatuscount->create();
-				$this->Ticketstatuscount->save( array(
+				if( $this->Ticketstatuscount->save( array(
 						'ticketstatus_id' => 2 //empty status using for Open tickets
 					,	'count' => $iNumberOfTicketsInQueue
-				) );
+				) ) ) {
+					$this->log('- Created total open tickets count (' . $iNumberOfTicketsInQueue . ')', 4);
+				} else {
+					$this->log('- Could not update total open tickets count (' . $iNumberOfTicketsInQueue . ')', 4);
+				}
 
 			}
+			
+			$this->log('..done.', 2);
+
 		}
 	}
