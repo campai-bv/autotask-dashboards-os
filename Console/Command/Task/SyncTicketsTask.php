@@ -185,8 +185,8 @@
 				$this->log('Initial Sync');
 			}
 			if (! $this->oSyncFromActivityDate instanceof DateTime) {
+				// it's from the DB'
 				$this->oSyncFromActivityDate = date_create($this->oSyncFromActivityDate);
-				$this->oSyncFromActivityDate->sub(new DateInterval('P7D'));
 			}
 			$this->log('Sync from LastActivityDate:'.$this->oSyncFromActivityDate->format('Y-m-d H:i:s'));
 		}
