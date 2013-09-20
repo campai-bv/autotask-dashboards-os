@@ -180,12 +180,13 @@
 				// lets just start 7 days ago for now
 				
 				$this->oSyncFromActivityDate = date_create(date_create()->format('Y-m-d 00:00:00'));// start of today
-				$this->oSyncFromActivityDate.sub(new DateInterval('P7D'));
+				$this->oSyncFromActivityDate->sub(new DateInterval('P7D'));
 				$this->bInitialSync = TRUE; // get all open tickets + tickets modified today
 				$this->log('Initial Sync');
 			}
 			if (! $this->oSyncFromActivityDate instanceof DateTime) {
 				$this->oSyncFromActivityDate = date_create($this->oSyncFromActivityDate);
+				$this->oSyncFromActivityDate->sub(new DateInterval('P7D'));
 			}
 			$this->log('Sync from LastActivityDate:'.$this->oSyncFromActivityDate->format('Y-m-d H:i:s'));
 		}
