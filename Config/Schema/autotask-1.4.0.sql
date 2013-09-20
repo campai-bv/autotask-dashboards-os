@@ -57,20 +57,20 @@ CREATE TABLE `dashboards` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `slug` varchar(255) NOT NULL,
-  `show_kill_rate` tinyint(1) NOT NULL DEFAULT '1',
-  `show_accounts` tinyint(1) NOT NULL DEFAULT '1',
-  `show_queues` tinyint(1) NOT NULL DEFAULT '1',
-  `show_resources` tinyint(1) NOT NULL DEFAULT '1',
-  `show_unassigned` tinyint(1) NOT NULL DEFAULT '1',
-  `show_missing_issue_type` tinyint(1) NOT NULL DEFAULT '1',
-  `show_rolling_week` tinyint(1) NOT NULL DEFAULT '1',
-  `show_rolling_week_bars` tinyint(1) NOT NULL,
-  `show_queue_health` tinyint(1) NOT NULL DEFAULT '1',
-  `show_sla_violations` tinyint(1) NOT NULL,
-  `show_tickets_top_x` tinyint(1) NOT NULL DEFAULT '0',
-  `show_clock` tinyint(1) NOT NULL DEFAULT '0',
-  `show_open_tickets` tinyint(1) NOT NULL DEFAULT '0',
-  `show_tickets_by_source` tinyint(1) NOT NULL DEFAULT '0',
+  `show_kill_rate` tinyint(2) NOT NULL DEFAULT '1',
+  `show_accounts` tinyint(2) NOT NULL DEFAULT '1',
+  `show_queues` tinyint(2) NOT NULL DEFAULT '1',
+  `show_resources` tinyint(2) NOT NULL DEFAULT '1',
+  `show_unassigned` tinyint(2) NOT NULL DEFAULT '1',
+  `show_missing_issue_type` tinyint(2) NOT NULL DEFAULT '1',
+  `show_rolling_week` tinyint(2) NOT NULL DEFAULT '1',
+  `show_rolling_week_bars` tinyint(2) NOT NULL,
+  `show_queue_health` tinyint(2) NOT NULL DEFAULT '1',
+  `show_sla_violations` tinyint(2) NOT NULL,
+  `show_tickets_top_x` tinyint(2) NOT NULL DEFAULT '0',
+  `show_clock` tinyint(2) NOT NULL DEFAULT '0',
+  `show_open_tickets` tinyint(2) NOT NULL DEFAULT '0',
+  `show_tickets_by_source` tinyint(2) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=COMPACT;
 
@@ -216,8 +216,8 @@ CREATE TABLE `tickets` (
   `subissuetype_id` int(10) DEFAULT NULL,
   `due` datetime NOT NULL,
   `priority` int(2) NOT NULL,
-  `has_met_sla` tinyint(1) NOT NULL DEFAULT '0',
-  `ticketsource_id` tinyint(1) NOT NULL DEFAULT '0',
+  `has_met_sla` tinyint(2) NOT NULL DEFAULT '0',
+  `ticketsource_id` tinyint(2) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=COMPACT;
 
@@ -254,7 +254,7 @@ CREATE TABLE `timeentries` (
   `ticket_id` int(10) NOT NULL,
   `hours_to_bill` double(10,2) NOT NULL,
   `hours_worked` double(10,2) NOT NULL,
-  `non_billable` tinyint(1) NOT NULL,
+  `non_billable` tinyint(2) NOT NULL,
   `offset_hours` double(10,2) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
