@@ -45,6 +45,17 @@ class ImportFromAutotaskShell extends AppShell {
 		$this->SyncPicklists->execute();
 		$this->SyncTickets->execute();
 
+		$this->log('> Clearing cache for all dashboards..', 1);
+		if( clearCache() // Clear the view cache
+			&&
+			Cache::clear( null, '1_hour' ) ) { // Clear the model cache
+			$this->log('..done.', 1);
+		} 
+		else {
+			$bErrorsEncountered = true;
+			$this->log('..could not delete view cache!', 1);
+		}
+
 		$this->log( 'Finished CRONJOB run.' , 0 );
 	}
 }
