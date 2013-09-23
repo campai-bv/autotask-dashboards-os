@@ -11,7 +11,9 @@
 	 * @author        Coen Coppens <coen@campai.nl>
 	 */
 	class SyncTimeEntriesTask extends Shell {
-
+		public $uses = array(
+			'Autotask.Timeenry'
+		);
 		public $tasks = array('Autotask.GetAutotaskObject');
 		public $aTimeEntryModelMap = array(
 			'id'=>array('sync'=>TRUE,'field'=>'id')
