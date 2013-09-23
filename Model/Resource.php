@@ -22,6 +22,7 @@
 
 		public $hasMany = array(
 				'Autotask.Ticket'
+			,	'Autotask.Timeentry'
 		);
 
 
@@ -64,9 +65,8 @@
 								'Resource.id' => $aResourceIds
 						)
 					,	'contain' => array(
-								'Ticket' => array(
-										'Timeentry'
-								)
+								'Ticket'
+							,	'Timeentry'
 						)
 				) );
 
@@ -131,22 +131,44 @@
 
 					}
 
-					// Calculate the time spent
-					if( !empty( $aTicket['Timeentry'] ) ) {
+				}
 
-						foreach ( $aTicket['Timeentry'] as $aTimeEntry ) {
+				if( 0 == $iTicketsToDivideBy ) {
 
-							$aTimeTotals['hours_worked'] += $aTimeEntry['hours_worked'];
-							$aResourceTotals['time_totals']['hours_worked'] += $aTimeEntry['hours_worked'];
-							$aTimeTotals['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
-							$aResourceTotals['time_totals']['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
+					$aResourceTotals['Resource'][ $aResource['Resource']['id'] ] = array(
+							'name' => $aResource['Resource']['name']
+						,	'count' => 0
+						,	'closed' => $iTicketsClosedToday
+						,	'average_days_open' => 0
+						,	'time_totals' => $aTimeTotals
+					);
 
-						}
+				} else {
 
-					}
-					// End
+					$aResourceTotals['Resource'][ $aResource['Resource']['id'] ] = array(
+							'name' => $aResource['Resource']['name']
+						,	'count' => $iTicketsToDivideBy
+						,	'closed' => $iTicketsClosedToday
+						,	'average_days_open' => number_format( $iTotalDaysOpen/$iTicketsToDivideBy, 0, ',', '.' )
+						,	'time_totals' => $aTimeTotals
+					);
 
 				}
+				
+				// Calculate the time spent
+				if (!empty ($aResource['Timeentry'] ) ) {
+				
+					foreach($aResource['Timeentry'] as $aTimeEntry) {
+	
+						$aTimeTotals['hours_worked'] += $aTimeEntry['hours_worked'];
+						$aResourceTotals['time_totals']['hours_worked'] += $aTimeEntry['hours_worked'];
+						$aTimeTotals['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
+						$aResourceTotals['time_totals']['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
+	
+					}
+					
+				}
+				// End
 
 				if( 0 == $iTicketsToDivideBy ) {
 
