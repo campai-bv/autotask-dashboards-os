@@ -24,8 +24,9 @@ class ImportFromAutotaskShell extends AppShell {
 		//,	'Autotask.CalculateTotalsForKillRate'
 		//,	'Autotask.CalculateTotalsForQueueHealth'
 		//,	'Autotask.CalculateTotalsForTimeEntries'
-			'Autotask.SyncPicklists'
-		, 	'Autotask.SyncTickets'
+		'Autotask.SyncTimeEntries'
+		,'Autotask.SyncPicklists'
+		,'Autotask.SyncTickets'
 	);
 
 
@@ -44,6 +45,7 @@ class ImportFromAutotaskShell extends AppShell {
 
 		$this->SyncPicklists->execute();
 		$this->SyncTickets->execute();
+		$this->SyncTimeEntries->execute();
 
 		$this->log('> Clearing cache for all dashboards..', 1);
 		if( clearCache() // Clear the view cache
