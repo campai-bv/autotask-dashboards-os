@@ -45,11 +45,13 @@
 						'Ticket' => array(
 							'conditions'=>array(
 								array(CakeTime::daysAsSql('Sep 23, 2013', 'Sep 23, 2013', 'Ticket.completed'))
+								,'OR'=>array('Ticket.ticketstatus_id != 5')
 								)
 							)
 						,'Timeentry'=> array(
 							'conditions'=>array(
 								array(CakeTime::daysAsSql('Sep 23, 2013', 'Sep 23, 2013', 'Timeentry.created'))
+								,'Timeentry.ticket_id > 0'
 								)
 							)
 						)
