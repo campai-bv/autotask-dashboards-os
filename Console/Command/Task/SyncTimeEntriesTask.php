@@ -12,7 +12,7 @@
 	 */
 	class SyncTimeEntriesTask extends Shell {
 		public $uses = array(
-			'Autotask.Timeenry'
+			'Autotask.Timeentry'
 		);
 		public $tasks = array('Autotask.GetAutotaskObject');
 		public $aTimeEntryModelMap = array(
