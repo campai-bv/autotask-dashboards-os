@@ -11,37 +11,19 @@
 	 * @author        Coen Coppens <coen@campai.nl>
 	 */
 	App::uses('AutotaskAppModel', 'Autotask.Model');
-
+	App::uses('CakeTime', 'Utility');
 	class Resource extends AutotaskAppModel {
 
 		public $name = 'Resource';
 
 		public $hasMany = array(
 				'Autotask.Ticket'
+				,'Autotask.Timeentry'
 		);
 
 
-		/**
-		 * @param  string $sType  'all'
-		 * @param  array  $aQuery [description]
-		 * 
-		 * @return object
-		 */
-		public function findInAutotask( $sType = 'all', $aQuery = array() ) {
-
-			switch ( $sType ) {
-
-				case 'all':
-				default:
-					return $this->_findAllInAutotask( $aQuery );
-				break;
-
-			}
-
-		}
-
-
 		public function getTotals( $aQueueIds = array(), $aResourceIds = array() ) {
+			$db = $this->getDataSource();
 
 			$aResourceTotals = array(
 					'time_totals' => array(
@@ -56,17 +38,25 @@
 			if( !empty( $aResourceIds ) ) {
 
 				$aResources = $this->find( 'all', array(
-						'conditions' => array(
-								'Resource.id' => $aResourceIds
+					'conditions' => array(
+						'Resource.id' => $aResourceIds
 						)
-					,	'contain' => array(
-								'Ticket' => array(
-										'Timeentry'
+					,'contain' => array(
+						'Ticket' => array(
+							'conditions'=>array(
+								array(CakeTime::daysAsSql('Sep 23, 2013', 'Sep 23, 2013', 'Ticket.completed'))
 								)
+							)
+						,'Timeentry'=> array(
+							'conditions'=>array(
+								array(CakeTime::daysAsSql('Sep 23, 2013', 'Sep 23, 2013', 'Timeentry.created'))
+								)
+							)
 						)
-				) );
+					) );
 
-			} else {
+			} 
+			else {
 				$aResources = $this->find( 'all' );
 			}
 
@@ -126,22 +116,15 @@
 						}
 
 					}
-
+				}
+				if( !empty( $aResource['Timeentry'] ) ) {
+					foreach($aResource['Timeentry'] as $aTimeEntry) {
 					// Calculate the time spent
-					if( !empty( $aTicket['Timeentry'] ) ) {
-
-						foreach ( $aTicket['Timeentry'] as $aTimeEntry ) {
-
-							$aTimeTotals['hours_worked'] += $aTimeEntry['hours_worked'];
-							$aResourceTotals['time_totals']['hours_worked'] += $aTimeEntry['hours_worked'];
-							$aTimeTotals['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
-							$aResourceTotals['time_totals']['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
-
-						}
-
+						$aTimeTotals['hours_worked'] += $aTimeEntry['hours_worked'];
+						$aResourceTotals['time_totals']['hours_worked'] += $aTimeEntry['hours_worked'];
+						$aTimeTotals['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
+						$aResourceTotals['time_totals']['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
 					}
-					// End
-
 				}
 
 				if( 0 == $iTicketsToDivideBy ) {
@@ -171,21 +154,6 @@
 
 			$aResourceTotals['Resource'] = Hash::sort( $aResourceTotals['Resource'], '{n}.time_totals.hours_worked', 'desc', 'numeric' );
 			return $aResourceTotals;
-
-		}
-
-
-		private function _findAllInAutotask( Array $aQuery ) {
-
-			$aConditions = array();
-
-			if( !empty( $aQuery['conditions'] ) ) {
-				$aQuery['conditions'] = array_merge_recursive( $aQuery['conditions'], $aConditions );
-			} else {
-				$aQuery['conditions'] = $aConditions;
-			}
-
-			return $this->queryAutotask( 'Resource', $aQuery );
 
 		}
 
