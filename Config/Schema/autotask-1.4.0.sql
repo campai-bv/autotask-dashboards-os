@@ -217,7 +217,7 @@ CREATE TABLE `tickets` (
   `due` datetime NOT NULL,
   `priority` int(2) NOT NULL,
   `has_met_sla` tinyint(2) NOT NULL DEFAULT '0',
-  `ticketsource_id` tinyint(2) NOT NULL DEFAULT '0',
+  `ticketsource_id` int(10) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=COMPACT;
 
