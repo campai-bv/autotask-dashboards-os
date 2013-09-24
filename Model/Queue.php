@@ -65,7 +65,13 @@
 					foreach ( $aQueue['Ticket'] as $aTicket ) {
 
 						$start = strtotime( $aTicket['created'] );
-						$end = strtotime( date( 'Y-m-d h:I:s' ) );
+						if ($aTicket['completed']) {
+							$end = strtotime( $aTicket['completed']) );
+						}
+						else {
+							$end = strtotime( date( 'Y-m-d h:I:s' ) );	
+						}
+						
 						$iTotalDaysOpen += round( abs( $end - $start ) / 86400,0 );
 
 						if( $aTicket['due'] < date( 'Y-m-d' ) ) {
