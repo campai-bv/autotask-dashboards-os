@@ -22,7 +22,7 @@
 			,'InternalAllocationCodeID'=>array('sync'=>FALSE)
 			,'Type'=>array('sync'=>FALSE)
 			,'DateWorked'=>array('sync'=>FALSE)
-			,'StartDateTime'=>array('sync'=>TRUE,'field'=>'created','dbhook'=>'dateToDb')
+			,'StartDateTime'=>array('sync'=>TRUE,'field'=>'created','dbhook'=>'timeDateToDb')
 			,'EndDateTime'=>array('sync'=>FALSE)
 			,'HoursWorked'=>array('sync'=>TRUE,'field'=>'hours_worked')
 			,'HoursToBill'=>array('sync'=>TRUE,'field'=>'hours_to_bill')
@@ -126,7 +126,7 @@
 				}
 				if (isset($map['dbhook'])){
 					$this->log($sField . ' is to be converted with:'.$map['dbhook']);
-					$value = $this->$map['dbhook']($uValue);
+					$value = $this->$map['dbhook']($oTimeEntry,$sField);
 				}
 				else {
 					$value = $uValue;
@@ -140,7 +140,8 @@
 			}
 			return $aModelData;
 		}
-		private function dateToDb($api_date) {
+		private function dateToDb($entity,$field) {
+			$api_date = $entity->$field;
 			if (!isset($this->oApiTimeZone)) {
 				$this->oApiTimeZone = new DateTimeZone('US/Eastern');
 			}
@@ -149,6 +150,14 @@
 			}
 			$oDate = date_create($api_date,$this->oApiTimeZone);
 			return $oDate->setTimezone($this->oLocalTimeZone)->format("Y-m-d H:i:s");
+		}
+		private function timeDateToDb($entity,$field) {
+			// if start date is empty, use dateworked instead 
+			// time type straight hours vs start stop
+			if ($entity->$field == '0000-00-00 00:00:00') {
+				return $this->dateToDb($entity,'DateWorked');
+			}
+			return $this->dateToDb($entity,$field);
 		}
 		private function SetLastModifiedDate() {
 			// gets the last update date
