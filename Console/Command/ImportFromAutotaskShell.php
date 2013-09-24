@@ -51,7 +51,7 @@ class ImportFromAutotaskShell extends AppShell {
 		// or, we could create a view which shews them correctly in realtime
 		$this->CalculateTotalsByTicketStatus->execute();
 		$this->CalculateTotalsForKillRate->execute();
-		$this->CalculateTotalsByTicketStatus->execute();
+		$this->CalculateTotalsForQueueHealth->execute();
 		
 
 		$this->log('> Clearing cache for all dashboards..', 1);
