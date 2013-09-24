@@ -66,7 +66,7 @@
 
 						$start = strtotime( $aTicket['created'] );
 						if ($aTicket['completed']) {
-							$end = strtotime( $aTicket['completed']) );
+							$end = strtotime( $aTicket['completed']) ;
 						}
 						else {
 							$end = strtotime( date( 'Y-m-d h:I:s' ) );	
