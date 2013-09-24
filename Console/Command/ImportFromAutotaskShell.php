@@ -19,6 +19,7 @@ class ImportFromAutotaskShell extends AppShell {
 	public $tasks = array(
 		'Autotask.CalculateTotalsByTicketStatus'
 		,'Autotask.CalculateTotalsForKillRate'
+		,'Autotask.CalculateTotalsOpenTickets'
 		,'Autotask.CalculateTotalsForQueueHealth'
 		,'Autotask.SyncTimeEntries'
 		,'Autotask.SyncPicklists'
@@ -52,7 +53,7 @@ class ImportFromAutotaskShell extends AppShell {
 		$this->CalculateTotalsByTicketStatus->execute();
 		$this->CalculateTotalsForKillRate->execute();
 		$this->CalculateTotalsForQueueHealth->execute();
-		
+		$this->CalculateTotalsOpenTickets->execute();
 
 		$this->log('> Clearing cache for all dashboards..', 1);
 		if( clearCache() // Clear the view cache
