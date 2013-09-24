@@ -17,14 +17,10 @@ require_once(dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'Vendor'.DIRECTORY_SE
 class ImportFromAutotaskShell extends AppShell {
 
 	public $tasks = array(
-		//	'Autotask.TimeConverter'
-		//,	'Autotask.GetTicketsCompletedToday'
-		//,	'Autotask.GetTicketsOpenToday'
-		//,	'Autotask.CalculateTotalsByTicketStatus'
-		//,	'Autotask.CalculateTotalsForKillRate'
-		//,	'Autotask.CalculateTotalsForQueueHealth'
-		//,	'Autotask.CalculateTotalsForTimeEntries'
-		'Autotask.SyncTimeEntries'
+		'Autotask.CalculateTotalsByTicketStatus'
+		,'Autotask.CalculateTotalsForKillRate'
+		,'Autotask.CalculateTotalsForQueueHealth'
+		,'Autotask.SyncTimeEntries'
 		,'Autotask.SyncPicklists'
 		,'Autotask.SyncTickets'
 	);
@@ -46,6 +42,17 @@ class ImportFromAutotaskShell extends AppShell {
 		$this->SyncPicklists->execute();
 		$this->SyncTickets->execute();
 		$this->SyncTimeEntries->execute();
+		
+		
+		//@todo: these should be replaced with mysql procedures
+		// which triger off the update of a cron ran table,
+		// or mysql scheduled procedures
+		// ideally, they should run every minute regardless of cron
+		// or, we could create a view which shews them correctly in realtime
+		$this->CalculateTotalsByTicketStatus->execute();
+		$this->CalculateTotalsForKillRate->execute();
+		$this->CalculateTotalsByTicketStatus->execute();
+		
 
 		$this->log('> Clearing cache for all dashboards..', 1);
 		if( clearCache() // Clear the view cache
