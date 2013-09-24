@@ -33,7 +33,7 @@
 					,	'contain' => array(
 								'Ticket' => array(
 										'conditions' => array(
-												'Ticket.ticketstatus_id !=' => 5 // Completed
+												'OR'=>array(CakeTime::daysAsSql(date( 'Y-m-d 00:00:00' ), date( 'Y-m-d 23:59:59' ), 'Ticket.completed'),'Ticket.ticketstatus_id != 5')
 										)
 								)
 						)
@@ -45,7 +45,7 @@
 						'contain' => array(
 								'Ticket' => array(
 										'conditions' => array(
-												'Ticket.ticketstatus_id !=' => 5
+												'OR'=>array(CakeTime::daysAsSql(date( 'Y-m-d 00:00:00' ), date( 'Y-m-d 23:59:59' ), 'Ticket.completed'),'Ticket.ticketstatus_id != 5')
 										)
 								)
 						)
