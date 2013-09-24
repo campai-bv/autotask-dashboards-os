@@ -44,14 +44,14 @@
 					,'contain' => array(
 						'Ticket' => array(
 							'conditions'=>array(
-								array(CakeTime::daysAsSql('Sep 23, 2013', 'Sep 23, 2013', 'Ticket.completed'))
+								array(CakeTime::daysAsSql(date( 'Y-m-d 00:00:00' ), date( 'Y-m-d 23:59:59' ), 'Ticket.completed'))
 								,'OR'=>array('Ticket.ticketstatus_id != 5')
 								)
 							)
 						,'Timeentry'=> array(
 							'conditions'=>array(
-								array(CakeTime::daysAsSql('Sep 23, 2013', 'Sep 23, 2013', 'Timeentry.created'))
-								,'Timeentry.ticket_id > 0'
+								array(CakeTime::daysAsSql(date( 'Y-m-d 00:00:00' ), date( 'Y-m-d 23:59:59' ), 'Timeentry.created'))
+								//,'Timeentry.ticket_id > 0' include or do not include task entries
 								)
 							)
 						)
