@@ -72,9 +72,13 @@
 						<tbody>
 							<?php
 								$iPointer = 1;
-
+								$iNumResources = 15; //@todo: add this to a setting for displaying top n resources. 0 would be all
 								foreach ( $aData['Resource'] as $iResourceId => $aResourceDetails ) {
-
+									if($iNumResources > 0) {
+										if($iNumResources > $iPointer) {
+											break;
+										}
+									}
 									$sClass = 'row_' . $iPointer;
 									?>
 
