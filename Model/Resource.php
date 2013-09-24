@@ -44,10 +44,11 @@
 					,'contain' => array(
 						'Ticket' => array(
 							'conditions'=>array(
-								array(CakeTime::daysAsSql(date( 'Y-m-d 00:00:00' ), date( 'Y-m-d 23:59:59' ), 'Ticket.completed'))
-								,'OR'=>array('Ticket.ticketstatus_id != 5')
+								'OR'=>array(CakeTime::daysAsSql(date( 'Y-m-d 00:00:00' ), date( 'Y-m-d 23:59:59' ), 'Ticket.completed'),'Ticket.ticketstatus_id != 5')
 								)
 							)
+						// this could still be better.  we should use sum with a subquery
+						// and not need to loop through to get our totals
 						,'Timeentry'=> array(
 							'conditions'=>array(
 								array(CakeTime::daysAsSql(date( 'Y-m-d 00:00:00' ), date( 'Y-m-d 23:59:59' ), 'Timeentry.created'))
@@ -127,6 +128,10 @@
 						$aTimeTotals['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
 						$aResourceTotals['time_totals']['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
 					}
+				}
+				else {
+					$aTimeTotals['hours_worked'] = 0;
+					$aTimeTotals['hours_to_bill'] = 0;
 				}
 
 				if( 0 == $iTicketsToDivideBy ) {
