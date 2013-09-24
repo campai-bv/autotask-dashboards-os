@@ -139,7 +139,7 @@
 				}
 				if (isset($map['dbhook'])){
 					$this->log($sField . ' is to be converted with:'.$map['dbhook']);
-					$value = $this->$map['dbhook']($uValue);
+					$value = $this->$map['dbhook']($oTicket,$sField);
 				}
 				else {
 					$value = $uValue;
@@ -153,7 +153,8 @@
 			}
 			return $aModelData;
 		}
-		private function dateToDb($api_date) {
+		private function dateToDb($entity,$field) {
+			$api_date = $entity->$field;
 			if (!isset($this->oApiTimeZone)) {
 				$this->oApiTimeZone = new DateTimeZone('US/Eastern');
 			}
