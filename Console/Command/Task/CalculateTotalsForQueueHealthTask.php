@@ -10,7 +10,7 @@
 	 * @license       MIT License (http://opensource.org/licenses/mit-license.php)
 	 * @author        Coen Coppens <coen@campai.nl>
 	 */
-	class CalculateTotalsForQueueHealthTask extends Shell {
+	class CalculateTotalsForQueueHealthTask extends ImportFromAutotaskShell {
 
 		public $uses = array(
 				'Autotask.Dashboard'
@@ -21,13 +21,13 @@
 
 		public function execute() {
 
-			if( !$this->iLogLevel = Configure::read( 'Import.logLevel' ) ) {
-				$this->iLogLevel = 0;
-			}
+			$this->log('> Calculating queue health totals for all dashboards..',2);
 
 			$aDashboards = $this->Dashboard->find( 'all' );
 
-			if( !empty( $aDashboards ) ) {
+			if(empty( $aDashboards )) {
+				$this->log('..done - no queue health totals to save.' , 2);
+			} else {
 
 				foreach ( $aDashboards as $aDashboard ) {
 
@@ -48,9 +48,15 @@
 								,	$aQueueHealth['id']
 								,	$aQueueHealth['average_days_open']
 							) ) {
+<<<<<<< HEAD
 								$this->log( '- Saved queue health history for dashboard "' . $aDashboard['Dashboard']['name'] . '", queue "' . $aQueueHealth['name'] . '".', 2 );
 							} else {
 								$this->log( '- Could not save queue health history for dashboard "' . $aDashboard['Dashboard']['name'] . '", queue "' . $aQueueHealth['name'] . '".', 2 );
+=======
+								$this->log( '- Saved queue health history for dashboard "' . $aDashboard['Dashboard']['name'] . '", queue "' . $aQueueHealth['name'] . '".', 4);
+							} else {
+								$this->log( '- Could not save queue health history for dashboard "' . $aDashboard['Dashboard']['name'] . '", queue "' . $aQueueHealth['name'] . '".', 4);
+>>>>>>> upstream/1.4.0
 							}
 
 						}
@@ -58,6 +64,8 @@
 					}
 
 				}
+
+				$this->log('..done.' , 2);
 
 			}
 

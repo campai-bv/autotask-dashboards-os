@@ -395,7 +395,23 @@
 							) );
 
 						break;
+<<<<<<< HEAD
 
+=======
+
+						// Open tickets.
+						case 11:
+
+							App::uses( 'Opentickets', 'Autotask.Model' );
+							$this->Opentickets = new Opentickets();
+
+							$aWidget = array_merge( $aWidget, array(
+									'Widgetdata' => $this->Opentickets->getTotals()
+							) );
+
+						break;
+
+>>>>>>> upstream/1.4.0
 						// Tickets by source
 						case 12:
 							App::uses( 'Ticketsource', 'Autotask.Model' );

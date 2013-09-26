@@ -50,12 +50,23 @@ To use this application you'll need:
   ```
   sh </path/to/your/cake/installation/>/lib/CakeConsole/cake -app /path/to/your/application/folder/app Autotask.import_from_autotask
   ```
+<<<<<<< HEAD
+=======
+* Set the rights on your .htaccess file so it can be updated. If not sure what rights to give, simply set it open for the world:
+  ```
+  chmod 777 .htaccess
+  ```
+>>>>>>> upstream/1.4.0
 
 # Upgrading
 * Copy the files in this directory into app/Plugin/Autotask.
 * Run the upgrade SQL statement(s) depending on which version you were running.
   For instance, when you have 1.2 installed, use the file /app/Plugin/Autotask/Config/Schema/upgrade-1.2.0-to-1.3.0.sql.
+<<<<<<< HEAD
   If you want to get a clean start, use the autotask-1.3.0.sql file to setup the default database.
+=======
+  If you want to get a clean start, use the autotask.sql file to setup the default database.
+>>>>>>> upstream/1.4.0
 * Delete the cache created by the existing dashboards. If you open up the console of the VM (or your server) you can remove all cached files with (path may differ):
   ```
   rm -f /var/www/app/tmp/cache/models/* /var/www/app/tmp/cache/persistent/* /var/www/app/tmp/cache/views/*
@@ -70,5 +81,10 @@ The only thing you'll need to do now is: go ahead and create your first dashboar
 # Issues / FAQ
 Please report any issues you have with the plugin to the issue tracker on [GitHub](https://github.com/coencoppens/autotask-dashboards/issues).
 
+<<<<<<< HEAD
+=======
+For more information or the documentation, visit [our website](http://www.autotask.campai.nl).
+
+>>>>>>> upstream/1.4.0
 # License
 Autotask Dashboards is offered under the MIT License (http://opensource.org/licenses/mit-license.php).

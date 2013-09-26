@@ -57,6 +57,7 @@ CREATE TABLE `dashboards` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `slug` varchar(255) NOT NULL,
+<<<<<<< HEAD
   `show_kill_rate` tinyint(1) NOT NULL DEFAULT '1',
   `show_accounts` tinyint(1) NOT NULL DEFAULT '1',
   `show_queues` tinyint(1) NOT NULL DEFAULT '1',
@@ -71,6 +72,22 @@ CREATE TABLE `dashboards` (
   `show_clock` tinyint(1) NOT NULL DEFAULT '0',
   `show_open` tinyint(1) NOT NULL DEFAULT '0',
   `show_tickets_by_source` tinyint(1) NOT NULL DEFAULT '0',
+=======
+  `show_kill_rate` tinyint(2) NOT NULL DEFAULT '1',
+  `show_accounts` tinyint(2) NOT NULL DEFAULT '1',
+  `show_queues` tinyint(2) NOT NULL DEFAULT '1',
+  `show_resources` tinyint(2) NOT NULL DEFAULT '1',
+  `show_unassigned` tinyint(2) NOT NULL DEFAULT '1',
+  `show_missing_issue_type` tinyint(2) NOT NULL DEFAULT '1',
+  `show_rolling_week` tinyint(2) NOT NULL DEFAULT '1',
+  `show_rolling_week_bars` tinyint(2) NOT NULL,
+  `show_queue_health` tinyint(2) NOT NULL DEFAULT '1',
+  `show_sla_violations` tinyint(2) NOT NULL,
+  `show_tickets_top_x` tinyint(2) NOT NULL DEFAULT '0',
+  `show_clock` tinyint(2) NOT NULL DEFAULT '0',
+  `show_open_tickets` tinyint(2) NOT NULL DEFAULT '0',
+  `show_tickets_by_source` tinyint(2) NOT NULL DEFAULT '0',
+>>>>>>> upstream/1.4.0
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=COMPACT;
 
@@ -216,8 +233,13 @@ CREATE TABLE `tickets` (
   `subissuetype_id` int(10) DEFAULT NULL,
   `due` datetime NOT NULL,
   `priority` int(2) NOT NULL,
+<<<<<<< HEAD
   `has_met_sla` tinyint(1) NOT NULL DEFAULT '0',
   `ticketsource_id` tinyint(1) NOT NULL DEFAULT '0',
+=======
+  `has_met_sla` tinyint(2) NOT NULL DEFAULT '0',
+  `ticketsource_id` tinyint(2) NOT NULL DEFAULT '0',
+>>>>>>> upstream/1.4.0
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=COMPACT;
 
@@ -254,7 +276,11 @@ CREATE TABLE `timeentries` (
   `ticket_id` int(10) NOT NULL,
   `hours_to_bill` double(10,2) NOT NULL,
   `hours_worked` double(10,2) NOT NULL,
+<<<<<<< HEAD
   `non_billable` tinyint(1) NOT NULL,
+=======
+  `non_billable` tinyint(2) NOT NULL,
+>>>>>>> upstream/1.4.0
   `offset_hours` double(10,2) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -294,7 +320,11 @@ CREATE TABLE `widgets` (
 --  Records of `widgets`
 -- ----------------------------
 BEGIN;
+<<<<<<< HEAD
 INSERT INTO `widgets` VALUES ('1', 'Kill Rate', '3', '1', 'Widgets/kill_rate'), ('2', 'New vs. Closed', '3', '1', 'Widgets/kill_rate_graph'), ('3', 'Average Days Open', '3', '1', 'Widgets/queue_health_graph'), ('4', 'Account Top X', '2', '2', 'Widgets/accounts'), ('5', 'Queue Health', '2', '0', 'Widgets/queues'), ('6', 'Resources', '2', '0', 'Widgets/resources'), ('7', 'Ticket Status', '1', '1', 'Widgets/ticketstatus'), ('8', 'New vs. Closed', '3', '1', 'Widgets/kill_rate_bars'), ('9', 'Latest tickets', '3', '2', 'Widgets/tickets_top_x'), ('10', 'Clock', '1', '1', 'Widgets/clock'), ('12', 'Tickets by source', '3', '2', 'Widgets/tickets_by_source');
+=======
+INSERT INTO `widgets` VALUES ('1', 'Kill Rate', '3', '1', 'Widgets/kill_rate'), ('2', 'New vs. Closed', '3', '1', 'Widgets/kill_rate_graph'), ('3', 'Average Days Open', '3', '1', 'Widgets/queue_health_graph'), ('4', 'Account Top X', '2', '2', 'Widgets/accounts'), ('5', 'Queue Health', '2', '0', 'Widgets/queues'), ('6', 'Resources', '2', '0', 'Widgets/resources'), ('7', 'Ticket Status', '1', '1', 'Widgets/ticketstatus'), ('8', 'New vs. Closed', '3', '1', 'Widgets/kill_rate_bars'), ('9', 'Latest tickets', '3', '2', 'Widgets/tickets_top_x'), ('10', 'Clock', '1', '1', 'Widgets/clock'), ('11', 'Open', '1', '1', 'Widgets/opentickets'), ('12', 'Tickets by source', '3', '2', 'Widgets/tickets_by_source');
+>>>>>>> upstream/1.4.0
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;

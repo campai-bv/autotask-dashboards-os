@@ -4,14 +4,31 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 --  Table structure for `dashboards`
 -- ----------------------------
+<<<<<<< HEAD:Config/Schema/upgrade-1.3.2-to-1.4.0.sql
 ALTER TABLE `dashboards` ADD COLUMN `show_open` tinyint(1) NOT NULL DEFAULT '0';
 ALTER TABLE `dashboards` ADD COLUMN `show_tickets_by_source` tinyint(1) NOT NULL DEFAULT '0';
+=======
+ALTER TABLE `dashboards` MODIFY `show_kill_rate` tinyint(2) NOT NULL DEFAULT '1';
+ALTER TABLE `dashboards` MODIFY `show_accounts` tinyint(2) NOT NULL DEFAULT '1';
+ALTER TABLE `dashboards` MODIFY `show_queues` tinyint(2) NOT NULL DEFAULT '1';
+ALTER TABLE `dashboards` MODIFY `show_resources` tinyint(2) NOT NULL DEFAULT '1';
+ALTER TABLE `dashboards` MODIFY `show_unassigned` tinyint(2) NOT NULL DEFAULT '1';
+ALTER TABLE `dashboards` MODIFY `show_missing_issue_type` tinyint(2) NOT NULL DEFAULT '1';
+ALTER TABLE `dashboards` MODIFY `show_rolling_week` tinyint(2) NOT NULL DEFAULT '1';
+ALTER TABLE `dashboards` MODIFY `show_rolling_week_bars` tinyint(2) NOT NULL DEFAULT '0';
+ALTER TABLE `dashboards` MODIFY `show_queue_health` tinyint(2) NOT NULL DEFAULT '0';
+ALTER TABLE `dashboards` MODIFY `show_sla_violations` tinyint(2) NOT NULL DEFAULT '0';
+ALTER TABLE `dashboards` MODIFY `show_tickets_top_x` tinyint(2) NOT NULL DEFAULT '0';
+ALTER TABLE `dashboards` MODIFY `show_clock` tinyint(2) NOT NULL DEFAULT '0';
+ALTER TABLE `dashboards` ADD COLUMN `show_open_tickets` tinyint(2) NOT NULL DEFAULT '0';
+ALTER TABLE `dashboards` ADD COLUMN `show_tickets_by_source` tinyint(2) NOT NULL DEFAULT '0';
+>>>>>>> upstream/1.4.0:Config/Schema/upgrade-1.3.2-to-1.4.0.sql
 
 -- ----------------------------
 --  Table structure for `tickets`
 -- ----------------------------
 ALTER TABLE `tickets` ADD COLUMN `ticketsource_id` int(10) NOT NULL after `queue_id`;
-
+  
 -- ----------------------------
 --  Table structure for `ticketsources`
 -- ----------------------------
