@@ -32,41 +32,26 @@
 			,	'Autotask.CalculateTotalsForKillRate'
 			,	'Autotask.CalculateTotalsForQueueHealth'
 			,	'Autotask.CalculateTotalsForTimeEntries'
+			,	'Autotask.CalculateTotalsOpenTickets'
 		);
 
 
-<<<<<<< HEAD
-		public function log( $sMessage, $iLevel = 0 ) {
-=======
 		public function log($sMessage, $iLevel = 0) {
->>>>>>> upstream/1.4.0
 
 			if (!$this->iLogLevel = Configure::read('Import.logLevel')) {
 				$this->iLogLevel = 0;
 			}
 
-<<<<<<< HEAD
-			if( $iLevel <= $this->iLogLevel ) {
-=======
 			if ($iLevel <= $this->iLogLevel) {
->>>>>>> upstream/1.4.0
 
 				// Auto indent the messages based on their level.
 				$sIdentation = '';
 
-<<<<<<< HEAD
-				for( $i=1; $i <= $iLevel; $i++ ) {
-					$sIdentation .= "  ";
-				}
-
-				parent::log( $sIdentation . $sMessage, 'cronjob' );
-=======
 				for( $i=2; $i <= $iLevel; $i++ ) {
 					$sIdentation .= "   ";
 				}
 
 				parent::log($sIdentation . $sMessage, 'cronjob');
->>>>>>> upstream/1.4.0
 
 			}
 
@@ -76,21 +61,12 @@
 		public function main() {
 
 			$bErrorsEncountered = false;
-<<<<<<< HEAD
-
-			$this->log( 'Starting with the import.' );
-
-			// Set the database object so we can clean quotes from user input.
-			$this->db = ConnectionManager::getDataSource( 'default' );
-
-=======
 
 			$this->log('Starting with the import..', 1);
 
 			// Set the database object so we can clean quotes from user input.
 			$this->db = ConnectionManager::getDataSource( 'default' );
 
->>>>>>> upstream/1.4.0
 			// First we must make sure we can login. We do this by performing an inexpensive call and see what it returns.
 			if( false === $this->Ticket->connectAutotask() ) {
 				$bErrorsEncountered = true;
@@ -98,59 +74,30 @@
 			// Appearantly we can login, so let's get into action!
 			// @comment removing this indent.
 			} else {
-<<<<<<< HEAD
-				// may as well do these first so there are none missing
-				// sync issue types
-				$this->__syncPicklistsWithDatabase();
-				// Delete any existing records so we have a clean start.
-				$this->log( '> Truncating tickets table..',1 );
-=======
 
 				// may as well do these first so there are none missing
 				// sync issue types
 				$this->__syncPicklistsWithDatabase();
->>>>>>> upstream/1.4.0
 
 				// Delete any existing records so we have a clean start.
 				$this->log( '> Truncating tickets table..', 1);
 				$this->Ticket->query('TRUNCATE TABLE tickets;');
-<<<<<<< HEAD
-
-				$this->log(  ' ..done.',1);
-				// End
-
-				// Import completed tickets
-				$this->log(  '> Importing completed tickets (today) into the database..',1 );
-=======
 				$this->log('..done.', 1);
 				// End
 
 				// Import completed tickets
 				$this->log('> Importing completed tickets into the database..', 1);
->>>>>>> upstream/1.4.0
 
 				$oTickets = $this->GetTicketsCompleted->execute();
 
 				if( empty( $oTickets ) ) {
-<<<<<<< HEAD
-
-					$this->log( ' ..nothing saved - query returned no tickets.',1 );
-
-=======
 					$this->log('..nothing saved - query returned no tickets.', 1);
->>>>>>> upstream/1.4.0
 				} else {
 
 					if( !$this->__saveTicketsToDatabase( $oTickets ) ) {
 						$bErrorsEncountered = true;
 					} else {
-<<<<<<< HEAD
-
-						$this->log(  ' ..imported ' . count( $oTickets ) . ' ticket(s).' ,1);
-
-=======
 						$this->log('..imported ' . count( $oTickets ) . ' ticket(s).' , 1);
->>>>>>> upstream/1.4.0
 					}
 
 				}
@@ -159,32 +106,20 @@
 				if( !$bErrorsEncountered ) {
 
 					// Import the tickets that have any other status then 'completed'.
-<<<<<<< HEAD
-					$this->log(  '> Importing open tickets (today) into the database..',1);
-=======
 					$this->log('> Importing open tickets into the database..', 1);
->>>>>>> upstream/1.4.0
 
 					$oTickets = $this->GetTicketsOpen->execute();
 
 					if( empty( $oTickets ) ) {
 
-<<<<<<< HEAD
-						$this->log( ' ..nothing saved - query returned no tickets.',1 );
-=======
 						$this->log('..nothing saved - query returned no tickets.', 1);
->>>>>>> upstream/1.4.0
 
 					} else {
 
 						if( !$this->__saveTicketsToDatabase( $oTickets ) ) {
 							$bErrorsEncountered = true;
 						} else {
-<<<<<<< HEAD
-							$this->log(  ' ..imported ' . count( $oTickets ) . ' ticket(s).' ,1);
-=======
 							$this->log('..imported ' . count( $oTickets ) . ' ticket(s).' , 1);
->>>>>>> upstream/1.4.0
 						}
 
 					}
@@ -192,33 +127,6 @@
 					if( !$bErrorsEncountered ) {
 
 						// Processing of the tickets data into totals for kill rates, queue healths etc.
-<<<<<<< HEAD
-						$this->log('> Calculating ticket status totals for all dashboards..',1 );
-
-						$this->CalculateTotalsByTicketStatus->execute();
-
-						$this->log( '..done.', 'cronjob', 1 );
-
-						$this->log( '> Calculating tickets by source for all dashboards..', 1 );
-						$this->CalculateTotalsByTicketSource->execute();
-						$this->log( '..done.', 'cronjob' );
-
-						$this->log( '> Calculating kill rate totals for all dashboards..', 1 );
-						$this->CalculateTotalsForKillRate->execute();
-						$this->log( '..done.',1 );
-
-						$this->log( '> Calculating queue health totals for all dashboards..',1 );
-						$this->CalculateTotalsForQueueHealth->execute();
-						$this->log( '..done.' ,1);
-
-						$this->log( '> Importing time entries..',1 );
-						if( !$this->CalculateTotalsForTimeEntries->execute() ) {
-							$bErrorsEncountered = true;
-						}
-						$this->log(  '..done.',1 );
-
-						$this->log( '> Clearing cache for all dashboards..',1 );
-=======
 						$this->log('> Processing the tickets data into totals for all dashboards..', 1);
 
 							$this->CalculateTotalsByTicketStatus->execute();
@@ -234,27 +142,18 @@
 						$this->log('..done.', 1);
 
 						$this->log('> Clearing cache for all dashboards..', 1);
->>>>>>> upstream/1.4.0
 						if(
 							clearCache() // Clear the view cache
 							&&
 							Cache::clear( null, '1_hour' ) // Clear the model cache
 						) {
 
-<<<<<<< HEAD
-							$this->log(  '..done.',1 );
-=======
 							$this->log('..done.', 1);
->>>>>>> upstream/1.4.0
 
 						} else {
 
 							$bErrorsEncountered = true;
-<<<<<<< HEAD
-							$this->log( '..could not delete view cache!' );
-=======
 							$this->log('..could not delete view cache!', 1);
->>>>>>> upstream/1.4.0
 
 						}
 
@@ -266,17 +165,10 @@
 			// End
 
 			if( $bErrorsEncountered ) {
-<<<<<<< HEAD
-				$this->log( 'Failed: we\'ve encountered some errors while running the import script.' );
-			} else {
-
-				$this->log( 'Success: everything imported correctly.' );
-=======
 				$this->log( 'Failed: we\'ve encountered some errors while running the import script.', 1);
 			} else {
 
 				$this->log( 'Success! Everything imported correctly.', 1);
->>>>>>> upstream/1.4.0
 
 			}
 
@@ -311,7 +203,6 @@
 				$this->log( '> Checking model: ' . $sModel . ' for name: ' . $sName . '..', 4 );
 
 				$aModelRecord = $this->$sModel->findByid($iId);
-<<<<<<< HEAD
 
 				if (empty($aModelRecord)) {
 
@@ -325,21 +216,6 @@
 						$this->log( '..Updating ' . $sModel . ' with id ' . $iId . ' which does not have a name. New name: "' . $sName . '"', 4 );
 						$aNewModelRecords[]=array($sModel=>array('id'=>$iId,'name'=>$sName));
 
-=======
-
-				if (empty($aModelRecord)) {
-
-					$this->log('..Non existing: ' . $sModel . ' model so inserting: "' . $sName . '" with id '. $iId , 4 );
-					$aNewModelRecords[] = array($sModel=>array('id'=>$iId,'name'=>$sName));
-
-				} else {
-
-					if (empty($aModelRecord[$sModel]['name'])) {
-
-						$this->log( '..Updating ' . $sModel . ' with id ' . $iId . ' which does not have a name. New name: "' . $sName . '"', 4 );
-						$aNewModelRecords[]=array($sModel=>array('id'=>$iId,'name'=>$sName));
-
->>>>>>> upstream/1.4.0
 					} else {
 						// allow dashboard settings to change name of picklist item.
 						// set back to empty to resync on next cronjob run
@@ -393,11 +269,7 @@
 					} catch ( Exception $e ) {
 
 						$this->log( '- Could not save the new ' . Inflector::pluralize( $sModel ) . '. MySQL says: "' . $e->errorInfo[2] . '"' );
-<<<<<<< HEAD
-						$this->log( '- ' . $oStatement->queryString );
-=======
 						$this->log('- Query executed: "' . $sQuery . '"');
->>>>>>> upstream/1.4.0
 						return false;
 
 					}

@@ -4,10 +4,6 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 --  Table structure for `dashboards`
 -- ----------------------------
-<<<<<<< HEAD:Config/Schema/upgrade-1.3.2-to-1.4.0.sql
-ALTER TABLE `dashboards` ADD COLUMN `show_open` tinyint(1) NOT NULL DEFAULT '0';
-ALTER TABLE `dashboards` ADD COLUMN `show_tickets_by_source` tinyint(1) NOT NULL DEFAULT '0';
-=======
 ALTER TABLE `dashboards` MODIFY `show_kill_rate` tinyint(2) NOT NULL DEFAULT '1';
 ALTER TABLE `dashboards` MODIFY `show_accounts` tinyint(2) NOT NULL DEFAULT '1';
 ALTER TABLE `dashboards` MODIFY `show_queues` tinyint(2) NOT NULL DEFAULT '1';
@@ -22,7 +18,6 @@ ALTER TABLE `dashboards` MODIFY `show_tickets_top_x` tinyint(2) NOT NULL DEFAULT
 ALTER TABLE `dashboards` MODIFY `show_clock` tinyint(2) NOT NULL DEFAULT '0';
 ALTER TABLE `dashboards` ADD COLUMN `show_open_tickets` tinyint(2) NOT NULL DEFAULT '0';
 ALTER TABLE `dashboards` ADD COLUMN `show_tickets_by_source` tinyint(2) NOT NULL DEFAULT '0';
->>>>>>> upstream/1.4.0:Config/Schema/upgrade-1.3.2-to-1.4.0.sql
 
 -- ----------------------------
 --  Table structure for `tickets`
@@ -51,8 +46,7 @@ CREATE TABLE IF NOT EXISTS `ticketsourcecounts` (
 --  Records of `widgets`
 -- ----------------------------
 BEGIN;
-INSERT INTO `widgets` VALUES ('12', 'Tickets by source', '3', '2', 'Widgets/tickets_by_source');
-DELETE FROM `widgets` WHERE `id` = 11 AND default_name = 'Open Tickets';
+INSERT INTO `widgets` VALUES ('11', 'Open', '1', '1', 'Widgets/opentickets'), ('12', 'Tickets by source', '3', '2', 'Widgets/tickets_by_source');
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;

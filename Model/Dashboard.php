@@ -98,11 +98,6 @@
 							'goal_description' => 'Should be 0'
 						)
 				)
-			,	'open' => array(
-						'database_field' => 'show_open'
-					,	'widget_id' => 7
-					,	'type' => 'open'
-				)
 			,	'sla_violations' => array(
 						'database_field' => 'show_sla_violations'
 					,	'widget_id' => 7
@@ -137,6 +132,11 @@
 			,	'clock' => array(
 						'database_field' => 'show_clock'
 					,	'widget_id' => 10
+					,	'type' => ''
+				)
+			,	'open_tickets' => array(
+						'database_field' => 'show_open_tickets'
+					,	'widget_id' => 11
 					,	'type' => ''
 				)
 			,	'tickets_by_source' => array(
@@ -343,14 +343,6 @@
 										) );
 
 									break;
-									
-									case 'open':
-
-										$aWidget = array_merge( $aWidget, array(
-												'Widgetdata' => $this->Ticket->getOpenTotals( $aQueueIds )
-										) );
-
-									break;
 
 									case 'sla_violations':
 
@@ -395,9 +387,6 @@
 							) );
 
 						break;
-<<<<<<< HEAD
-
-=======
 
 						// Open tickets.
 						case 11:
@@ -411,7 +400,6 @@
 
 						break;
 
->>>>>>> upstream/1.4.0
 						// Tickets by source
 						case 12:
 							App::uses( 'Ticketsource', 'Autotask.Model' );
@@ -438,10 +426,6 @@
 
 							case 'unassigned':
 								$aWidget['display_name'] = 'Unassigned';
-							break;
-							
-							case 'open':
-								$aWidget['display_name'] = 'Open';
 							break;
 
 							default:
@@ -641,15 +625,6 @@
 
 				foreach ( $this->__aCalculatedWidgets as $aWidget ) {
 
-					if( 'show_open' == $aWidget['database_field'] ) {
-
-						debug( $aWidget );
-						//debug( $aSubmittedData['Dashboard'][ $aWidget['database_field'] ] );
-						debug( $aBeforeSaveDashboard['Dashboard'][ $aWidget['database_field'] ] );
-
-					}
-				
-				
 					// Was '<widget name here>' added?
 					if(
 						1 == $aSubmittedData['Dashboard'][ $aWidget['database_field'] ]

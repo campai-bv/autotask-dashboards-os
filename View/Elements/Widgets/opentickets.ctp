@@ -1,8 +1,8 @@
 <?php echo '<li id="' . $iDashboardWidgetId . '" data-row="' . $iRow . '" data-col="' . $iCol . '" data-sizex="' . $iDataSizeX . '" data-sizey="' . $iDataSizeY . '">'; ?>
 
-	<div class="well status-count">
+	<div class="status-count">
 
-		<h4 class="jeditable" id="display_name"><?php echo $sTitle; ?></h4>
+		<h4><?php echo $sTitle; ?></h4>
 		<hr class="dark">
 		<hr class="light">
 		<h1><?php
@@ -12,8 +12,6 @@
 					echo $aData['counts']['new'];
 				} elseif( isset( $aData['count'] ) ) {
 					echo $aData['count'];
-				} elseif( is_array( $aData ) ) {
-					echo $aData[0];
 				} else {
 					echo $aData;
 				}
@@ -65,16 +63,7 @@
 			if( !empty( $aData['counts'] ) ) {
 				echo $aData['counts']['difference'] . '%';
 			} else {
-				echo '<span class="jeditable_setting" id="goal_description">';
-				$aSetting = Hash::extract( $aSettings, '{n}[name=goal_description].value' );
-
-				if( isset( $aSetting[0] ) ) {
-					echo $aSetting[0];
-				} else {
-					echo 'Should be 0';
-				}
-
-				echo '</span>';
+				echo 'Should be 0';
 			}
 
 		?></span>
@@ -82,37 +71,3 @@
 	</div>
 
 </li>
-
-<?php if( 'Dashboards' == $this->name && 'reorganize' == $this->action ) { ?>
-
-	<script type="text/javascript">
-
-		$(function() {
-
-			$( 'li#<?php echo $iDashboardWidgetId; ?> .jeditable' ).editable( '/autotask/dashboardwidgets/edit/<?php echo $iDashboardWidgetId; ?>', {
-				indicator : 'Saving..',
-				tooltip   : 'Click to edit'
-			});
-
-			$( 'li#<?php echo $iDashboardWidgetId; ?> .jeditable_setting' ).editable( function( sNewValue, settings ) {
-
-				$.post( '/autotask/dashboardwidgetsettings/edit/<?php echo $iDashboardWidgetId; ?>' , {
-
-						name: $( this ).attr( 'id' )
-					,	value: sNewValue
-
-				} );
-
-				return sNewValue;
-
-			}, { 
-				indicator : 'Saving..',
-				tooltip   : 'Click to edit',
-				onblur : 'submit'
-			});
-
-		});
-
-	</script>
-
-<?php } ?>

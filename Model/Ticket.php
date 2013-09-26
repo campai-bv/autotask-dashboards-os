@@ -121,65 +121,6 @@
 			return $aUnassignedTotals;
 
 		}
-		
-		
-		public function getOpenTotals( $aQueueIds = array() ) {
-
-			if( !empty( $aQueueIds ) ) {
-
-				$aOpenTickets = $this->find( 'all', array(
-						'conditions' => array(
-								'Ticket.queue_id' => $aQueueIds
-							,	'Ticket.ticketstatus_id !=' => 5 // Completed
-						)
-				) );
-
-			} else {
-
-				$aOpenTickets = $this->find( 'all', array(
-						'conditions' => array(
-								'Ticket.ticketstatus_id !=' => 5 // Completed
-						)
-				) );
-
-			}
-
-			$iTotalDaysOpen = 0;
-
-			foreach ( $aOpenTickets as $aTicket ) {
-
-				$start = strtotime( $aTicket['Ticket']['created'] );
-				$end = strtotime( date( 'Y-m-d h:I:s' ) );
-				$iTotalDaysOpen += round( abs( $end - $start ) / 86400,0 );
-
-			}
-
-			if( 0 == count( $aOpenTickets ) ) {
-				
-				$aOpenTotals = array(
-						'name' => 'Open'
-					,	'count' => 0
-					,	'average_days_open' => 0
-				);
-
-			} else {
-
-				$aOpenTotals = array(
-						'name' => 'Open'
-					,	'count' => count( $aOpenTickets )
-					,	'average_days_open' => number_format( $iTotalDaysOpen/ count( $aOpenTickets ), 0, ',', '.' )
-				);
-
-			}
-
-			
-			// End
-			
-			return $aOpenTotals;
-
-		}
-		
-		
 
 
 		public function getAtes( $aQueueIds = array() ) {

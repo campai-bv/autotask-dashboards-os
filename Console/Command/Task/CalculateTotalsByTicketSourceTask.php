@@ -42,16 +42,6 @@
 							)
 					) );
 
-<<<<<<< HEAD
-				} else {
-
-					$this->Ticketsourcecount->create();
-					if( $this->Ticketsourcecount->save( array(
-							'ticketsource_id' => $iSourceId
-						,	'count' => $iNumberOfTicketsInQueue
-					) ) ) {
-						$this->log( '- Saved source count for source "' . $iSourceId .'"', 2 );
-=======
 					$aExistingCount = $this->Ticketsourcecount->find( 'first', array(
 							'conditions' => array(
 									'Ticketsourcecount.created' => date( 'Y-m-d' )
@@ -83,7 +73,6 @@
 							$this->log('- Could not create source count for source "' . $iSourceId .'" (counted ' . $iNumberOfTicketsForSource . ')', 4);
 						}
 
->>>>>>> upstream/1.4.0
 					}
 				}
 				
