@@ -69,7 +69,7 @@ CREATE TABLE `dashboards` (
   `show_sla_violations` tinyint(2) NOT NULL,
   `show_tickets_top_x` tinyint(2) NOT NULL DEFAULT '0',
   `show_clock` tinyint(2) NOT NULL DEFAULT '0',
-  `show_open_tickets` tinyint(2) NOT NULL DEFAULT '0',
+  `show_open` tinyint(2) NOT NULL DEFAULT '0',
   `show_tickets_by_source` tinyint(2) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=COMPACT;
