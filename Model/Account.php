@@ -121,10 +121,11 @@
 
 			$aAccountTotals = Hash::sort( $aAccountTotals, '{n}.count', 'desc', 'numeric' );
 
-			if( 3 < count( $aAccountTotals ) ) {
+			// not relevant with user settings in place
+			/*if( 3 < count( $aAccountTotals ) ) {
 				$aAccountTotals = array_chunk( $aAccountTotals, 3 );
 				$aAccountTotals = $aAccountTotals[0];
-			}
+			}*/
 
 			return $aAccountTotals;
 

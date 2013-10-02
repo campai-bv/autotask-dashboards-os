@@ -72,57 +72,38 @@
 			}
 
 			// Set the height of the widget
-			switch ( $aWidget['Dashboardwidget']['Widget']['id'] ) {
+			if( $aWidget['Dashboardwidget']['Widget']['data_sizey'] == 0 ) {
+				switch ( $aWidget['Dashboardwidget']['Widget']['id'] ) {
 
-				case 4:
-				case 5:
-
-					if( 4 >= count( $aWidgetVariables['aData'] ) ) {
-						$aWidgetVariables['iDataSizeY'] = 1;
-					} elseif(
-						4 < count( $aWidgetVariables['aData'] )
-						&&
-						9 >= count( $aWidgetVariables['aData'] )
-					) {
-						$aWidgetVariables['iDataSizeY'] = 2;
-					} elseif(
-						9 < count( $aWidgetVariables['aData'] )
-						&&
-						13 >= count( $aWidgetVariables['aData'] )
-					) {
-						$aWidgetVariables['iDataSizeY'] = 3;
-					} else {
-						$aWidgetVariables['iDataSizeY'] = 4;
-					}
-
-				break;
-
-				case 6:
-
-					if( 4 >= count( $aWidgetVariables['aData']['Resource'] ) ) {
-						$aWidgetVariables['iDataSizeY'] = 1;
-					} elseif(
-						4 < count( $aWidgetVariables['aData']['Resource'] )
-						&&
-						9 >= count( $aWidgetVariables['aData']['Resource'] )
-					) {
-						$aWidgetVariables['iDataSizeY'] = 2;
-					} elseif(
-						9 < count( $aWidgetVariables['aData']['Resource'] )
-						&&
-						13 >= count( $aWidgetVariables['aData']['Resource'] )
-					) {
-						$aWidgetVariables['iDataSizeY'] = 3;
-					} else {
-						$aWidgetVariables['iDataSizeY'] = 4;
-					}
-
-				break;
-
-				default:
-					$aWidgetVariables['iDataSizeY'] = $aWidget['Dashboardwidget']['Widget']['data_sizey'];
-				break;
-
+					case 4:
+					case 5:
+					case 6:
+					
+						$noRows = 0;
+						if ($aWidget['Dashboardwidget']['Widget']['id'] == 6) {
+							$noRows = count( $aWidgetVariables['aData']['Resource'] );
+						} else {
+							$noRows = count( $aWidgetVariables['aData'] );
+						}
+						// might need calibration here or in CSS
+						if( 4 >= $noRows ) {
+							$aWidgetVariables['iDataSizeY'] = 1;
+						} elseif( 4 < $noRows && 10 >= $noRows ) {
+							$aWidgetVariables['iDataSizeY'] = 2;
+						} elseif( 10 < $noRows && 15 >= $noRows ) {
+							$aWidgetVariables['iDataSizeY'] = 3;
+						} elseif( 15 < $noRows && 20 >= $noRows ) {
+							$aWidgetVariables['iDataSizeY'] = 4;
+						} else {
+							$aWidgetVariables['iDataSizeY'] = 5;
+						}
+						break;
+					default:
+						$aWidgetVariables['iDataSizeY'] = $aWidget['Dashboardwidget']['Widget']['data_sizey'];
+						break;
+				}
+			} else {
+				$aWidgetVariables['iDataSizeY'] = $aWidget['Dashboardwidget']['Widget']['data_sizey'];
 			}
 			// End
 

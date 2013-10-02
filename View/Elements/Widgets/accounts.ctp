@@ -41,13 +41,33 @@
 			<tbody>
 				<?php
 					$iPointer = 1;
-
-					foreach ( $aData as $iAccountKey => $aAccountDetails ) {
-
-						if( 0 != $aAccountDetails['count'] ) {
-
-							$sClass = 'row_' . $iPointer;
-						?>
+					$nRows = 0;
+					switch($iDataSizeY) {
+						case 1:
+							$nRows = 4;
+							break;
+						case 2:
+							$nRows = 10;
+							break;
+						case 3:
+							$nRows = 15;
+							break;
+						case 4:
+							$nRows = 20;
+							break;
+						default:
+							$nRows = count($aData);
+					}
+		
+					if ($nRows > count($aData)) {
+						$nRows = count($aData);
+					}
+		
+					for ($x=0; $x < $nRows; $x++)
+					{
+						$aAccountDetails = $aData[$x];
+						$sClass = 'row_' . $iPointer;
+				?>
 
 							<tr class="<?php echo $sClass; ?> account">
 								<td class="first" nowrap><?php
@@ -76,8 +96,8 @@
 						<?php
 							$iPointer++;
 
-						}
-				} ?>
+						
+					} ?>
 			</tbody>
 		</table>
 

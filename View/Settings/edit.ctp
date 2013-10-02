@@ -46,6 +46,40 @@
 			)
 		,	'placeholder' => '155.12.0.55 # Office (location Amsterdam)'
 	) );
+	
+	echo '<h2>Widget y-axis length</h2>';
+	echo '<h5>Set to 0 for system chosen length (lists all entries)</h5>';
+	
+	echo $this->Form->input( 'Setting.Accounts.Widget.data_sizey', array(
+			'type' => 'select'
+		,	'options' => array( 0, 1, 2, 3, 4)
+		,	'class' => 'select'
+		,	'label' => array(
+					'class' => 'control-label'
+				,	'text' => 'Accounts'
+			)
+	) );
+	
+	echo $this->Form->input( 'Setting.Queues.Widget.data_sizey', array(
+			'type' => 'select'
+		,	'options' => array( 0, 1, 2, 3, 4)
+		,	'class' => 'select'
+		,	'label' => array(
+					'class' => 'control-label'
+				,	'text' => 'Queues'
+			)
+	) );
+	
+	echo $this->Form->input( 'Setting.Resources.Widget.data_sizey', array(
+			'type' => 'select'
+		,	'options' => array( 0, 1, 2, 3, 4)
+		,	'class' => 'select'
+		,	'label' => array(
+					'class' => 'control-label'
+				,	'text' => 'Resources'
+			)
+	) );
+//
 
 	echo $this->Form->submit( 'Save', array(
 			'class' => 'btn btn-success'

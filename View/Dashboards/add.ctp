@@ -195,7 +195,7 @@
 				,	'title' => 'A list of resources (max 10), sorted by amount of tickets they\'ve completed today (desc). Depends on the queues and resources you select.'
 			)
 	) );
-
+	
 	echo $this->Form->input( 'Dashboard.show_open', array(
 			'type' => 'checkbox'
 		,	'div' => array(
