@@ -213,7 +213,7 @@
 							<li class="divider"></li>
 
 							<?php
-								if( !file_exists( APP . 'Plugin/Autotask/.git/HEAD' ) ) {
+								if( file_exists( APP . 'Plugin/Autotask/.git/HEAD' ) ) {
 
 									$aFile = file( APP . 'Plugin/Autotask/.git/HEAD' );
 									$sLine = $aFile[0];
