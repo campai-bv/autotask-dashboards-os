@@ -16,7 +16,7 @@ ALTER TABLE `dashboards` MODIFY `show_queue_health` tinyint(2) NOT NULL DEFAULT 
 ALTER TABLE `dashboards` MODIFY `show_sla_violations` tinyint(2) NOT NULL DEFAULT '0';
 ALTER TABLE `dashboards` MODIFY `show_tickets_top_x` tinyint(2) NOT NULL DEFAULT '0';
 ALTER TABLE `dashboards` MODIFY `show_clock` tinyint(2) NOT NULL DEFAULT '0';
-ALTER TABLE `dashboards` ADD COLUMN `show_open_tickets` tinyint(2) NOT NULL DEFAULT '0';
+ALTER TABLE `dashboards` ADD COLUMN `show_open` tinyint(2) NOT NULL DEFAULT '0';
 ALTER TABLE `dashboards` ADD COLUMN `show_tickets_by_source` tinyint(2) NOT NULL DEFAULT '0';
 
 -- ----------------------------

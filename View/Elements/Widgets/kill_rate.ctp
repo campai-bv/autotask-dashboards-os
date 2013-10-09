@@ -3,7 +3,7 @@
 	<table class="table kill-rate">
 		<thead>
 			<tr>
-				<th colspan="2" style="text-align: center;"><h4 style="margin-top: 20px;" class="jeditable" id="display_name"><?php echo $sTitle; ?></h4></th>
+				<th colspan="2" style="text-align: center;"><h4  class="jeditable" id="display_name"><?php echo $sTitle; ?></h4></th>
 			</tr>
 		</thead>
 		<tbody>

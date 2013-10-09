@@ -210,6 +210,15 @@
 									) );
 								?>
 							</li>
+							<!-- Can be moved to other menu/sub-menu -->
+							<li>
+								<?php
+									echo $this->Html->link( 'Custom Widgets', array(
+											'plugin' => 'autotask'
+										,	'controller' => 'customwidgets'
+									) );
+								?>
+							</li>
 							<li class="divider"></li>
 
 							<?php

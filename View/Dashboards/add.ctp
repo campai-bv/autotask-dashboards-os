@@ -195,8 +195,8 @@
 				,	'title' => 'A list of resources (max 10), sorted by amount of tickets they\'ve completed today (desc). Depends on the queues and resources you select.'
 			)
 	) );
-
-	echo $this->Form->input( 'Dashboard.show_open_tickets', array(
+	
+	echo $this->Form->input( 'Dashboard.show_open', array(
 			'type' => 'checkbox'
 		,	'div' => array(
 					'class' => 'control-group input checkbox-container'
@@ -284,6 +284,22 @@
 					'class' => 'control-label'
 				,	'text' => 'Show Tickets by Source'
 				,	'title' => 'View of tickets by source.'
+			)
+	) );
+	
+	echo '<br />';
+	
+	echo $this->Form->input( 'Customwidget.id', array(
+			'options' => $aCustomwidgets['options']
+		,	'selected' => $aCustomwidgets['selected']
+		,	'multiple' => 'checkbox'
+		,	'div' => array(
+					'class' => 'control-group input checkboxes-container'
+			)
+		,	'class' => 'checkbox'
+		,	'label' => array(
+					'class' => 'control-label'
+				,	'text' => 'Custom Widgets'
 			)
 	) );
 

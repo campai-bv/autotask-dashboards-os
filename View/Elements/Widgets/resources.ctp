@@ -72,11 +72,33 @@
 						<tbody>
 							<?php
 								$iPointer = 1;
-
-								foreach ( $aData['Resource'] as $iResourceId => $aResourceDetails ) {
-
+								$nRows = 0;
+								switch($iDataSizeY) {
+									case 1:
+										$nRows = 4;
+										break;
+									case 2:
+										$nRows = 10;
+										break;
+									case 3:
+										$nRows = 15;
+										break;
+									case 4:
+										$nRows = 20;
+										break;
+									default:
+										$nRows = count($aData['Resource']);
+								}
+								
+								if ($nRows > count($aData['Resource'])) {
+									$nRows = count($aData['Resource']);
+								}
+								
+								for ($x=0; $x < $nRows; $x++)
+								{
+									$aResourceDetails = $aData['Resource'][$x];
 									$sClass = 'row_' . $iPointer;
-									?>
+							?>
 
 										<tr class="<?php echo $sClass; ?>">
 											<td class="first" nowrap><?php

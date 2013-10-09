@@ -36,7 +36,7 @@
 		);
 
 
-		public function log($sMessage, $iLevel = 0) {
+		public function logit($sMessage, $iLevel = 0) {
 
 			if (!$this->iLogLevel = Configure::read('Import.logLevel')) {
 				$this->iLogLevel = 0;
@@ -62,7 +62,7 @@
 
 			$bErrorsEncountered = false;
 
-			$this->log('Starting with the import..', 1);
+			$this->logit('Starting with the import..', 1);
 
 			// Set the database object so we can clean quotes from user input.
 			$this->db = ConnectionManager::getDataSource( 'default' );
@@ -80,24 +80,24 @@
 				$this->__syncPicklistsWithDatabase();
 
 				// Delete any existing records so we have a clean start.
-				$this->log( '> Truncating tickets table..', 1);
+				$this->logit( '> Truncating tickets table..', 1);
 				$this->Ticket->query('TRUNCATE TABLE tickets;');
-				$this->log('..done.', 1);
+				$this->logit('..done.', 1);
 				// End
 
 				// Import completed tickets
-				$this->log('> Importing completed tickets into the database..', 1);
+				$this->logit('> Importing completed tickets into the database..', 1);
 
 				$oTickets = $this->GetTicketsCompleted->execute();
 
 				if( empty( $oTickets ) ) {
-					$this->log('..nothing saved - query returned no tickets.', 1);
+					$this->logit('..nothing saved - query returned no tickets.', 1);
 				} else {
 
 					if( !$this->__saveTicketsToDatabase( $oTickets ) ) {
 						$bErrorsEncountered = true;
 					} else {
-						$this->log('..imported ' . count( $oTickets ) . ' ticket(s).' , 1);
+						$this->logit('..imported ' . count( $oTickets ) . ' ticket(s).' , 1);
 					}
 
 				}
@@ -106,20 +106,20 @@
 				if( !$bErrorsEncountered ) {
 
 					// Import the tickets that have any other status then 'completed'.
-					$this->log('> Importing open tickets into the database..', 1);
+					$this->logit('> Importing open tickets into the database..', 1);
 
 					$oTickets = $this->GetTicketsOpen->execute();
 
 					if( empty( $oTickets ) ) {
 
-						$this->log('..nothing saved - query returned no tickets.', 1);
+						$this->logit('..nothing saved - query returned no tickets.', 1);
 
 					} else {
 
 						if( !$this->__saveTicketsToDatabase( $oTickets ) ) {
 							$bErrorsEncountered = true;
 						} else {
-							$this->log('..imported ' . count( $oTickets ) . ' ticket(s).' , 1);
+							$this->logit('..imported ' . count( $oTickets ) . ' ticket(s).' , 1);
 						}
 
 					}
@@ -127,7 +127,7 @@
 					if( !$bErrorsEncountered ) {
 
 						// Processing of the tickets data into totals for kill rates, queue healths etc.
-						$this->log('> Processing the tickets data into totals for all dashboards..', 1);
+						$this->logit('> Processing the tickets data into totals for all dashboards..', 1);
 
 							$this->CalculateTotalsByTicketStatus->execute();
 							$this->CalculateTotalsByTicketSource->execute();
@@ -139,21 +139,21 @@
 								$bErrorsEncountered = true;
 							}
 
-						$this->log('..done.', 1);
+						$this->logit('..done.', 1);
 
-						$this->log('> Clearing cache for all dashboards..', 1);
+						$this->logit('> Clearing cache for all dashboards..', 1);
 						if(
 							clearCache() // Clear the view cache
 							&&
 							Cache::clear( null, '1_hour' ) // Clear the model cache
 						) {
 
-							$this->log('..done.', 1);
+							$this->logit('..done.', 1);
 
 						} else {
 
 							$bErrorsEncountered = true;
-							$this->log('..could not delete view cache!', 1);
+							$this->logit('..could not delete view cache!', 1);
 
 						}
 
@@ -165,10 +165,10 @@
 			// End
 
 			if( $bErrorsEncountered ) {
-				$this->log( 'Failed: we\'ve encountered some errors while running the import script.', 1);
+				$this->logit( 'Failed: we\'ve encountered some errors while running the import script.', 1);
 			} else {
 
-				$this->log( 'Success! Everything imported correctly.', 1);
+				$this->logit( 'Success! Everything imported correctly.', 1);
 
 			}
 
@@ -200,26 +200,26 @@
 
 			foreach ( $aPicklist as $iId => $sName ) {
 
-				$this->log( '> Checking model: ' . $sModel . ' for name: ' . $sName . '..', 4 );
+				$this->logit( '> Checking model: ' . $sModel . ' for name: ' . $sName . '..', 4 );
 
 				$aModelRecord = $this->$sModel->findByid($iId);
 
 				if (empty($aModelRecord)) {
 
-					$this->log('..Non existing: ' . $sModel . ' model so inserting: "' . $sName . '" with id '. $iId , 4 );
+					$this->logit('..Non existing: ' . $sModel . ' model so inserting: "' . $sName . '" with id '. $iId , 4 );
 					$aNewModelRecords[] = array($sModel=>array('id'=>$iId,'name'=>$sName));
 
 				} else {
 
 					if (empty($aModelRecord[$sModel]['name'])) {
 
-						$this->log( '..Updating ' . $sModel . ' with id ' . $iId . ' which does not have a name. New name: "' . $sName . '"', 4 );
+						$this->logit( '..Updating ' . $sModel . ' with id ' . $iId . ' which does not have a name. New name: "' . $sName . '"', 4 );
 						$aNewModelRecords[]=array($sModel=>array('id'=>$iId,'name'=>$sName));
 
 					} else {
 						// allow dashboard settings to change name of picklist item.
 						// set back to empty to resync on next cronjob run
-						$this->log( '..' . $sModel . ' "' . $sName . '" exists and has name "' . $aModelRecord[$sModel]['name'] . '"' , 4 );
+						$this->logit( '..' . $sModel . ' "' . $sName . '" exists and has name "' . $aModelRecord[$sModel]['name'] . '"' , 4 );
 
 					}
 
@@ -268,8 +268,8 @@
 						$this->{$sModel}->query( $sQuery );
 					} catch ( Exception $e ) {
 
-						$this->log( '- Could not save the new ' . Inflector::pluralize( $sModel ) . '. MySQL says: "' . $e->errorInfo[2] . '"' );
-						$this->log('- Query executed: "' . $sQuery . '"');
+						$this->logit( '- Could not save the new ' . Inflector::pluralize( $sModel ) . '. MySQL says: "' . $e->errorInfo[2] . '"' );
+						$this->logit('- Query executed: "' . $sQuery . '"');
 						return false;
 
 					}
@@ -425,7 +425,7 @@
 
 					$aIds['Resource'][] = $iResourceId;
 
-					$this->log( '- Found new Resource => Inserted into the database ("' . $sResourceName . '").' ,3);
+					$this->logit( '- Found new Resource => Inserted into the database ("' . $sResourceName . '").' ,3);
 
 				}
 
@@ -457,7 +457,7 @@
 
 					$aIds['Queue'][] = $iQueueId;
 
-					$this->log( '- Found new Queue => Inserted into the database (id ' . $iQueueId . ').' ,3);
+					$this->logit( '- Found new Queue => Inserted into the database (id ' . $iQueueId . ').' ,3);
 
 				}
 
@@ -486,7 +486,7 @@
 
 				$aIds['Ticketstatus'][] = $oTicket->Status;
 
-				$this->log( '- Found new Ticket Status => Inserted into the database (id ' . $oTicket->Status . ').' ,3);
+				$this->logit( '- Found new Ticket Status => Inserted into the database (id ' . $oTicket->Status . ').' ,3);
 
 			}
 			// End
@@ -556,7 +556,7 @@
 
 					$aIds['Account'][] = $oTicket->AccountID;
 
-					$this->log( '- Found new Account => Inserted into the database ("' . $oAccount->AccountName . '").' ,3);
+					$this->logit( '- Found new Account => Inserted into the database ("' . $oAccount->AccountName . '").' ,3);
 
 				}
 
@@ -586,7 +586,7 @@
 
 					$aIds['Issuetype'][] = $oTicket->IssueType;
 
-						$this->log(  '- Found new Issue Type => Inserted into the database (id ' . $oTicket->IssueType . ').',3 );
+						$this->logit(  '- Found new Issue Type => Inserted into the database (id ' . $oTicket->IssueType . ').',3 );
 
 				}
 
@@ -616,7 +616,7 @@
 
 					$aIds['Subissuetype'][] = $oTicket->SubIssueType;
 
-					$this->log( '- Found new Sub Issue Type => Inserted into the database (id ' . $oTicket->SubIssueType . ').' ,3);
+					$this->logit( '- Found new Sub Issue Type => Inserted into the database (id ' . $oTicket->SubIssueType . ').' ,3);
 
 				}
 

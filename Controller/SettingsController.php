@@ -16,6 +16,9 @@
 
 		public function edit() {
 
+			// simple access to model was used. 
+			$this->loadModel('Widget');
+		
 			if(
 				$this->request->is( 'put' )
 				||
@@ -24,6 +27,14 @@
 
 				if( $this->Setting->save( $this->request->data ) ) {
 
+					// these save queries could be optimised if possible
+					$this->Widget->id = 4;
+					$this->Widget->save( $this->request->data['Setting']['Accounts']['Widget'] );
+					$this->Widget->id = 5;
+					$this->Widget->save( $this->request->data['Setting']['Queues']['Widget'] );
+					$this->Widget->id = 6;
+					$this->Widget->save( $this->request->data['Setting']['Resources']['Widget'] );
+					
 					if( $this->__writeHtaccess( $this->request->data['Setting']['ips'] ) ) {
 						$this->Session->setFlash( 'Setting changes have been saved.' );
 					}
@@ -43,6 +54,9 @@
 
 			$this->request->data = $this->Setting->read( null, 1 );
 			$this->request->data['Setting']['ips'] = $this->__readHtaccess();
+			$this->request->data['Setting']['Accounts'] = $this->Widget->read('data_sizey', 4);
+			$this->request->data['Setting']['Queues'] = $this->Widget->read('data_sizey', 5);
+			$this->request->data['Setting']['Resources'] = $this->Widget->read('data_sizey', 6);
 
 		}
 

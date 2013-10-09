@@ -30,6 +30,7 @@
 			,	'Autotask.Subissuetype'
 			,	'Autotask.Killratecount'
 			,	'Autotask.Queuehealthcount'
+			,	'Autotask.Widget'
 		);
 
 		public $helpers = array(
@@ -196,10 +197,23 @@
 			) );
 
 			$aTicketstatuses['selected'] = array();
+			
+			$aCustomwidgets['options'] = $this->Widget->find( 'list', array(
+					'conditions' => array('id >' => 13)
+				,	'order' => 'default_name asc'
+				,	'fields' => array(
+						'Widget.id'
+					,	'Widget.default_name'
+			) ) );
+
+			$aCustomwidgets['selected'] = array();
+			
+			
 
 			$this->set( 'aResources', $aResources );
 			$this->set( 'aQueues', $aQueues );
 			$this->set( 'aTicketstatuses', $aTicketstatuses );
+			$this->set( 'aCustomwidgets', $aCustomwidgets );
 
 			if( $this->request->is( 'post' ) ) {
 
@@ -253,6 +267,21 @@
 
 					}
 					// End - Ticket statuses
+					
+					// Custom Widgets
+					if( !empty( $this->request->data['Customwidget']['id'] ) ) {
+
+						foreach ( $this->request->data['Customwidget']['id'] as $iKey => $iWidgetId ) {
+
+							$this->Dashboardwidget->create();
+							$this->Dashboardwidget->save( array(
+									'widget_id' => $iWidgetId
+								,	'dashboard_id' => $this->Dashboard->id
+							) );	
+						}
+
+					}
+					// End - Custom Widgets
 
 					$sFlashMessage = '<strong>Success!</strong> Dashboard has been added.';
 					$this->Session->setFlash( $sFlashMessage );
@@ -282,6 +311,19 @@
 			$aTicketstatuses['options'] = $this->Ticketstatus->find( 'list', array(
 					'order' => 'name asc'
 			) );
+			
+			$aCustomwidgets['options'] = $this->Widget->find( 'list', array(
+					'conditions' => array('id >' => 13)
+				,	'order' => 'default_name asc'
+				,	'fields' => array(
+						'Widget.id'
+					,	'Widget.default_name'
+			) ) );
+			
+			
+			//Widget->find( 'list', array(
+					//'order' => 'default_name asc'
+			//) );
 
 			$aResources['selected'] = array();
 			if( !empty( $aDashboard['Dashboardresource'] ) ) {
@@ -297,10 +339,16 @@
 			if( !empty( $aDashboard['Dashboardticketstatus'] ) ) {
 				$aTicketstatuses['selected'] = Hash::extract( $aDashboard['Dashboardticketstatus'], '{n}.ticketstatus_id' );
 			}
+			
+			$aCustomwidgets['selected'] = array();
+			if( !empty( $aDashboard['Dashboardwidget'] ) ) {
+				$aCustomwidgets['selected'] = Hash::extract( $aDashboard['Dashboardwidget'], '{n}.widget_id' );
+			}
 
 			$this->set( 'aResources', $aResources );
 			$this->set( 'aQueues', $aQueues );
 			$this->set( 'aTicketstatuses', $aTicketstatuses );
+			$this->set( 'aCustomwidgets', $aCustomwidgets );
 			// End
 
 			if(
@@ -379,6 +427,25 @@
 
 					}
 					// End - Ticket statuses
+					
+					// Custom widgets
+					$this->Dashboardwidget->deleteAll( array(
+							'dashboard_id' => $this->request->data['Dashboard']['id']
+					) );
+
+					if( !empty( $this->request->data['Customwidget']['id'] ) ) {
+
+						foreach ( $this->request->data['Customwidget']['id'] as $iKey => $iWidgetId ) {
+
+							$this->Dashboardwidget->create();
+							$this->Dashboardwidget->save( array(
+									'widget_id' => $iWidgetId
+								,	'dashboard_id' => $this->Dashboard->id
+							) );
+						}
+
+					}
+					// End - Custom widgets
 
 					$sFlashMessage = '<strong>Success!</strong> Dashboard has been updated.';
 
