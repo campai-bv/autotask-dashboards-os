@@ -286,6 +286,22 @@
 				,	'title' => 'View of tickets by source.'
 			)
 	) );
+	
+	echo '<br />';
+	
+	echo $this->Form->input( 'Customwidget.id', array(
+			'options' => $aCustomwidgets['options']
+		,	'selected' => $aCustomwidgets['selected']
+		,	'multiple' => 'checkbox'
+		,	'div' => array(
+					'class' => 'control-group input checkboxes-container'
+			)
+		,	'class' => 'checkbox'
+		,	'label' => array(
+					'class' => 'control-label'
+				,	'text' => 'Custom Widgets'
+			)
+	) );
 
 	if( 'add' == $this->action) {
 

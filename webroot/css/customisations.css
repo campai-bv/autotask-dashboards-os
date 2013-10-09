@@ -52,15 +52,18 @@ h2 {
 	}
 
 		.status-count h4,
+		.kill-rate h4,
 		.kill-rate-counts h4,
 		.kill-rate-bars h4,
 		.tickets-source-counts h4,
 		.queue-health-counts h4,
+		.custom-widget h4,
 		#resources h2,
 		#resources h4 {
 			color: #959595;
 			text-transform: uppercase;
-			height: 3em;
+			text-align: center;
+			/*height: 3em;*/
 		}
 
 			.kill-rate-counts h4,
@@ -69,8 +72,9 @@ h2 {
 			.queue-health-counts h4 {
 				position: absolute;
 				z-index: 99999;
-				margin-left: 40%;
-				height: auto;
+				/*margin-left: 40%;*/
+				text-align:center;
+				/*height: auto;*/
 				padding: 0;
 			}
 

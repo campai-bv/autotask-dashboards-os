@@ -28,3 +28,5 @@
 	// End
 
 	Router::connect('/autotask/settings', array('plugin' => 'autotask', 'controller' => 'settings', 'action' => 'edit'));
+	
+	Router::connect('/autotask/customwidgets', array('plugin' => 'autotask', 'controller' => 'customwidgets', 'action' => 'edit'));
