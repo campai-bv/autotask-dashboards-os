@@ -50,7 +50,7 @@
 			$oResult = $this->Timeentry->findInAutotask( 'all', array(
 					'conditions' => array(
 							'IsThisDay' => array(
-								'DateWorked' => date( 'Y-m-d' )
+									'DateWorked' => date( 'Y-m-d' )
 							)
 					)
 			) );
@@ -140,13 +140,13 @@
 					}
 
 					if( !$bErrorsEncountered ) {
-						$this->log('..done - imported ' . count( $oResult ) . ' time entries.', 4);
+						$this->log('..done - imported ' . count( $oResult ) . ' time entries.', 2);
 					}
 
 				}
 
 			} else {
-				$this->log('..done - nothing saved because query returned no time entries.', 4);
+				$this->log('..done - nothing saved because query returned no time entries.', 2);
 			}
 
 			if( $bErrorsEncountered ) {

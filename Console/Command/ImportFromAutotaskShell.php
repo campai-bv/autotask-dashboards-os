@@ -91,13 +91,13 @@
 				$oTickets = $this->GetTicketsCompleted->execute();
 
 				if( empty( $oTickets ) ) {
-					$this->log('..nothing saved - query returned no tickets.', 1);
+					$this->log('..done - nothing saved, query returned no tickets.', 1);
 				} else {
 
 					if( !$this->__saveTicketsToDatabase( $oTickets ) ) {
 						$bErrorsEncountered = true;
 					} else {
-						$this->log('..imported ' . count( $oTickets ) . ' ticket(s).' , 1);
+						$this->log('..done - imported ' . count( $oTickets ) . ' ticket(s).' , 1);
 					}
 
 				}
@@ -112,14 +112,14 @@
 
 					if( empty( $oTickets ) ) {
 
-						$this->log('..nothing saved - query returned no tickets.', 1);
+						$this->log('..done - nothing saved, query returned no tickets.', 1);
 
 					} else {
 
 						if( !$this->__saveTicketsToDatabase( $oTickets ) ) {
 							$bErrorsEncountered = true;
 						} else {
-							$this->log('..imported ' . count( $oTickets ) . ' ticket(s).' , 1);
+							$this->log('..done - imported ' . count( $oTickets ) . ' ticket(s).' , 1);
 						}
 
 					}
