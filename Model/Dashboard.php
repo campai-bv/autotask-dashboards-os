@@ -422,7 +422,7 @@
 							$this->Ticketsource = new Ticketsource();
 
 							$aWidget = array_merge( $aWidget, array(
-									'Widgetdata' => $this->Ticketsource->getTotals()
+									'Widgetdata' => $this->Ticketsource->getTotals($aQueueIds)
 							) );
 						break;
 
