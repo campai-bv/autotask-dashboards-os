@@ -16,6 +16,7 @@
 				'Autotask.Ticket'
 			,	'Autotask.Ticketstatus'
 			,	'Autotask.Ticketstatuscount'
+			,	'Autotask.Queue'
 		);
 
 		public function execute() {
@@ -28,6 +29,9 @@
 			$this->Ticketstatus->recursive = -1;
 			$aStatuses = $this->Ticketstatus->find( 'list' );
 
+			// To enable filtering on queues, we fetch the open tickets per queue.
+			$aQueueIds = $this->Queue->find('list');
+
 			// Then import the new ones.
 			if(empty($aStatuses)) {
 				$this->log('..done - no ticket statuses available.', 2);
@@ -35,43 +39,51 @@
 			
 				foreach ( $aStatuses as $iStatusId => $sName ) {
 
-					$iNumberOfTicketsInQueue = $this->Ticket->find( 'count', array(
-							'conditions' => array(
-									'Ticket.ticketstatus_id' => $iStatusId
-							)
-					) );
-	
-					$aExistingCount = $this->Ticketstatuscount->find( 'first', array(
-							'conditions' => array(
-									'Ticketstatuscount.created' => date( 'Y-m-d' )
-								,	'Ticketstatuscount.ticketstatus_id' => $iStatusId
-							)
-					) );
-	
-					if( !empty( $aExistingCount ) ) {
-	
-						if( $this->Ticketstatuscount->save( array(
-								'id' => $aExistingCount['Ticketstatuscount']['id']
-							,	'ticketstatus_id' => $iStatusId
-							,	'count' => $iNumberOfTicketsInQueue
-						) ) ) {
-							$this->log('- Updated ticket status count for status "' . $iStatusId .'" (counted ' . $iNumberOfTicketsInQueue . ')', 4);
+					foreach ($aQueueIds as $iQueueId => $sQueueName) {
+
+						$iNumberOfTicketsInQueue = $this->Ticket->find('count', array(
+								'conditions' => array(
+										'Ticket.ticketstatus_id' => $iStatusId
+									,	'Ticket.queue_id' => $iQueueId
+								)
+						));
+
+						$aExistingCount = $this->Ticketstatuscount->find('first', array(
+								'conditions' => array(
+										'Ticketstatuscount.created' => date('Y-m-d')
+									,	'Ticketstatuscount.ticketstatus_id' => $iStatusId
+									,	'Ticketstatuscount.queue_id' => $iQueueId
+								)
+						));
+
+						if (!empty($aExistingCount)) {
+
+							if ($this->Ticketstatuscount->save(array(
+									'id' => $aExistingCount['Ticketstatuscount']['id']
+								,	'ticketstatus_id' => $iStatusId
+								,	'queue_id' => $iQueueId
+								,	'count' => $iNumberOfTicketsInQueue
+							) ) ) {
+								$this->log('- Updated ticket status count for status "' . $iStatusId .'" (counted ' . $iNumberOfTicketsInQueue . ')', 4);
+							} else {
+								$this->log('- Could not update ticket status count for source "' . $iStatusId .'" (counted ' . $iNumberOfTicketsInQueue . ')', 4);
+							}
+		
 						} else {
-							$this->log('- Could not update ticket status count for source "' . $iStatusId .'" (counted ' . $iNumberOfTicketsInQueue . ')', 4);
+		
+							$this->Ticketstatuscount->create();
+							if( $this->Ticketstatuscount->save( array(
+									'ticketstatus_id' => $iStatusId
+								,	'queue_id' => $iQueueId
+								,	'count' => $iNumberOfTicketsInQueue
+							) ) ) {
+								$this->log('- Created ticket status count for status "' . $iStatusId .'" (counted ' . $iNumberOfTicketsInQueue . ')', 4);
+							} else {
+								$this->log('- Could not create ticket status count for source "' . $iStatusId .'" (counted ' . $iNumberOfTicketsInQueue . ')', 4);
+							}
+		
 						}
-	
-					} else {
-	
-						$this->Ticketstatuscount->create();
-						if( $this->Ticketstatuscount->save( array(
-								'ticketstatus_id' => $iStatusId
-							,	'count' => $iNumberOfTicketsInQueue
-						) ) ) {
-							$this->log('- Created ticket status count for status "' . $iStatusId .'" (counted ' . $iNumberOfTicketsInQueue . ')', 4);
-						} else {
-							$this->log('- Could not create ticket status count for source "' . $iStatusId .'" (counted ' . $iNumberOfTicketsInQueue . ')', 4);
-						}
-	
+
 					}
 	
 				}
