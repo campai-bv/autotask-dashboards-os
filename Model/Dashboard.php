@@ -379,12 +379,28 @@
 							App::uses( 'Ticket', 'Autotask.Model' );
 							$this->Ticket = new Ticket();
 
-							$aWidget = array_merge( $aWidget, array(
-									'Widgetdata' => $this->Ticket->find( 'all', array(
-											'limit' => 11
-										,	'order' => 'created DESC'
-									) )
-							) );
+							if (!empty($aQueueIds)) {
+
+								$aWidget = array_merge($aWidget, array(
+										'Widgetdata' => $this->Ticket->find('all', array(
+												'limit' => 11
+											,	'order' => 'created DESC'
+											,	'conditions' => array(
+														'Ticket.queue_id' => $aQueueIds
+												)
+										))
+								));
+
+							} else {
+
+								$aWidget = array_merge($aWidget, array(
+										'Widgetdata' => $this->Ticket->find('all', array(
+												'limit' => 11
+											,	'order' => 'created DESC'
+										))
+								));
+
+							}
 
 						break;
 
