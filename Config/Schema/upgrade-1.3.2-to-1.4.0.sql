@@ -39,8 +39,14 @@ CREATE TABLE IF NOT EXISTS `ticketsourcecounts` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `created` date NOT NULL,
   `ticketsource_id` int(10) NOT NULL,
+  `queue_id` int(10) NOT NULL,
   `count` int(10) NOT NULL,
   PRIMARY KEY (`id`)) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=0 ;
+
+-- ----------------------------
+--  Table structure for `ticketstatuscounts`
+-- ----------------------------
+ALTER TABLE `ticketstatuscounts` ADD COLUMN `queue_id` int(10) NOT NULL after `ticketstatus_id`;
 
 -- ----------------------------
 --  Records of `widgets`
