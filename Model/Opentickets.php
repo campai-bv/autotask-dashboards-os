@@ -22,47 +22,59 @@
 		);
 
 
-		public function getTotals( ){
+		public function getTotals(Array $aQueueIds){
 
-			$aOldStatuses = $this->Ticketstatuscount->find( 'first', array(
+			$aOldStatuses = $this->Ticketstatuscount->find('all', array(
 					'conditions' => array(
-									'Ticketstatuscount.created' => date( 'Y-m-d', strtotime( '-1 day' ) )
-								,	'Ticketstatuscount.ticketstatus_id' => 2
-							)
-			) );
+							'Ticketstatuscount.created' => date('Y-m-d', strtotime('-1 day'))
+						,	'Ticketstatuscount.ticketstatus_id' => 2
+						,	'Ticketstatuscount.queue_id' => $aQueueIds
+					)
+			));
 
-			$aNewStatuses = $this->Ticketstatuscount->find( 'first', array(
+			$aNewStatuses = $this->Ticketstatuscount->find('all', array(
 					'conditions' => array(
-									'Ticketstatuscount.created' => date( 'Y-m-d' )
-								,	'Ticketstatuscount.ticketstatus_id' => 2
-							)
-			) );
+							'Ticketstatuscount.created' => date('Y-m-d')
+						,	'Ticketstatuscount.ticketstatus_id' => 2
+						,	'Ticketstatuscount.queue_id' => $aQueueIds
+					)
+			));
 
-			$aTotals = array();	
+			$iNew = 0;
+			if (!empty($aNewStatuses)) {
+
+				foreach ($aNewStatuses as $aStatus) {
+					$iNew += $aStatus['Ticketstatuscount']['count'];
+				}
+
+			}
+
+			$aTotals = array();
 			$aTotals = array(
 					'counts' => array(
-							'new' =>     $aNewStatuses['Ticketstatuscount']['count']
+							'new' => $iNew
 						,	'old' => 0
 						,	'difference' => 0
 					)
 			);
 
-			if( !empty( $aOldStatuses['Ticketstatuscount']['count'] ) ) {
+			if (!empty($aOldStatuses['Ticketstatuscount']['count'])) {
 				$iOld = $aOldStatuses['Ticketstatuscount']['count'];
 			} else {
 				$iOld = 0;
 			}
 
 			$aTotals['counts']['old'] = $iOld;
-			$iNew = $aTotals['counts']['new'];
 
 			// You cant divide by zero
-			if( 0 == $iOld ) {
+			if (0 == $iOld) {
 				$iOld = 1;
 			}
 
-			$aTotals['counts']['difference'] = number_format( ( ( 100 * $iNew ) / $iOld ) - 100, 0, ',', '.' );
+			$aTotals['counts']['difference'] = number_format(((100*$iNew)/$iOld)-100, 0, ',', '.');
 
 			return $aTotals;
+
 		}
+
 	}

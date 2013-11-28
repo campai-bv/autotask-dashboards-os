@@ -15,51 +15,63 @@
 		public $uses = array(
 				'Autotask.Ticket'
 			,	'Autotask.Ticketstatuscount'
+			,	'Autotask.Queue'
 		);
 
 		public function execute() {
 
 			$this->log('> Calculating total open tickets for all dashboards..', 2);
 
-			$iNumberOfTicketsInQueue = $this->Ticket->find( 'count', array(
-					'conditions' => array(
-							'Ticket.ticketstatus_id !=' => 5
-					)
-			) );
+			// To enable filtering on queues, we fetch the open tickets per queue.
+			$aQueueIds = $this->Queue->find('list');
 
-			$aExistingCount = $this->Ticketstatuscount->find( 'first', array(
-					'conditions' => array(
-							'Ticketstatuscount.created' => date( 'Y-m-d' )
-						,	'Ticketstatuscount.ticketstatus_id' => 2
-					)
-			) );
+			foreach ($aQueueIds as $iQueueId => $sQueueName) {
 
-			if( !empty( $aExistingCount ) ) {
+				$iNumberOfTicketsInQueue = $this->Ticket->find('count', array(
+						'conditions' => array(
+								'Ticket.ticketstatus_id !=' => 5
+							,	'Ticket.queue_id' => $iQueueId
+						)
+				));
 
-				if( $this->Ticketstatuscount->save( array(
-						'id' => $aExistingCount['Ticketstatuscount']['id']
-					,	'ticketstatus_id' => 2 //empty status using for Open tickets
-					,	'count' => $iNumberOfTicketsInQueue
-				) ) ) {
-					$this->log('- Updated total open tickets count (' . $iNumberOfTicketsInQueue . ')', 4);
+				$aExistingCount = $this->Ticketstatuscount->find('first', array(
+						'conditions' => array(
+								'Ticketstatuscount.created' => date('Y-m-d')
+							,	'Ticketstatuscount.ticketstatus_id' => 2
+							,	'Ticketstatuscount.queue_id' => $iQueueId
+						)
+				));
+
+				if (!empty($aExistingCount)) {
+
+					if ($this->Ticketstatuscount->save(array(
+							'id' => $aExistingCount['Ticketstatuscount']['id']
+						,	'ticketstatus_id' => 2 //empty status using for Open tickets
+						,	'queue_id' => $iQueueId
+						,	'count' => $iNumberOfTicketsInQueue
+					))) {
+						$this->log('- Updated total open tickets count (' . $iNumberOfTicketsInQueue . ')', 4);
+					} else {
+						$this->log('- Could not update total open tickets count (' . $iNumberOfTicketsInQueue . ')', 4);
+					}
+
 				} else {
-					$this->log('- Could not update total open tickets count (' . $iNumberOfTicketsInQueue . ')', 4);
-				}
 
-			} else {
+					$this->Ticketstatuscount->create();
+					if ($this->Ticketstatuscount->save(array(
+							'ticketstatus_id' => 2 //empty status using for Open tickets
+						,	'queue_id' => $iQueueId
+						,	'count' => $iNumberOfTicketsInQueue
+					))) {
+						$this->log('- Created total open tickets count (' . $iNumberOfTicketsInQueue . ')', 4);
+					} else {
+						$this->log('- Could not update total open tickets count (' . $iNumberOfTicketsInQueue . ')', 4);
+					}
 
-				$this->Ticketstatuscount->create();
-				if( $this->Ticketstatuscount->save( array(
-						'ticketstatus_id' => 2 //empty status using for Open tickets
-					,	'count' => $iNumberOfTicketsInQueue
-				) ) ) {
-					$this->log('- Created total open tickets count (' . $iNumberOfTicketsInQueue . ')', 4);
-				} else {
-					$this->log('- Could not update total open tickets count (' . $iNumberOfTicketsInQueue . ')', 4);
 				}
 
 			}
-			
+
 			$this->log('..done.', 2);
 
 		}

@@ -411,7 +411,7 @@
 							$this->Opentickets = new Opentickets();
 
 							$aWidget = array_merge( $aWidget, array(
-									'Widgetdata' => $this->Opentickets->getTotals()
+									'Widgetdata' => $this->Opentickets->getTotals($aQueueIds)
 							) );
 
 						break;
