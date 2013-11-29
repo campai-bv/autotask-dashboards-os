@@ -164,6 +164,7 @@
 				}
 
 				clearCache(); // Remove the view cache
+				Cache::clear( null ,'1_hour' ); // Clear the model cache
 
 				if( $bErrorOccured ) {
 					echo 'Saved but with errors.';
@@ -457,6 +458,7 @@
 			}
 
 			clearCache(); // Clear the view cache
+			Cache::clear( null ,'1_hour' ); // Clear the model cache
 			exit();
 
 		}
