@@ -159,11 +159,26 @@
 				if (!empty ($aResource['Timeentry'] ) ) {
 				
 					foreach($aResource['Timeentry'] as $aTimeEntry) {
-	
-						$aTimeTotals['hours_worked'] += $aTimeEntry['hours_worked'];
-						$aResourceTotals['time_totals']['hours_worked'] += $aTimeEntry['hours_worked'];
-						$aTimeTotals['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
-						$aResourceTotals['time_totals']['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
+
+						if (!empty($aQueueIds)) {
+
+							if (in_array($aTicket['queue_id'], $aQueueIds)) {
+
+								$aTimeTotals['hours_worked'] += $aTimeEntry['hours_worked'];
+								$aResourceTotals['time_totals']['hours_worked'] += $aTimeEntry['hours_worked'];
+								$aTimeTotals['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
+								$aResourceTotals['time_totals']['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
+
+							}
+
+						} else {
+
+							$aTimeTotals['hours_worked'] += $aTimeEntry['hours_worked'];
+							$aResourceTotals['time_totals']['hours_worked'] += $aTimeEntry['hours_worked'];
+							$aTimeTotals['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
+							$aResourceTotals['time_totals']['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
+
+						}
 	
 					}
 					
