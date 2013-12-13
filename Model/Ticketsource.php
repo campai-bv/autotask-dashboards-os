@@ -29,11 +29,11 @@
 					)
 			));
 
-			$count = count($aSourceList);
+			$iAmountOfSources = count($aSourceList);
 
 			$newArray = array();
-			
-			for ($x=0;$x<$count;$x++) {
+
+			for ($x=0;$x<$iAmountOfSources;$x++) {
 
 				$aHistory = $this->Ticketsourcecount->find('all', array(
 					'conditions' => array(
@@ -54,16 +54,20 @@
 
 			$aList = array();
 
-			for ($x=0;$x<$count;$x++){
+			if (!empty($newArray[0])) {
 
-				for ($y=0;$y<count($newArray[0]);$y++){
+				for ($x=0;$x<$iAmountOfSources;$x++){
 
-					$aList['dates'][$y] = $newArray[$x][$y]['Ticketsourcecount']['created'];
-					if ($y==0){
-						$aList[$x][$y] = $newArray[$x][$y]['Ticketsource']['name'];
+					for ($y=0;$y<count($newArray[0]);$y++){
+
+						$aList['dates'][$y] = $newArray[$x][$y]['Ticketsourcecount']['created'];
+						if ($y==0){
+							$aList[$x][$y] = $newArray[$x][$y]['Ticketsource']['name'];
+						}
+
+						$aList[$x][$y+1] = $newArray[$x][$y]['Ticketsourcecount']['count'];
+
 					}
-
-					$aList[$x][$y+1] = $newArray[$x][$y]['Ticketsourcecount']['count'];
 
 				}
 
