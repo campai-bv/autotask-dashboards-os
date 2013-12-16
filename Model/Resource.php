@@ -166,8 +166,14 @@
 
 								$aTimeTotals['hours_worked'] += $aTimeEntry['hours_worked'];
 								$aResourceTotals['time_totals']['hours_worked'] += $aTimeEntry['hours_worked'];
-								$aTimeTotals['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
-								$aResourceTotals['time_totals']['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
+
+								if (0 == $aTimeEntry['non_billable']) {
+
+									// Don't use hours_to_bill - Autotask calculates totals in a weird way :S
+									$aTimeTotals['hours_to_bill'] += $aTimeEntry['hours_worked'];
+									$aResourceTotals['time_totals']['hours_to_bill'] += $aTimeEntry['hours_worked'];
+
+								}
 
 							}
 
@@ -175,8 +181,14 @@
 
 							$aTimeTotals['hours_worked'] += $aTimeEntry['hours_worked'];
 							$aResourceTotals['time_totals']['hours_worked'] += $aTimeEntry['hours_worked'];
-							$aTimeTotals['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
-							$aResourceTotals['time_totals']['hours_to_bill'] += $aTimeEntry['hours_to_bill'];
+
+							if (0 == $aTimeEntry['non_billable']) {
+
+								// Don't use hours_to_bill - Autotask calculates totals in a weird way :S
+								$aTimeTotals['hours_to_bill'] += $aTimeEntry['hours_worked'];
+								$aResourceTotals['time_totals']['hours_to_bill'] += $aTimeEntry['hours_worked'];
+
+							}
 
 						}
 	
