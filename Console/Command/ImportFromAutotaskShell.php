@@ -36,6 +36,25 @@
 		);
 
 
+		public function getOptionParser() {
+
+			$parser = parent::getOptionParser();
+
+			$parser->addOption('data_to_check', array(
+					'short' => 'd'
+				,	'help' => 'Only run logic concerning data of a certain type, like time entries. Useful for resolving problems in a specific part of the cronjob. Will recalculate the appropriate totals only.'
+				,	'choices' => array(
+							'open_tickets'
+						,	'completed_tickets'
+						,	'time_entries'
+					)
+			));
+
+			return $parser;
+
+		}
+
+
 		public function log($sMessage, $iLevel = 0) {
 
 			if (!$this->iLogLevel = Configure::read('Import.logLevel')) {
@@ -80,24 +99,69 @@
 				$this->__syncPicklistsWithDatabase();
 
 				// Delete any existing records so we have a clean start.
-				$this->log( '> Truncating tickets table..', 1);
-				$this->Ticket->query('TRUNCATE TABLE tickets;');
-				$this->log('..done.', 1);
+				if (!empty($this->params['data_to_check'])) {
+
+					switch ($this->params['data_to_check']) {
+
+						case 'completed_tickets':
+
+							$this->log( '> Deleting completed tickets from database..', 1);
+							$this->Ticket->query('DELETE from tickets WHERE ticketstatus_id = 5;');
+							$this->log('..done.', 1);
+
+						break;
+
+
+						case 'open_tickets':
+
+							$this->log( '> Deleting open tickets from database..', 1);
+							$this->Ticket->query('DELETE from tickets WHERE ticketstatus_id != 5;');
+							$this->log('..done.', 1);
+
+						break;
+
+						default:
+						break;
+
+					}
+
+				} else {
+
+					$this->log( '> Truncating tickets table..', 1);
+					$this->Ticket->query('TRUNCATE TABLE tickets;');
+					$this->log('..done.', 1);
+
+				}
 				// End
 
 				// Import completed tickets
-				$this->log('> Importing completed tickets into the database..', 1);
+				if ($this->dataIsNeededFor('completed_tickets')) {
 
-				$oTickets = $this->GetTicketsCompleted->execute();
+					$this->log('> Importing completed tickets into the database..', 1);
 
-				if( empty( $oTickets ) ) {
-					$this->log('..done - nothing saved, query returned no tickets.', 1);
-				} else {
+					$oTickets = $this->GetTicketsCompleted->execute();
 
-					if( !$this->__saveTicketsToDatabase( $oTickets ) ) {
-						$bErrorsEncountered = true;
+					if (empty($oTickets)) {
+						$this->log('..done - nothing saved, query returned no tickets.', 1);
+
+						if ($this->dataIsNeededFor('completed_tickets')) {
+							$this->out('No completed tickets found with Completed Date = ' . date('Y-m-d', strtotime('-1 days')) . ' or ' . date( 'Y-m-d' ) . '.', 1, Shell::QUIET);
+						}
+
 					} else {
-						$this->log('..done - imported ' . count( $oTickets ) . ' ticket(s).' , 1);
+
+						if (!$this->__saveTicketsToDatabase($oTickets)) {
+							$bErrorsEncountered = true;
+						} else {
+
+							if ($this->dataIsNeededFor('completed_tickets')) {
+								$this->out(count($oTickets) . ' completed tickets found with Completed Date equal to ' . date('Y-m-d', strtotime('-1 days')) . ' or ' . date( 'Y-m-d' ) . '.', 1, Shell::QUIET);
+							}
+
+							$this->log('..done - imported ' . count( $oTickets ) . ' ticket(s).' , 1);
+
+						}
+
 					}
 
 				}
@@ -106,28 +170,55 @@
 				if( !$bErrorsEncountered ) {
 
 					// Import the tickets that have any other status then 'completed'.
-					$this->log('> Importing open tickets into the database..', 1);
+					if ($this->dataIsNeededFor('open_tickets')) {
 
-					$oTickets = $this->GetTicketsOpen->execute();
+						$this->log('> Importing open tickets into the database..', 1);
 
-					if( empty( $oTickets ) ) {
+						$oTickets = $this->GetTicketsOpen->execute();
 
-						$this->log('..done - nothing saved, query returned no tickets.', 1);
+						if (empty($oTickets)) {
 
-					} else {
+							if ($this->dataIsNeededFor('open_tickets')) {
 
-						if( !$this->__saveTicketsToDatabase( $oTickets ) ) {
-							$bErrorsEncountered = true;
+								if (!$iAmountOfDays = Configure::read('Import.OpenTickets.history')) {
+									$iAmountOfDays = 365;
+								}
+
+								$this->out('No open tickets found with Create Date between ' . date('Y-m-d', strtotime('-' . $iAmountOfDays . ' days')) . ' and ' . date('Y-m-d') . '.', 1, Shell::QUIET);
+							}
+
+							$this->log('..done - nothing saved, query returned no tickets.', 1);
+
 						} else {
-							$this->log('..done - imported ' . count( $oTickets ) . ' ticket(s).' , 1);
+
+							if (!$this->__saveTicketsToDatabase($oTickets)) {
+								$bErrorsEncountered = true;
+							} else {
+
+								if ($this->dataIsNeededFor('open_tickets')) {
+
+									if (!$iAmountOfDays = Configure::read('Import.OpenTickets.history')) {
+										$iAmountOfDays = 365;
+									}
+
+									$this->out(count($oTickets) . ' open tickets found with Create Date between ' . date('Y-m-d', strtotime('-' . $iAmountOfDays . ' days')) . ' and ' . date('Y-m-d') . '.', 1, Shell::QUIET);
+								}
+
+								$this->log('..done - imported ' . count($oTickets) . ' ticket(s).' , 1);
+							}
+
 						}
 
 					}
 
-					if( !$bErrorsEncountered ) {
+				}
 
-						// Processing of the tickets data into totals for kill rates, queue healths etc.
-						$this->log('> Processing the tickets data into totals for all dashboards..', 1);
+				if (!$bErrorsEncountered) {
+
+					// Processing of the tickets data into totals for kill rates, queue healths etc.
+					$this->log('> Processing the tickets data into totals for all dashboards..', 1);
+
+						if ($this->dataIsNeededFor(array('completed_tickets', 'open_tickets'))) {
 
 							$this->CalculateTotalsByTicketStatus->execute();
 							$this->CalculateTotalsByTicketSource->execute();
@@ -135,27 +226,31 @@
 							$this->CalculateTotalsForKillRate->execute();
 							$this->CalculateTotalsForQueueHealth->execute();
 
-							if( !$this->CalculateTotalsForTimeEntries->execute() ) {
+						}
+
+						if ($this->dataIsNeededFor('time_entries')) {
+
+							if (!$this->CalculateTotalsForTimeEntries->execute()) {
 								$bErrorsEncountered = true;
 							}
 
+						}
+
+					$this->log('..done.', 1);
+
+					$this->log('> Clearing cache for all dashboards..', 1);
+					if(
+						clearCache() // Clear the view cache
+						&&
+						Cache::clear( null, '1_hour' ) // Clear the model cache
+					) {
+
 						$this->log('..done.', 1);
 
-						$this->log('> Clearing cache for all dashboards..', 1);
-						if(
-							clearCache() // Clear the view cache
-							&&
-							Cache::clear( null, '1_hour' ) // Clear the model cache
-						) {
+					} else {
 
-							$this->log('..done.', 1);
-
-						} else {
-
-							$bErrorsEncountered = true;
-							$this->log('..could not delete view cache!', 1);
-
-						}
+						$bErrorsEncountered = true;
+						$this->log('..could not delete view cache!', 1);
 
 					}
 
@@ -622,6 +717,43 @@
 
 			}
 			// End
+
+		}
+
+
+		/**
+		 * Decide whether or not to run logic for specific data.
+		 * 
+		 * You can limit execution of the cronjob to certain data. For example,
+		 * all tasks related to time entries. This function allows you to check
+		 * if pieces of code should be executed in the current run.
+		 * 
+		 * @param  mixed $mDataToCheck - String or array containing the name(s) of the type of data that needs to be checked.
+		 * @return boolean
+		 */
+		public function dataIsNeededFor($mDataToCheck = NULL) {
+
+			// No specific data has been requested.
+			if (empty($this->params['data_to_check'])) {
+				return true;
+			}
+
+			// Only code concering specific data needs to run.
+			if (is_array($mDataToCheck)) {
+
+				if (in_array($this->params['data_to_check'], $mDataToCheck)) {
+					return true;
+				}
+
+			} else {
+
+				if (!empty($this->params['data_to_check']) && $mDataToCheck == $this->params['data_to_check']) {
+					return true;
+				}
+
+			}
+
+			return false;
 
 		}
 
