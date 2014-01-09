@@ -15,6 +15,10 @@
 		
 		public function getTotals(Array $aQueueIds) {
 
+			$aList = array(
+					'dates' => array()
+			);
+
 			$iDaysToGoBack = Configure::read('Widget.RollingWeek.daysOfHistory')-1;
 			if (-1 == $iDaysToGoBack) {
 				$iDaysToGoBack = 6;
@@ -29,43 +33,47 @@
 					)
 			));
 
-			$iAmountOfSources = count($aSourceList);
+			if (!empty($aSourceList)) {
 
-			$newArray = array();
+				foreach ($aSourceList as $aSource) {
 
-			for ($x=0;$x<$iAmountOfSources;$x++) {
+					$aHistory = $this->Ticketsourcecount->find('all', array(
+							'conditions' => array(
+									'ticketsource_id' => $aSource['Ticketsource']['id']
+								,	'created >=' => date('Y-m-d', strtotime("-" . $iDaysToGoBack . " days"))
+								,	'queue_id' => $aQueueIds
+							)
+						,	'order' => array(
+									'created ASC'
+							)
+					));
 
-				$aHistory = $this->Ticketsourcecount->find('all', array(
-					'conditions' => array(
-							'ticketsource_id' => $aSourceList[$x]['Ticketsource']['id']
-						,	'created >=' => date('Y-m-d', strtotime("-" . $iDaysToGoBack . " days"))
-						,	'queue_id' => $aQueueIds
-					)
-				,	'order' => array(
-							'created ASC'
-					)
-				));
+					if (!empty($aHistory)) {
 
-				if (!empty($aHistory)) {
-					array_unshift($newArray,$aHistory);
-				}
+						foreach ($aHistory as $aHistoryRecord) {
 
-			}
+							// Add the date to the list of available dates.
+							// You should only have to do this for the first source - all other sources have the same dates (I know, assumption..)
+							$sRecordDate = $aHistoryRecord['Ticketsourcecount']['created'];
 
-			$aList = array();
+							if (!in_array($sRecordDate, $aList['dates'])) {
+								$aList['dates'][] = $sRecordDate;
+							}
+							// End
 
-			if (!empty($newArray[0])) {
+							// Add the # of tickets for the source to the list.
+							$sSourceName = $aHistoryRecord['Ticketsource']['name'];
 
-				for ($x=0;$x<$iAmountOfSources;$x++){
+							if (!isset($aList[$sSourceName][$sRecordDate])) {
 
-					for ($y=0;$y<count($newArray[0]);$y++){
+								$aList[$sSourceName][$sRecordDate] = 0;
 
-						$aList['dates'][$y] = $newArray[$x][$y]['Ticketsourcecount']['created'];
-						if ($y==0){
-							$aList[$x][$y] = $newArray[$x][$y]['Ticketsource']['name'];
+							}
+
+							$aList[$sSourceName][$sRecordDate] += $aHistoryRecord['Ticketsourcecount']['count'];
+							// End
+
 						}
-
-						$aList[$x][$y+1] = $newArray[$x][$y]['Ticketsourcecount']['count'];
 
 					}
 
@@ -73,7 +81,6 @@
 
 			}
 
-			// End
 			return $aList;
 
 		}

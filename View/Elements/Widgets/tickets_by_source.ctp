@@ -34,8 +34,8 @@ Highcharts.setOptions(Highcharts.ticketSource);
             xAxis: {
                 categories: [
 					<?php
-						foreach ( $aData['dates'] as $aCount ) {
-							$ymd = DateTime::createFromFormat('Y-m-d', $aCount)->format('j M');
+						foreach ($aData['dates'] as $sDate) {
+							$ymd = DateTime::createFromFormat('Y-m-d', $sDate)->format('j M');
 							echo "'" . $ymd  . "',";
 						}
 					?>
@@ -84,13 +84,19 @@ Highcharts.setOptions(Highcharts.ticketSource);
             
 			series: [
 				<?php
-					for($x=0;$x<count($aData)-1;$x++){
-						echo "{name: '" . $aData[$x][0] . "',";
-						echo "data: [";
-						for($y=1;$y<count($aData[0]);$y++){
-							echo $aData[$x][$y] . ", ";
+					foreach ($aData as $sSourceName => $aRecords) {
+
+						if ('dates' != $sSourceName) {
+
+							echo "{name: '" . $sSourceName . "',";
+							echo "data: [";
+								foreach ($aRecords as $iSourceCount){
+									echo $iSourceCount . ", ";
+								}
+							echo "]},";
+
 						}
-						echo "]},";
+
 					}
 				?>
             ]
