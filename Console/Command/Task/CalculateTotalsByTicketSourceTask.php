@@ -29,13 +29,13 @@
 			$this->Ticketsource->recursive = -1;
 			$aSources = $this->Ticketsource->find('list');
 
-			// To enable filtering on queues, we fetch the open tickets per queue.
-			$aQueueIds = $this->Queue->find('list');
-
 			// Then import the new ones.
 			if (empty($aSources)) {
 				$this->log('..done - no ticket sources available.', 2);
 			} else {
+
+				// To enable filtering on queues, we fetch the open tickets per queue.
+				$aQueueIds = $this->Queue->find('list');
 
 				foreach ($aSources as $iSourceId => $sName) {
 
@@ -44,10 +44,19 @@
 						$iNumberOfTicketsForSource = $this->Ticket->find('count', array(
 								'conditions' => array(
 										'Ticket.ticketsource_id' => $iSourceId
-									,	'datediff(Ticket.created, now())' => 0
 									,	'Ticket.queue_id' => $iQueueId
+									,	'Ticket.created >=' => date('Y-m-d') . ' 00:00:00'
+									,	'Ticket.created <=' => date('Y-m-d') . ' 23:59:59'
 								)
 						));
+
+						if ($this->outputIsNeededFor('ticket_sources')) {
+
+							if (0 != $iNumberOfTicketsForSource) {
+								$this->out($iNumberOfTicketsForSource . ' tickets found in queue ' . $iQueueId . ' for source ' . $iSourceId, 1, Shell::QUIET);
+							}
+
+						}
 
 						$aExistingCount = $this->Ticketsourcecount->find('first', array(
 								'conditions' => array(
@@ -56,9 +65,9 @@
 									,	'Ticketsourcecount.queue_id' => $iQueueId
 								)
 						));
-		
+
 						if (!empty($aExistingCount)) {
-		
+
 							if ($this->Ticketsourcecount->save(array(
 									'id' => $aExistingCount['Ticketsourcecount']['id']
 								,	'ticketsource_id' => $iSourceId

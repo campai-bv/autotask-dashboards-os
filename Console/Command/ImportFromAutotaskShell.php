@@ -47,6 +47,7 @@
 							'open_tickets'
 						,	'completed_tickets'
 						,	'time_entries'
+						,	'ticket_sources'
 					)
 			));
 
@@ -144,7 +145,7 @@
 					if (empty($oTickets)) {
 						$this->log('..done - nothing saved, query returned no tickets.', 1);
 
-						if ($this->dataIsNeededFor('completed_tickets')) {
+						if ($this->outputIsNeededFor('completed_tickets')) {
 							$this->out('No completed tickets found with Completed Date = ' . date('Y-m-d', strtotime('-1 days')) . ' or ' . date( 'Y-m-d' ) . '.', 1, Shell::QUIET);
 						}
 
@@ -154,7 +155,7 @@
 							$bErrorsEncountered = true;
 						} else {
 
-							if ($this->dataIsNeededFor('completed_tickets')) {
+							if ($this->outputIsNeededFor('completed_tickets')) {
 								$this->out(count($oTickets) . ' completed tickets found with Completed Date equal to ' . date('Y-m-d', strtotime('-1 days')) . ' or ' . date( 'Y-m-d' ) . '.', 1, Shell::QUIET);
 							}
 
@@ -178,7 +179,7 @@
 
 						if (empty($oTickets)) {
 
-							if ($this->dataIsNeededFor('open_tickets')) {
+							if ($this->outputIsNeededFor('open_tickets')) {
 
 								if (!$iAmountOfDays = Configure::read('Import.OpenTickets.history')) {
 									$iAmountOfDays = 365;
@@ -195,7 +196,7 @@
 								$bErrorsEncountered = true;
 							} else {
 
-								if ($this->dataIsNeededFor('open_tickets')) {
+								if ($this->outputIsNeededFor('open_tickets')) {
 
 									if (!$iAmountOfDays = Configure::read('Import.OpenTickets.history')) {
 										$iAmountOfDays = 365;
@@ -221,11 +222,15 @@
 						if ($this->dataIsNeededFor(array('completed_tickets', 'open_tickets'))) {
 
 							$this->CalculateTotalsByTicketStatus->execute();
-							$this->CalculateTotalsByTicketSource->execute();
 							$this->CalculateTotalsOpenTickets->execute();
 							$this->CalculateTotalsForKillRate->execute();
 							$this->CalculateTotalsForQueueHealth->execute();
+							$this->CalculateTotalsByTicketSource->execute();
 
+						}
+
+						if ($this->dataIsNeededFor('ticket_sources')) {
+							$this->CalculateTotalsByTicketSource->execute();
 						}
 
 						if ($this->dataIsNeededFor('time_entries')) {
@@ -749,6 +754,42 @@
 
 				if (!empty($this->params['data_to_check']) && $mDataToCheck == $this->params['data_to_check']) {
 					return true;
+				}
+
+			}
+
+			return false;
+
+		}
+
+
+		/**
+		 * Decide whether or not to log specific data.
+		 * 
+		 * You can limit execution of the cronjob to certain data. For example,
+		 * all tasks related to time entries. This function allows you to check
+		 * if pieces of code should be logged in the current run.
+		 * 
+		 * @param  mixed $mDataToCheck - String or array containing the name(s) of the type of data that needs to be checked.
+		 * @return boolean
+		 */
+		public function outputIsNeededFor($mDataToCheck = NULL) {
+
+			// Only code concering specific data needs to be logged.
+			if (!empty($this->params['data_to_check'])) {
+
+				if (is_array($mDataToCheck)) {
+
+					if (in_array($this->params['data_to_check'], $mDataToCheck)) {
+						return true;
+					}
+
+				} else {
+
+					if (!empty($this->params['data_to_check']) && $mDataToCheck == $this->params['data_to_check']) {
+						return true;
+					}
+
 				}
 
 			}
