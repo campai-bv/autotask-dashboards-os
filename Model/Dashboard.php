@@ -436,6 +436,10 @@
 
 						switch ( $aWidget['type'] ) {
 
+							case 'sla_violations':
+								$aWidget['display_name'] = 'SLA Violations';
+							break;
+
 							case 'missing_issue_type':
 								$aWidget['display_name'] = 'Missing Issue Type';
 							break;
