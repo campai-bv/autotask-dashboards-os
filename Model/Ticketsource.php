@@ -59,23 +59,41 @@
 							if (!in_array($sRecordDate, $aList['dates'])) {
 								$aList['dates'][] = $sRecordDate;
 							}
+
+							// All history records are kept in an array of their respective source.
+							$sSourceName = $aHistoryRecord['Ticketsource']['name'];
+
+							if (!isset($aList[$sSourceName])) {
+								$aList[$sSourceName] = array();
+							}
 							// End
 
 							// Add the # of tickets for the source to the list.
-							$sSourceName = $aHistoryRecord['Ticketsource']['name'];
-
 							if (!isset($aList[$sSourceName][$sRecordDate])) {
-
 								$aList[$sSourceName][$sRecordDate] = 0;
-
 							}
 
 							$aList[$sSourceName][$sRecordDate] += $aHistoryRecord['Ticketsourcecount']['count'];
-							// End
 
 						}
 
 					}
+
+					// If we're missing any data (because you've added a new source for example) we fill
+					// it up with 0's.
+					if (count($aList[$sSourceName]) < count($aList['dates'])) {
+
+						foreach ($aList['dates'] as $sDate) {
+
+							if (!isset($aList[$sSourceName][$sDate])) {
+								$aList[$sSourceName][$sDate] = 0;
+							}
+
+						}
+
+					}
+
+					ksort($aList[$sSourceName]);
 
 				}
 
