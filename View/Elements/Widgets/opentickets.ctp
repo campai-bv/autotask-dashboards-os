@@ -1,8 +1,8 @@
 <?php echo '<li id="' . $iDashboardWidgetId . '" data-row="' . $iRow . '" data-col="' . $iCol . '" data-sizex="' . $iDataSizeX . '" data-sizey="' . $iDataSizeY . '">'; ?>
 
-	<div class="status-count">
+	<div class="well status-count">
 
-		<h4><?php echo $sTitle; ?></h4>
+		<h4 class="jeditable" id="display_name"><?php echo $sTitle; ?></h4>
 		<hr class="dark">
 		<hr class="light">
 		<h1><?php
@@ -71,3 +71,37 @@
 	</div>
 
 </li>
+
+<?php if( 'Dashboards' == $this->name && 'reorganize' == $this->action ) { ?>
+
+	<script type="text/javascript">
+
+		$(function() {
+
+			$( 'li#<?php echo $iDashboardWidgetId; ?> .jeditable' ).editable( '/autotask/dashboardwidgets/edit/<?php echo $iDashboardWidgetId; ?>', {
+				indicator : 'Saving..',
+				tooltip   : 'Click to edit'
+			});
+
+			$( 'li#<?php echo $iDashboardWidgetId; ?> .jeditable_setting' ).editable( function( sNewValue, settings ) {
+
+				$.post( '/autotask/dashboardwidgetsettings/edit/<?php echo $iDashboardWidgetId; ?>' , {
+
+						name: $( this ).attr( 'id' )
+					,	value: sNewValue
+
+				} );
+
+				return sNewValue;
+
+			}, { 
+				indicator : 'Saving..',
+				tooltip   : 'Click to edit',
+				onblur : 'submit'
+			});
+
+		});
+
+	</script>
+
+<?php } ?>
