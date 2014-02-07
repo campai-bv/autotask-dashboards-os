@@ -142,7 +142,7 @@
 
 						if( !$bErrorsEncountered ) {
 
-							if ($this->dataIsNeededFor('time_entries')) {
+							if ($this->outputIsNeededFor('time_entries')) {
 								$this->out(count($oResult) . ' time entries found with Worked Date equal to ' . date('Y-m-d') . '.', 1, Shell::QUIET);
 							}
 
@@ -153,7 +153,7 @@
 
 				} else {
 
-					if ($this->dataIsNeededFor('time_entries')) {
+					if ($this->outputIsNeededFor('time_entries')) {
 						$this->out('No time entries found with Worked Date = ' . date('Y-m-d') . '.', 1, Shell::QUIET);
 					}
 
