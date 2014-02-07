@@ -500,19 +500,19 @@
 
 					$sResourceName = '';
 
-					if( !empty( $oResource->FirstName ) ) {
-						$sResourceName .= $oResource->FirstName . ' ';
+					if (!empty($oResource[0]->FirstName)) {
+						$sResourceName .= $oResource[0]->FirstName . ' ';
 					}
 
-					if( !empty( $oResource->FirstName ) ) {
-						$sResourceName .= $oResource->MiddleName . ' ';
+					if (!empty($oResource[0]->MiddleName)) {
+						$sResourceName .= $oResource[0]->MiddleName . ' ';
 					}
 
-					if( !empty( $oResource->FirstName ) ) {
-						$sResourceName .= $oResource->LastName;
+					if (!empty($oResource[0]->LastName)) {
+						$sResourceName .= $oResource[0]->LastName;
 					}
 
-					if( empty( $aQueries['Resource'] ) ) {
+					if (empty($aQueries['Resource'])) {
 						$aQueries['Resource'] = "INSERT INTO resources (`id`, `name` ) VALUES ";
 					} else {
 						$aQueries['Resource'] .= ', ';
@@ -520,12 +520,12 @@
 
 					$aQueries['Resource'] .= '(';
 						$aQueries['Resource'] .= $iResourceId;
-						$aQueries['Resource'] .= ',' . $this->db->value( $sResourceName );
+						$aQueries['Resource'] .= ',' . $this->db->value($sResourceName);
 					$aQueries['Resource'] .= ')';
 
 					$aIds['Resource'][] = $iResourceId;
 
-					$this->log( '- Found new Resource => Inserted into the database ("' . $sResourceName . '").' ,3);
+					$this->log('- Found new Resource => Inserted into the database ("' . $sResourceName . '").' ,3);
 
 				}
 
@@ -651,12 +651,12 @@
 
 					$aQueries['Account'] .= '(';
 						$aQueries['Account'] .= $oTicket->AccountID;
-						$aQueries['Account'] .= ',' . $this->db->value( $oAccount->AccountName );
+						$aQueries['Account'] .= ',' . $this->db->value($oAccount[0]->AccountName);
 					$aQueries['Account'] .= ')';
 
 					$aIds['Account'][] = $oTicket->AccountID;
 
-					$this->log( '- Found new Account => Inserted into the database ("' . $oAccount->AccountName . '").' ,3);
+					$this->log( '- Found new Account => Inserted into the database ("' . $oAccount[0]->AccountName . '").' ,3);
 
 				}
 
