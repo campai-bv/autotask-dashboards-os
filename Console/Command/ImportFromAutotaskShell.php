@@ -116,7 +116,7 @@
 
 					// This function has been left out of the GetTicketsOpenTask to allow
 					// it to use the saveTickets function.
-					$this->importCompletedTickets();
+					$this->importOpenTickets();
 
 					$this->calculateTotals();
 					$this->clearCache();
