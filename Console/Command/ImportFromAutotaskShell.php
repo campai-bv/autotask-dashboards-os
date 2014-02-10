@@ -48,6 +48,7 @@
 						,	'completed_tickets'
 						,	'time_entries'
 						,	'ticket_sources'
+						,	'picklist'
 					)
 			))->addOption('full', array(
 					'short' => 'f'
@@ -101,8 +102,8 @@
 
 				// may as well do these first so there are none missing
 				// sync issue types
-				if ($this->params['full']) {
-					$this->__syncPicklistsWithDatabase();
+				if ($this->dataIsNeededFor('picklist') || $this->params['full']) {
+					$this->syncPicklistsWithDatabase();
 				}
 
 				try {
@@ -131,58 +132,74 @@
 
 		}
 
-		private function __syncPicklistsWithDatabase( ) {
 
-			$aIssueTypes = $this->Ticket->getAutotaskPicklist( 'Ticket', 'IssueType' );
+		private function syncPicklistsWithDatabase() {
+
+			$aIssueTypes = $this->Ticket->getAutotaskPicklist('Ticket', 'IssueType');
 			$aSubissueTypes = $this->Ticket->getAutotaskPicklist('Ticket','SubIssueType');
 			$aQueues = $this->Ticket->getAutotaskPicklist('Ticket','QueueID');
 			$aTicketstatus = $this->Ticket->getAutotaskPicklist('Ticket','Status');
 			$aTicketsource = $this->Ticket->getAutotaskPicklist('Ticket','Source');
 
-			$this->__savePicklistToModel('Issuetype',$aIssueTypes);
-			$this->__savePicklistToModel('Subissuetype',$aSubissueTypes);
-			$this->__savePicklistToModel('Queue',$aQueues);
-			$this->__savePicklistToModel('Ticketstatus',$aTicketstatus);
-			$this->__savePicklistToModel('Ticketsource',$aTicketsource);
+			$this->savePicklistToModel('Issuetype',$aIssueTypes);
+			$this->savePicklistToModel('Subissuetype',$aSubissueTypes);
+			$this->savePicklistToModel('Queue',$aQueues);
+			$this->savePicklistToModel('Ticketstatus',$aTicketstatus);
+			$this->savePicklistToModel('Ticketsource',$aTicketsource);
 
 		}
 
-		private function __savePicklistToModel($sModel,$aPicklist) {
 
-			if( !is_array( $aPicklist ) ) {
+		private function savePicklistToModel($sModel, $aPicklist) {
+
+			if (!is_array($aPicklist)) {
 				return false;
 			}
 
 			$aNewModelRecords = array();
 
-			foreach ( $aPicklist as $iId => $sName ) {
+			foreach ($aPicklist as $iId => $sName) {
 
-				$this->log( '> Checking model: ' . $sModel . ' for name: ' . $sName . '..', 4 );
+				$this->log('> Checking model: ' . $sModel . ' for name: ' . $sName . '..', 4);
 
+				$this->$sModel->recursive = -1;
 				$aModelRecord = $this->$sModel->findByid($iId);
 
 				if (empty($aModelRecord)) {
 
-					$this->log('..Non existing: ' . $sModel . ' model so inserting: "' . $sName . '" with id '. $iId , 4 );
+					$this->log('..Non existing: ' . $sModel . ' model so inserting: "' . $sName . '" with id '. $iId , 4);
 					$aNewModelRecords[] = array($sModel=>array('id'=>$iId,'name'=>$sName));
+
+					if ($this->outputIsNeededFor('picklist')) {
+						$this->out('Inserted new ' . $sModel . ' with name ' . $sName . '.', 1, Shell::QUIET);
+					}
 
 				} else {
 
 					if (empty($aModelRecord[$sModel]['name'])) {
 
-						$this->log( '..Updating ' . $sModel . ' with id ' . $iId . ' which does not have a name. New name: "' . $sName . '"', 4 );
-						$aNewModelRecords[]=array($sModel=>array('id'=>$iId,'name'=>$sName));
+						$this->log('..Updating ' . $sModel . ' with id ' . $iId . ' which does not have a name. New name: "' . $sName . '"', 4);
+						$aNewModelRecords[] = array($sModel => array('id' => $iId, 'name' => $sName));
+
+						if ($this->outputIsNeededFor('picklist')) {
+							$this->out('Updating ' . $sModel . ' with id ' . $iId . ' which does not have a name. New name: "' . $sName . '"', 1, Shell::QUIET);
+						}
 
 					} else {
 						// allow dashboard settings to change name of picklist item.
 						// set back to empty to resync on next cronjob run
-						$this->log( '..' . $sModel . ' "' . $sName . '" exists and has name "' . $aModelRecord[$sModel]['name'] . '"' , 4 );
+						$this->log('..' . $sModel . ' "' . $sName . '" exists and has name "' . $aModelRecord[$sModel]['name'] . '"' , 4);
+
+						if ($this->outputIsNeededFor('picklist')) {
+							$this->out($sModel . ' "' . $sName . '" exists and has name "' . $aModelRecord[$sModel]['name'] . '"', 1, Shell::QUIET);
+						}
 
 					}
 
 				}
+
 			}
-			
+
 			if (!empty($aNewModelRecords)) {
 				// batch write our model changes
 				$this->$sModel->saveAll($aNewModelRecords);
@@ -420,7 +437,7 @@
 
 					$aQueries['Queue'] .= '(';
 						$aQueries['Queue'] .= $iQueueId;
-						$aQueries['Queue'] .= ",'Not yet specified'";
+						$aQueries['Queue'] .= ",''";
 					$aQueries['Queue'] .= ')';
 
 					$aIds['Queue'][] = $iQueueId;
@@ -449,7 +466,7 @@
 
 				$aQueries['Ticketstatus'] .= '(';
 					$aQueries['Ticketstatus'] .= $oTicket->Status;
-					$aQueries['Ticketstatus'] .= ",'Not yet specified'";
+					$aQueries['Ticketstatus'] .= ",''";
 				$aQueries['Ticketstatus'] .= ')';
 
 				$aIds['Ticketstatus'][] = $oTicket->Status;
@@ -478,7 +495,7 @@
 
 					$aQueries['Ticketsource'] .= '(';
 						$aQueries['Ticketsource'] .= $oTicket->Source;
-						$aQueries['Ticketsource'] .= ",'Not yet specified'";
+						$aQueries['Ticketsource'] .= ",''";
 					$aQueries['Ticketsource'] .= ')';
 
 					$aIds['Ticketsource'][] = $oTicket->Source;
