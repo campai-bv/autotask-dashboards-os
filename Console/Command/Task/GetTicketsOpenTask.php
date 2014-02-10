@@ -23,28 +23,32 @@
 			// This prevents recurring tickets from being included, which often leads
 			// to insane amount of tickets.
 			$aDates = array(
-					date( 'Y-m-d' )
+					date('Y-m-d')
 			);
 
-			if( !$iAmountOfDays = Configure::read( 'Import.OpenTickets.history' ) ) {
-				$iAmountOfDays = 365;
-			}
+			if ($this->params['full']) {
 
-			for ( $i=1; $i <= $iAmountOfDays; $i++ ) { 
-				$aDates[] = date( 'Y-m-d', strtotime( '-' . $i . ' days' ) );
+				if (!$iAmountOfDays = Configure::read('Import.OpenTickets.history')) {
+					$iAmountOfDays = 365;
+				}
+
+				for ($i=1; $i <= $iAmountOfDays; $i++) { 
+					$aDates[] = date('Y-m-d', strtotime('-' . $i . ' days'));
+				}
+
 			}
 			// End
 
-			$oResult = $this->Ticket->findInAutotask( 'open', array(
+			$oResult = $this->Ticket->findInAutotask('open', array(
 					'conditions' => array(
 							'Equals' => array(
-								'QueueID' => Hash::extract( $this->Dashboardqueue->find( 'all' ), '{n}.Dashboardqueue.queue_id' )
+								'QueueID' => Hash::extract($this->Dashboardqueue->find('all'), '{n}.Dashboardqueue.queue_id')
 							)
 						,	'IsThisDay' => array(
 								'CreateDate' => $aDates
 							)
 					)
-			) );
+			));
 
 			return $oResult;
 

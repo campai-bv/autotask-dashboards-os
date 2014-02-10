@@ -26,8 +26,9 @@
 			// Now that all the data is in place, calculate totals.
 			$aTicketCounts = array();
 
-			$this->Ticketsource->recursive = -1;
-			$aSources = $this->Ticketsource->find('list');
+			$aSources = $this->Ticketsource->find('list', array(
+					'contain' => array()
+			));
 
 			// Then import the new ones.
 			if (empty($aSources)) {
@@ -35,7 +36,9 @@
 			} else {
 
 				// To enable filtering on queues, we fetch the open tickets per queue.
-				$aQueueIds = $this->Queue->find('list');
+				$aQueueIds = $this->Queue->find('list', array(
+						'contain' => array()
+				));
 
 				foreach ($aSources as $iSourceId => $sName) {
 
@@ -48,6 +51,7 @@
 									,	'Ticket.created >=' => date('Y-m-d') . ' 00:00:00'
 									,	'Ticket.created <=' => date('Y-m-d') . ' 23:59:59'
 								)
+							,	'contain' => array()
 						));
 
 						if ($this->outputIsNeededFor('ticket_sources')) {
@@ -64,6 +68,7 @@
 									,	'Ticketsourcecount.ticketsource_id' => $iSourceId
 									,	'Ticketsourcecount.queue_id' => $iQueueId
 								)
+							,	'contain' => array()
 						));
 
 						if (!empty($aExistingCount)) {
@@ -77,19 +82,21 @@
 								$this->log('- Updated source count for source "' . $iSourceId .'" (counted ' . $iNumberOfTicketsForSource . ')', 4);
 							} else {
 								$this->log('- Could not update source count for source "' . $iSourceId .'" (counted ' . $iNumberOfTicketsForSource . ')', 4);
+								throw new Exception('Could not update source count for source "' . $iSourceId .'" (counted ' . $iNumberOfTicketsForSource . ')');
 							}
-		
+
 						} else {
-		
+
 							$this->Ticketsourcecount->create();
-							if( $this->Ticketsourcecount->save( array(
+							if ($this->Ticketsourcecount->save(array(
 									'ticketsource_id' => $iSourceId
 								,	'queue_id' => $iQueueId
 								,	'count' => $iNumberOfTicketsForSource
-							) ) ) {
+							))) {
 								$this->log('- Created source count for source "' . $iSourceId .'" (counted ' . $iNumberOfTicketsForSource . ')', 4);
 							} else {
 								$this->log('- Could not create source count for source "' . $iSourceId .'" (counted ' . $iNumberOfTicketsForSource . ')', 4);
+								throw new Exception('Could not create source count for source "' . $iSourceId .'" (counted ' . $iNumberOfTicketsForSource . ')');
 							}
 
 						}
@@ -99,6 +106,7 @@
 				}
 
 				$this->log('..done.', 2);
+				return true;
 
 			}
 			// End

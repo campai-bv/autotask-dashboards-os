@@ -28,19 +28,24 @@
 		 */
 		public function execute() {
 
-			$oResult = $this->Ticket->findInAutotask( 'closed', array(
+			$aCompletedDates = array(
+					date('Y-m-d')
+			);
+
+			if ($this->params['full']) {
+				$aCompletedDates[] = date('Y-m-d', strtotime('-1 days'));
+			}
+
+			$oResult = $this->Ticket->findInAutotask('closed', array(
 					'conditions' => array(
 							'IsThisDay' => array(
-								'CompletedDate' => array(
-										date( 'Y-m-d', strtotime( '-1 days' ) )
-									,	date( 'Y-m-d' )
-								)
+								'CompletedDate' => $aCompletedDates
 							)
 						,	'Equals' => array(
-								'QueueID' => Hash::extract( $this->Dashboardqueue->find( 'all' ), '{n}.Dashboardqueue.queue_id' )
+								'QueueID' => Hash::extract($this->Dashboardqueue->find('all'), '{n}.Dashboardqueue.queue_id')
 							)
 					)
-			) );
+			));
 
 			return $oResult;
 

@@ -40,20 +40,20 @@
 		 * 
 		 * @return object
 		 */
-		public function findInAutotask( $sType = 'open', $aQuery = array() ) {
+		public function findInAutotask($sType = 'open', $aQuery = array()) {
 
-			switch ( $sType ) {
+			switch ($sType) {
 
 				case 'open':
-					return $this->_findOpenInAutotask( $aQuery );
+					return $this->_findOpenInAutotask($aQuery);
 				break;
 
 				case 'closed':
-					return $this->_findClosedInAutotask( $aQuery );
+					return $this->_findClosedInAutotask($aQuery);
 				break;
 
 				case 'waitingCustomer':
-					return $this->_findWaitingCustomerInAutotask( $aQuery );
+					return $this->_findWaitingCustomerInAutotask($aQuery);
 				break;
 
 				default:
@@ -64,41 +64,41 @@
 		}
 
 
-		public function getUnassignedTotals( $aQueueIds = array() ) {
+		public function getUnassignedTotals($aQueueIds = array()) {
 
-			if( !empty( $aQueueIds ) ) {
+			if (!empty($aQueueIds)) {
 
-				$aUnassignedTickets = $this->find( 'all', array(
+				$aUnassignedTickets = $this->find('all', array(
 						'conditions' => array(
 								'Ticket.queue_id' => $aQueueIds
 							,	'Ticket.resource_id' => 0
 							,	'Ticket.ticketstatus_id !=' => 5 // Completed
 						)
-				) );
+				));
 
 			} else {
 
-				$aUnassignedTickets = $this->find( 'all', array(
+				$aUnassignedTickets = $this->find('all', array(
 						'conditions' => array(
 								'Ticket.resource_id' => 0
 							,	'Ticket.ticketstatus_id !=' => 5 // Completed
 						)
-				) );
+				));
 
 			}
 
 			$iTotalDaysOpen = 0;
 
-			foreach ( $aUnassignedTickets as $aTicket ) {
+			foreach ($aUnassignedTickets as $aTicket) {
 
-				$start = strtotime( $aTicket['Ticket']['created'] );
-				$end = strtotime( date( 'Y-m-d h:I:s' ) );
-				$iTotalDaysOpen += round( abs( $end - $start ) / 86400,0 );
+				$start = strtotime($aTicket['Ticket']['created']);
+				$end = strtotime(date('Y-m-d h:I:s'));
+				$iTotalDaysOpen += round(abs($end - $start) / 86400,0);
 
 			}
 
-			if( 0 == count( $aUnassignedTickets ) ) {
-				
+			if (0 == count($aUnassignedTickets)) {
+
 				$aUnassignedTotals = array(
 						'name' => 'Unassigned'
 					,	'count' => 0
@@ -109,15 +109,14 @@
 
 				$aUnassignedTotals = array(
 						'name' => 'Unassigned'
-					,	'count' => count( $aUnassignedTickets )
-					,	'average_days_open' => number_format( $iTotalDaysOpen/ count( $aUnassignedTickets ), 0, ',', '.' )
+					,	'count' => count($aUnassignedTickets)
+					,	'average_days_open' => number_format($iTotalDaysOpen/ count($aUnassignedTickets), 0, ',', '.')
 				);
 
 			}
 
-			
 			// End
-			
+
 			return $aUnassignedTotals;
 
 		}

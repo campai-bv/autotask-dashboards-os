@@ -23,64 +23,70 @@
 
 			$this->log('> Calculating kill rate totals for all dashboards..', 2);
 
-			$aDashboards = $this->Dashboard->find( 'all' );
+			$aDashboards = $this->Dashboard->find('all', array(
+					'contain' => array()
+			));
 
-			if( empty( $aDashboards ) ) {
+			if (empty($aDashboards)) {
 				$this->log('..done - no dashboards available.', 2);
 			} else {
 
-				foreach ( $aDashboards as $aDashboard ) {
+				foreach ($aDashboards as $aDashboard) {
 
-					$aQueueIds = $this->Dashboardqueue->find( 'forDashboard', array(
+					$aQueueIds = $this->Dashboardqueue->find('forDashboard', array(
 							'conditions' => array(
 									'Dashboardqueue.dashboard_id' => $aDashboard['Dashboard']['id']
 							)
-					) );
+						,	'contain' => array()
+					));
 
-					$aKillRate = $this->Ticket->getKillRate( $aQueueIds );
+					$aKillRate = $this->Ticket->getKillRate($aQueueIds);
 
-					if( $this->__saveKillRateHistory(
+					if( $this->saveKillRateHistory(
 							$aDashboard['Dashboard']['id']
 						,	$aKillRate['created']
 						,	$aKillRate['completed']
 					) ) {
-						$this->log( '- Saved kill rate history for dashboard "' . $aDashboard['Dashboard']['name'] . '" (' . $aKillRate['created'] . ' new, ' . $aKillRate['completed'] . ' completed)', 4 );
+						$this->log('- Saved kill rate history for dashboard "' . $aDashboard['Dashboard']['name'] . '" (' . $aKillRate['created'] . ' new, ' . $aKillRate['completed'] . ' completed)', 4);
 					} else {
-						$this->log( '- Could not save kill rate history for dashboard "' . $aDashboard['Dashboard']['name'] . '"', 4 );
+						$this->log('- Could not save kill rate history for dashboard "' . $aDashboard['Dashboard']['name'] . '"', 4);
+						throw new Exception('Could not save kill rate history for dashboard "' . $aDashboard['Dashboard']['name'] . '"');
 					}
 
 				}
 
 				$this->log('..done.', 2);
+				return true;
 
 			}
 
 		}
 
 
-		private function __saveKillRateHistory( $iDashboardId, $iTicketsCreatedToday, $iTicketsCompletedToday ) {
+		private function saveKillRateHistory($iDashboardId, $iTicketsCreatedToday, $iTicketsCompletedToday) {
 
 			$aSaveData = array(
-					'created' => date( 'Y-m-d' )
+					'created' => date('Y-m-d')
 				,	'new_count' => $iTicketsCreatedToday
 				,	'completed_count' => $iTicketsCompletedToday
 				,	'dashboard_id' => $iDashboardId
 			);
 
-			$aPossiblyExistingKillrateCount = $this->Killratecount->find( 'first', array(
+			$aPossiblyExistingKillrateCount = $this->Killratecount->find('first', array(
 					'conditions' => array(
-							'created' => date( 'Y-m-d' )
+							'created' => date('Y-m-d')
 						,	'dashboard_id' => $iDashboardId
 					)
-			) );
+				,	'contain' => array()
+			));
 
-			if( !empty( $aPossiblyExistingKillrateCount ) ) {
+			if (!empty($aPossiblyExistingKillrateCount)) {
 				$aSaveData['id'] = $aPossiblyExistingKillrateCount['Killratecount']['id'];
 			} else {
 				$this->Killratecount->create();
 			}
 
-			if( $this->Killratecount->save( $aSaveData ) ) {
+			if ($this->Killratecount->save($aSaveData)) {
 				return true;
 			}
 

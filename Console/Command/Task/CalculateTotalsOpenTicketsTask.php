@@ -23,7 +23,9 @@
 			$this->log('> Calculating total open tickets for all dashboards..', 2);
 
 			// To enable filtering on queues, we fetch the open tickets per queue.
-			$aQueueIds = $this->Queue->find('list');
+			$aQueueIds = $this->Queue->find('list', array(
+					'contain' => array()
+			));
 
 			foreach ($aQueueIds as $iQueueId => $sQueueName) {
 
@@ -32,6 +34,7 @@
 								'Ticket.ticketstatus_id !=' => 5
 							,	'Ticket.queue_id' => $iQueueId
 						)
+					,	'contain' => array()
 				));
 
 				$aExistingCount = $this->Ticketstatuscount->find('first', array(
@@ -40,6 +43,7 @@
 							,	'Ticketstatuscount.ticketstatus_id' => 2
 							,	'Ticketstatuscount.queue_id' => $iQueueId
 						)
+					,	'contain' => array()
 				));
 
 				if (!empty($aExistingCount)) {
@@ -53,6 +57,7 @@
 						$this->log('- Updated total open tickets count (' . $iNumberOfTicketsInQueue . ')', 4);
 					} else {
 						$this->log('- Could not update total open tickets count (' . $iNumberOfTicketsInQueue . ')', 4);
+						throw new Exception('Could not update total open tickets count (' . $iNumberOfTicketsInQueue . ')');
 					}
 
 				} else {
@@ -66,6 +71,7 @@
 						$this->log('- Created total open tickets count (' . $iNumberOfTicketsInQueue . ')', 4);
 					} else {
 						$this->log('- Could not update total open tickets count (' . $iNumberOfTicketsInQueue . ')', 4);
+						throw new Exception('Could not update total open tickets count (' . $iNumberOfTicketsInQueue . ')');
 					}
 
 				}
@@ -73,6 +79,7 @@
 			}
 
 			$this->log('..done.', 2);
+			return true;
 
 		}
 	}

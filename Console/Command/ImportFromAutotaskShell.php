@@ -49,6 +49,10 @@
 						,	'time_entries'
 						,	'ticket_sources'
 					)
+			))->addOption('full', array(
+					'short' => 'f'
+				,	'help' => 'Run the cronjob, taking into account the full history of all items. Careful: might take a long time to run.'
+				,	'boolean' => true
 			));
 
 			return $parser;
@@ -85,10 +89,10 @@
 			$this->log('Starting with the import..', 1);
 
 			// Set the database object so we can clean quotes from user input.
-			$this->db = ConnectionManager::getDataSource( 'default' );
+			$this->db = ConnectionManager::getDataSource('default');
 
 			// First we must make sure we can login. We do this by performing an inexpensive call and see what it returns.
-			if( false === $this->Ticket->connectAutotask() ) {
+			if (false === $this->Ticket->connectAutotask()) {
 				$bErrorsEncountered = true;
 
 			// Appearantly we can login, so let's get into action!
@@ -97,180 +101,33 @@
 
 				// may as well do these first so there are none missing
 				// sync issue types
-				$this->__syncPicklistsWithDatabase();
-
-				// Delete any existing records so we have a clean start.
-				if (!empty($this->params['data_to_check'])) {
-
-					switch ($this->params['data_to_check']) {
-
-						case 'completed_tickets':
-
-							$this->log( '> Deleting completed tickets from database..', 1);
-							$this->Ticket->query('DELETE from tickets WHERE ticketstatus_id = 5;');
-							$this->log('..done.', 1);
-
-						break;
-
-
-						case 'open_tickets':
-
-							$this->log( '> Deleting open tickets from database..', 1);
-							$this->Ticket->query('DELETE from tickets WHERE ticketstatus_id != 5;');
-							$this->log('..done.', 1);
-
-						break;
-
-						default:
-						break;
-
-					}
-
-				} else {
-
-					$this->log( '> Truncating tickets table..', 1);
-					$this->Ticket->query('TRUNCATE TABLE tickets;');
-					$this->log('..done.', 1);
-
-				}
-				// End
-
-				// Import completed tickets
-				if ($this->dataIsNeededFor('completed_tickets')) {
-
-					$this->log('> Importing completed tickets into the database..', 1);
-
-					$oTickets = $this->GetTicketsCompleted->execute();
-
-					if (empty($oTickets)) {
-						$this->log('..done - nothing saved, query returned no tickets.', 1);
-
-						if ($this->outputIsNeededFor('completed_tickets')) {
-							$this->out('No completed tickets found with Completed Date = ' . date('Y-m-d', strtotime('-1 days')) . ' or ' . date( 'Y-m-d' ) . '.', 1, Shell::QUIET);
-						}
-
-					} else {
-
-						if (!$this->__saveTicketsToDatabase($oTickets)) {
-							$bErrorsEncountered = true;
-						} else {
-
-							if ($this->outputIsNeededFor('completed_tickets')) {
-								$this->out(count($oTickets) . ' completed tickets found with Completed Date equal to ' . date('Y-m-d', strtotime('-1 days')) . ' or ' . date( 'Y-m-d' ) . '.', 1, Shell::QUIET);
-							}
-
-							$this->log('..done - imported ' . count( $oTickets ) . ' ticket(s).' , 1);
-
-						}
-
-					}
-
-				}
-				// End
-
-				if( !$bErrorsEncountered ) {
-
-					// Import the tickets that have any other status then 'completed'.
-					if ($this->dataIsNeededFor('open_tickets')) {
-
-						$this->log('> Importing open tickets into the database..', 1);
-
-						$oTickets = $this->GetTicketsOpen->execute();
-
-						if (empty($oTickets)) {
-
-							if ($this->outputIsNeededFor('open_tickets')) {
-
-								if (!$iAmountOfDays = Configure::read('Import.OpenTickets.history')) {
-									$iAmountOfDays = 365;
-								}
-
-								$this->out('No open tickets found with Create Date between ' . date('Y-m-d', strtotime('-' . $iAmountOfDays . ' days')) . ' and ' . date('Y-m-d') . '.', 1, Shell::QUIET);
-							}
-
-							$this->log('..done - nothing saved, query returned no tickets.', 1);
-
-						} else {
-
-							if (!$this->__saveTicketsToDatabase($oTickets)) {
-								$bErrorsEncountered = true;
-							} else {
-
-								if ($this->outputIsNeededFor('open_tickets')) {
-
-									if (!$iAmountOfDays = Configure::read('Import.OpenTickets.history')) {
-										$iAmountOfDays = 365;
-									}
-
-									$this->out(count($oTickets) . ' open tickets found with Create Date between ' . date('Y-m-d', strtotime('-' . $iAmountOfDays . ' days')) . ' and ' . date('Y-m-d') . '.', 1, Shell::QUIET);
-								}
-
-								$this->log('..done - imported ' . count($oTickets) . ' ticket(s).' , 1);
-							}
-
-						}
-
-					}
-
+				if ($this->params['full']) {
+					$this->__syncPicklistsWithDatabase();
 				}
 
-				if (!$bErrorsEncountered) {
+				try {
 
-					// Processing of the tickets data into totals for kill rates, queue healths etc.
-					$this->log('> Processing the tickets data into totals for all dashboards..', 1);
+					$this->purgeDatabase();
 
-						if ($this->dataIsNeededFor(array('completed_tickets', 'open_tickets'))) {
+					// This function has been left out of the GetTicketsCompletedTask to allow
+					// it to use the saveTickets function.
+					$this->importCompletedTickets();
 
-							$this->CalculateTotalsByTicketStatus->execute();
-							$this->CalculateTotalsOpenTickets->execute();
-							$this->CalculateTotalsForKillRate->execute();
-							$this->CalculateTotalsForQueueHealth->execute();
-							$this->CalculateTotalsByTicketSource->execute();
+					// This function has been left out of the GetTicketsOpenTask to allow
+					// it to use the saveTickets function.
+					$this->importCompletedTickets();
 
-						}
+					$this->calculateTotals();
+					$this->clearCache();
 
-						if ($this->dataIsNeededFor('ticket_sources')) {
-							$this->CalculateTotalsByTicketSource->execute();
-						}
-
-						if ($this->dataIsNeededFor('time_entries')) {
-
-							if (!$this->CalculateTotalsForTimeEntries->execute()) {
-								$bErrorsEncountered = true;
-							}
-
-						}
-
-					$this->log('..done.', 1);
-
-					$this->log('> Clearing cache for all dashboards..', 1);
-					if(
-						clearCache() // Clear the view cache
-						&&
-						Cache::clear( null, '1_hour' ) // Clear the model cache
-					) {
-
-						$this->log('..done.', 1);
-
-					} else {
-
-						$bErrorsEncountered = true;
-						$this->log('..could not delete view cache!', 1);
-
-					}
-
+				} catch(Exception $e) {
+					$this->log('Failed: we\'ve encountered some errors while running the import script. Erorr thrown: ' . $e->getMessage(), 1);
 				}
 
 			}
 			// End
 
-			if( $bErrorsEncountered ) {
-				$this->log( 'Failed: we\'ve encountered some errors while running the import script.', 1);
-			} else {
-
-				$this->log( 'Success! Everything imported correctly.', 1);
-
-			}
+			$this->log( 'Success! Everything imported correctly.', 1);
 
 		}
 
@@ -332,12 +189,20 @@
 			}
 
 		}
-		private function __saveTicketsToDatabase( $oTickets ) {
 
-			if( !empty( $oTickets ) ) {
+
+		/**
+		 * @todo rename this function
+		 * @param  [type] $oTickets [description]
+		 * @return [type]           [description]
+		 */
+		private function saveTicketsToDatabase($oTickets) {
+
+			if (!empty($oTickets)) {
 
 				// Gets filled up with queries that should get executed.
 				$aQueries = array();
+
 				// Gets filled up with the id's of all new records, to prevent duplicate ones.
 				$aIds = array(
 						'Ticket' => array()
@@ -350,25 +215,25 @@
 					,	'Ticketsource' => array()
 				);
 
-				if( 1 == count( $oTickets ) ) {
-
-					$this->__rebuildAPIResponseToSaveData( $oTickets, $aQueries, $aIds );
-
-				} else {
-
-					foreach ( $oTickets as $oTicket ) {
-						$this->__rebuildAPIResponseToSaveData( $oTicket, $aQueries, $aIds );
-					}
-
+				foreach ($oTickets as $oTicket) {
+					$this->rebuildAPIResponseToSaveData($oTicket, $aQueries, $aIds);
 				}
 
-				foreach ( $aQueries as $sModel => $sQuery ) {
+				foreach ($aQueries as $sModel => $sQuery) {
 
 					try {
-						$this->{$sModel}->query( $sQuery );
-					} catch ( Exception $e ) {
 
-						$this->log( '- Could not save the new ' . Inflector::pluralize( $sModel ) . '. MySQL says: "' . $e->errorInfo[2] . '"' );
+						if (!empty($aIds[$sModel])) {
+							// Delete only the entries that we're going to insert again.
+							$this->{$sModel}->deleteAll(array($sModel . '.id' => $aIds[$sModel]));
+						}
+
+						// Then save the updated records.
+						$this->{$sModel}->query($sQuery);
+
+					} catch (Exception $e) {
+
+						$this->log('- Could not save the new ' . Inflector::pluralize($sModel) . '. MySQL says: "' . $e->errorInfo[2] . '"');
 						$this->log('- Query executed: "' . $sQuery . '"');
 						return false;
 
@@ -394,7 +259,7 @@
 		 * @param  array $aIds - The (referenced) array with the id's of any new records. Helps you prevent duplicate id's.
 		 * @return -
 		 */
-		private function __rebuildAPIResponseToSaveData( $oTicket, &$aQueries, &$aIds ) {
+		private function rebuildAPIResponseToSaveData($oTicket, &$aQueries, &$aIds) {
 
 			// Defaults
 			$sCompletedDate = '';
@@ -410,51 +275,51 @@
 			// End
 
 			// Reformat the dates to your own timezone.
-			$sCreateDate = $this->TimeConverter->convertToOwnTimezone( $oTicket->CreateDate );
+			$sCreateDate = $this->TimeConverter->convertToOwnTimezone($oTicket->CreateDate);
 
-			if( !empty( $oTicket->CompletedDate ) ) {
-				$sCompletedDate = $this->TimeConverter->convertToOwnTimezone( $oTicket->CompletedDate );
+			if (!empty($oTicket->CompletedDate)) {
+				$sCompletedDate = $this->TimeConverter->convertToOwnTimezone($oTicket->CompletedDate);
 			}
 
-			if( !empty( $oTicket->DueDateTime ) ) {
-				$sDueDateTime = $this->TimeConverter->convertToOwnTimezone( $oTicket->DueDateTime );
+			if (!empty($oTicket->DueDateTime)) {
+				$sDueDateTime = $this->TimeConverter->convertToOwnTimezone($oTicket->DueDateTime);
 			}
 			// End
 
-			if( !empty( $oTicket->AssignedResourceID ) ) {
+			if (!empty($oTicket->AssignedResourceID)) {
 				$iResourceId = $oTicket->AssignedResourceID;
 			}
 
-			if( !empty( $oTicket->AccountID ) ) {
+			if (!empty($oTicket->AccountID)) {
 				$iAccountId = $oTicket->AccountID;
 			}
 
-			if( !empty( $oTicket->IssueType ) ) {
+			if (!empty($oTicket->IssueType)) {
 				$iIssueTypeId = $oTicket->IssueType;
 			}
 
-			if( !empty( $oTicket->SubIssueType ) ) {
+			if (!empty($oTicket->SubIssueType)) {
 				$iSubIssueTypeId = $oTicket->SubIssueType;
 			}
 
-			if( !empty( $oTicket->QueueID ) ) {
+			if (!empty($oTicket->QueueID)) {
 				$iQueueId = $oTicket->QueueID;
 			}
 
-			if( !empty( $oTicket->Source ) ) {
+			if (!empty($oTicket->Source)) {
 				$iSourceId = $oTicket->Source;
 			}
 
-			if( !empty( $oTicket->Priority ) ) {
+			if (!empty($oTicket->Priority)) {
 				$iPriority = $oTicket->Priority;
 			}
 
-			if( isset( $oTicket->ServiceLevelAgreementHasBeenMet ) ) {
+			if (isset($oTicket->ServiceLevelAgreementHasBeenMet)) {
 				$iHasMetSLA = $oTicket->ServiceLevelAgreementHasBeenMet;
 			}
 
 			// All data is present, let's add it to the query
-			if( empty( $aQueries['Ticket'] ) ) {
+			if (empty($aQueries['Ticket'])) {
 				$aQueries['Ticket'] = "INSERT INTO tickets (`id`, `created`, `completed`, `number`, `title`, `ticketstatus_id`, `queue_id`, `resource_id`, `account_id`, `issuetype_id`, `subissuetype_id`, `due`, `priority`, `has_met_sla`, `ticketsource_id` ) VALUES ";
 			} else {
 				$aQueries['Ticket'] .= ', ';
@@ -462,41 +327,44 @@
 
 			$aQueries['Ticket'] .= '(';
 				$aQueries['Ticket'] .= $oTicket->id;
-				$aQueries['Ticket'] .= ',' . $this->db->value( $sCreateDate );
-				$aQueries['Ticket'] .= ',' . $this->db->value( $sCompletedDate );
-				$aQueries['Ticket'] .= ',' . $this->db->value( $oTicket->TicketNumber );
-				$aQueries['Ticket'] .= ',' . $this->db->value( $oTicket->Title );
-				$aQueries['Ticket'] .= ',' . $this->db->value( $oTicket->Status );
-				$aQueries['Ticket'] .= ',' . $this->db->value( $iQueueId );
-				$aQueries['Ticket'] .= ',' . $this->db->value( $iResourceId );
-				$aQueries['Ticket'] .= ',' . $this->db->value( $iAccountId );
-				$aQueries['Ticket'] .= ',' . $this->db->value( $iIssueTypeId );
-				$aQueries['Ticket'] .= ',' . $this->db->value( $iSubIssueTypeId );
-				$aQueries['Ticket'] .= ',' . $this->db->value( $sDueDateTime );
-				$aQueries['Ticket'] .= ',' . $this->db->value( $iPriority );
-				$aQueries['Ticket'] .= ',' . $this->db->value( $iHasMetSLA );
-				$aQueries['Ticket'] .= ',' . $this->db->value( $iSourceId );
+				$aQueries['Ticket'] .= ',' . $this->db->value($sCreateDate);
+				$aQueries['Ticket'] .= ',' . $this->db->value($sCompletedDate);
+				$aQueries['Ticket'] .= ',' . $this->db->value($oTicket->TicketNumber);
+				$aQueries['Ticket'] .= ',' . $this->db->value($oTicket->Title);
+				$aQueries['Ticket'] .= ',' . $this->db->value($oTicket->Status);
+				$aQueries['Ticket'] .= ',' . $this->db->value($iQueueId);
+				$aQueries['Ticket'] .= ',' . $this->db->value($iResourceId);
+				$aQueries['Ticket'] .= ',' . $this->db->value($iAccountId);
+				$aQueries['Ticket'] .= ',' . $this->db->value($iIssueTypeId);
+				$aQueries['Ticket'] .= ',' . $this->db->value($iSubIssueTypeId);
+				$aQueries['Ticket'] .= ',' . $this->db->value($sDueDateTime);
+				$aQueries['Ticket'] .= ',' . $this->db->value($iPriority);
+				$aQueries['Ticket'] .= ',' . $this->db->value($iHasMetSLA);
+				$aQueries['Ticket'] .= ',' . $this->db->value($iSourceId);
 			$aQueries['Ticket'] .= ')';
 			// End
 
-			// Save the resource (if new)
-			if( !empty( $oTicket->AssignedResourceID ) ) {
+			// Add the Ticket ID to the ID array.
+			$aIds['Ticket'][] = $oTicket->id;
 
-				$aResource = $this->Resource->read( null, $iResourceId );
+			// Save the resource (if new)
+			if (!empty($oTicket->AssignedResourceID)) {
+
+				$aResource = $this->Resource->read(null, $iResourceId);
 
 				if(
-					empty( $aResource )
+					empty($aResource)
 					&&
-					!in_array( $oTicket->AssignedResourceID, $aIds['Resource'] )
+					!in_array($oTicket->AssignedResourceID, $aIds['Resource'])
 				) {
 
-					$oResource = $this->Resource->findInAutotask( 'all', array(
+					$oResource = $this->Resource->findInAutotask('all', array(
 							'conditions' => array(
 									'Equals' => array(
 											'id' => $oTicket->AssignedResourceID
 									)
 							)
-					) );
+					));
 
 					$sResourceName = '';
 
@@ -534,17 +402,17 @@
 
 
 			// Save the queue (if new)
-			if( 0 != $iQueueId ) {
+			if (0 != $iQueueId) {
 
-				$aQueue = $this->Queue->read( null, $iQueueId );
+				$aQueue = $this->Queue->read(null, $iQueueId);
 
 				if(
-					empty( $aQueue )
+					empty($aQueue)
 					&&
-					!in_array( $iQueueId, $aIds['Queue'] )
+					!in_array($iQueueId, $aIds['Queue'])
 				) {
 
-					if( empty( $aQueries['Queue'] ) ) {
+					if (empty($aQueries['Queue'])) {
 						$aQueries['Queue'] = "INSERT INTO queues (`id`, `name` ) VALUES ";
 					} else {
 						$aQueries['Queue'] .= ', ';
@@ -557,7 +425,7 @@
 
 					$aIds['Queue'][] = $iQueueId;
 
-					$this->log( '- Found new Queue => Inserted into the database (id ' . $iQueueId . ').' ,3);
+					$this->log('- Found new Queue => Inserted into the database (id ' . $iQueueId . ').' ,3);
 
 				}
 
@@ -568,12 +436,12 @@
 			$aTicketstatus = $this->Ticketstatus->read( null, $oTicket->Status );
 
 			if(
-				empty( $aTicketstatus )
+				empty($aTicketstatus)
 				&&
-				!in_array( $oTicket->Status, $aIds['Ticketstatus'] )
+				!in_array($oTicket->Status, $aIds['Ticketstatus'])
 			) {
 
-				if( empty( $aQueries['Ticketstatus'] ) ) {
+				if (empty($aQueries['Ticketstatus'])) {
 					$aQueries['Ticketstatus'] = "INSERT INTO ticketstatuses (`id`, `name` ) VALUES ";
 				} else {
 					$aQueries['Ticketstatus'] .= ', ';
@@ -586,23 +454,23 @@
 
 				$aIds['Ticketstatus'][] = $oTicket->Status;
 
-				$this->log( '- Found new Ticket Status => Inserted into the database (id ' . $oTicket->Status . ').' ,3);
+				$this->log('- Found new Ticket Status => Inserted into the database (id ' . $oTicket->Status . ').' ,3);
 
 			}
 			// End
 			
 			// Save the ticketsource (if new)
-			if( isset( $oTicket->Source ) ) {
+			if (isset($oTicket->Source)) {
 
-				$aTicketsource = $this->Ticketsource->read( null, $oTicket->Source );
+				$aTicketsource = $this->Ticketsource->read(null, $oTicket->Source);
 
 				if(
-					empty( $aTicketsource )
+					empty($aTicketsource)
 					&&
-					!in_array( $oTicket->Source, $aIds['Ticketsource'] )
+					!in_array($oTicket->Source, $aIds['Ticketsource'])
 				) {
 
-					if( empty( $aQueries['Ticketsource'] ) ) {
+					if (empty($aQueries['Ticketsource'])) {
 						$aQueries['Ticketsource'] = "INSERT INTO ticketsources (id, name ) VALUES ";
 					} else {
 						$aQueries['Ticketsource'] .= ', ';
@@ -615,35 +483,35 @@
 
 					$aIds['Ticketsource'][] = $oTicket->Source;
 
-					if( 3 < $this->iLogLevel ) {
-						$this->log( '- Found new Ticket Source => Inserted into the database (id ' . $oTicket->Source . ').', 'cronjob' );
+					if (3 < $this->iLogLevel) {
+						$this->log('- Found new Ticket Source => Inserted into the database (id ' . $oTicket->Source . ').', 'cronjob');
 					}
 
 				}
 
 			}
 			// End
-			
-			// Save the account (if new)
-			if( !empty( $oTicket->AccountID ) ) {
 
-				$aAccount = $this->Account->read( null, $oTicket->AccountID );
+			// Save the account (if new)
+			if (!empty($oTicket->AccountID)) {
+
+				$aAccount = $this->Account->read(null, $oTicket->AccountID);
 
 				if(
-					empty( $aAccount )
+					empty($aAccount)
 					&&
-					!in_array( $oTicket->AccountID, $aIds['Account'] )
+					!in_array($oTicket->AccountID, $aIds['Account'])
 				) {
 
-					$oAccount = $this->Account->findInAutotask( 'all', array(
+					$oAccount = $this->Account->findInAutotask('all', array(
 							'conditions' => array(
 									'Equals' => array(
 											'id' => $oTicket->AccountID
 									)
 							)
-					) );
+					));
 
-					if( empty( $aQueries['Account'] ) ) {
+					if (empty($aQueries['Account'])) {
 						$aQueries['Account'] = "INSERT INTO accounts (`id`, `name` ) VALUES ";
 					} else {
 						$aQueries['Account'] .= ', ';
@@ -656,7 +524,7 @@
 
 					$aIds['Account'][] = $oTicket->AccountID;
 
-					$this->log( '- Found new Account => Inserted into the database ("' . $oAccount[0]->AccountName . '").' ,3);
+					$this->log('- Found new Account => Inserted into the database ("' . $oAccount[0]->AccountName . '").' , 3);
 
 				}
 
@@ -664,17 +532,17 @@
 			// End
 
 			// Save the issuetype (if new)
-			if( !empty( $oTicket->IssueType ) ) {
+			if (!empty($oTicket->IssueType)) {
 
-				$aIssueType = $this->Issuetype->read( null, $oTicket->IssueType );
+				$aIssueType = $this->Issuetype->read(null, $oTicket->IssueType);
 
 				if(
-					empty( $aIssueType )
+					empty($aIssueType)
 					&&
-					!in_array( $oTicket->IssueType, $aIds['Issuetype'] )
+					!in_array($oTicket->IssueType, $aIds['Issuetype'])
 				) {
 
-					if( empty( $aQueries['Issuetype'] ) ) {
+					if (empty($aQueries['Issuetype'])) {
 						$aQueries['Issuetype'] = "INSERT INTO issuetypes (`id`) VALUES ";
 					} else {
 						$aQueries['Issuetype'] .= ', ';
@@ -686,7 +554,7 @@
 
 					$aIds['Issuetype'][] = $oTicket->IssueType;
 
-						$this->log(  '- Found new Issue Type => Inserted into the database (id ' . $oTicket->IssueType . ').',3 );
+						$this->log('- Found new Issue Type => Inserted into the database (id ' . $oTicket->IssueType . ').', 3);
 
 				}
 
@@ -694,17 +562,17 @@
 			// End
 
 			// Save the subissuetype (if new)
-			if( !empty( $oTicket->SubIssueType ) ) {
+			if (!empty($oTicket->SubIssueType)) {
 
-				$aSubIssueType = $this->Subissuetype->read( null, $oTicket->SubIssueType );
+				$aSubIssueType = $this->Subissuetype->read(null, $oTicket->SubIssueType);
 
 				if(
-					empty( $aSubIssueType )
+					empty($aSubIssueType)
 					&&
-					!in_array( $oTicket->SubIssueType, $aIds['Subissuetype'] )
+					!in_array($oTicket->SubIssueType, $aIds['Subissuetype'])
 				) {
 
-					if( empty( $aQueries['Subissuetype'] ) ) {
+					if (empty($aQueries['Subissuetype'])) {
 						$aQueries['Subissuetype'] = "INSERT INTO subissuetypes (`id`) VALUES ";
 					} else {
 						$aQueries['Subissuetype'] .= ', ';
@@ -716,7 +584,7 @@
 
 					$aIds['Subissuetype'][] = $oTicket->SubIssueType;
 
-					$this->log( '- Found new Sub Issue Type => Inserted into the database (id ' . $oTicket->SubIssueType . ').' ,3);
+					$this->log('- Found new Sub Issue Type => Inserted into the database (id ' . $oTicket->SubIssueType . ').' , 3);
 
 				}
 
@@ -795,6 +663,267 @@
 			}
 
 			return false;
+
+		}
+
+
+		/**
+		 * Deletes any existing records so we have a clean start.
+		 *
+		 * Note that this only gets used in the situation where ALL records of
+		 * a certain type have to get removed. Specific records get removed
+		 * purged right before saving (see function saveTicketsToDatabase)
+		 *
+		 * @todo  adjust the link to the function saveTicketsToDatabase as this needs to be renamed.
+		 * 
+		 */
+		public function purgeDatabase() {
+
+			if (!empty($this->params['data_to_check'])) {
+
+				switch ($this->params['data_to_check']) {
+
+					case 'completed_tickets':
+
+						if ($this->params['full']) {
+
+							$this->log('> Deleting all completed tickets from database..', 1);
+
+							if (!$this->Ticket->query('DELETE from tickets WHERE ticketstatus_id = 5;')) {
+								throw new Exception('Could not delete completed tickets.');
+							}
+
+							$this->log('..done.', 1);
+
+						}
+
+					break;
+
+
+					case 'open_tickets':
+
+						if ($this->params['full']) {
+
+							$this->log('> Deleting all open tickets from database..', 1);
+
+							if (!$this->Ticket->query('DELETE from tickets WHERE ticketstatus_id != 5;')) {
+								throw new Exception('Could not delete open tickets.');
+							}
+
+							$this->log('..done.', 1);
+
+						}
+
+					break;
+
+					default:
+					break;
+
+				}
+
+			} else {
+
+				if ($this->params['full']) {
+
+					$this->log('> Truncating tickets table..', 1);
+
+					if (!$this->Ticket->query('TRUNCATE TABLE tickets;')) {
+						throw new Exception('Could truncate tickets table.');
+					}
+
+					$this->log('..done.', 1);
+
+				}
+
+			}
+
+			return true;
+
+		}
+
+
+		/**
+		 * Imports the completed tickets.
+		 */
+		private function importCompletedTickets() {
+
+			if ($this->dataIsNeededFor('completed_tickets')) {
+
+				$this->log('> Importing completed tickets into the database..', 1);
+
+				$oTickets = $this->GetTicketsCompleted->execute();
+
+				if (empty($oTickets)) {
+
+					$this->log('..done - nothing saved, query returned no tickets.', 1);
+
+					if ($this->outputIsNeededFor('completed_tickets')) {
+
+						if ($this->params['full']) {
+							$this->out('No completed tickets found with Completed Date = ' . date('Y-m-d', strtotime('-1 days')) . ' or ' . date('Y-m-d') . '.', 1, Shell::QUIET);
+						} else {
+							$this->out('No completed tickets found with Completed Date = ' . date('Y-m-d') . '.', 1, Shell::QUIET);
+						}
+
+					}
+
+				} else {
+
+					if (!$this->saveTicketsToDatabase($oTickets)) {
+						throw new Exception('Could save completed tickets to the database using saveTicketsToDatabase().');
+					} else {
+
+						if ($this->outputIsNeededFor('completed_tickets')) {
+
+							if ($this->params['full']) {
+								$this->out(count($oTickets) . ' completed tickets found with Completed Date equal to ' . date('Y-m-d', strtotime('-1 days')) . ' or ' . date('Y-m-d') . '.', 1, Shell::QUIET);
+							} else {
+								$this->out(count($oTickets) . ' completed tickets found with Completed Date equal to ' . date('Y-m-d') . '.', 1, Shell::QUIET);
+							}
+
+						}
+
+						$this->log('..done - imported ' . count($oTickets) . ' ticket(s).' , 1);
+
+					}
+
+				}
+
+			}
+
+			return true;
+
+		}
+
+
+		/**
+		 * Import the tickets that have any other status then 'completed'.
+		 */
+		public function importOpenTickets() {
+
+			if ($this->dataIsNeededFor('open_tickets')) {
+
+				$this->log('> Importing open tickets into the database..', 1);
+
+				$oTickets = $this->GetTicketsOpen->execute();
+
+				if (empty($oTickets)) {
+
+					if ($this->outputIsNeededFor('open_tickets')) {
+
+						if (!$iAmountOfDays = Configure::read('Import.OpenTickets.history')) {
+							$iAmountOfDays = 365;
+						}
+
+						if ($this->params['full']) {
+							$this->out('No open tickets found with Create Date between ' . date('Y-m-d', strtotime('-' . $iAmountOfDays . ' days')) . ' and ' . date('Y-m-d') . '.', 1, Shell::QUIET);
+						} else {
+							$this->out('No open tickets found with Create Date ' . date('Y-m-d') . '.', 1, Shell::QUIET);
+						}
+					}
+
+					$this->log('..done - nothing saved, query returned no tickets.', 1);
+
+				} else {
+
+					if (!$this->saveTicketsToDatabase($oTickets)) {
+						throw new Exception('Could save open tickets to the database using saveTicketsToDatabase().');
+					} else {
+
+						if ($this->outputIsNeededFor('open_tickets')) {
+
+							if (!$iAmountOfDays = Configure::read('Import.OpenTickets.history')) {
+								$iAmountOfDays = 365;
+							}
+
+							if ($this->params['full']) {
+								$this->out(count($oTickets) . ' open tickets found with Create Date between ' . date('Y-m-d', strtotime('-' . $iAmountOfDays . ' days')) . ' and ' . date('Y-m-d') . '.', 1, Shell::QUIET);
+							} else {
+								$this->out(count($oTickets) . ' open tickets found with Create Date ' . date('Y-m-d') . '.', 1, Shell::QUIET);
+							}
+
+						}
+
+						$this->log('..done - imported ' . count($oTickets) . ' ticket(s).' , 1);
+
+					}
+
+				}
+
+			}
+
+			return true;
+
+		}
+
+
+		/**
+		 * After tickets have been fetched from Autotask we calculate the totals for
+		 * kill rate, queue health etc.
+		 */
+		private function calculateTotals() {
+
+			// Processing of the tickets data into totals for kill rates, queue healths etc.
+			$this->log('> Processing the tickets data into totals for all dashboards..', 1);
+
+			if ($this->dataIsNeededFor(array('completed_tickets', 'open_tickets'))) {
+
+				try {
+
+					$this->CalculateTotalsByTicketStatus->execute();
+					$this->CalculateTotalsOpenTickets->execute();
+					$this->CalculateTotalsForKillRate->execute();
+					$this->CalculateTotalsForQueueHealth->execute();
+					$this->CalculateTotalsByTicketSource->execute();
+
+				} catch (Exception $e) {
+					throw $e;
+				}
+
+			}
+
+			if ($this->dataIsNeededFor('ticket_sources')) {
+
+				try {
+					$this->CalculateTotalsByTicketSource->execute();
+				} catch (Exception $e) {
+					throw $e;
+				}
+
+			}
+
+			if ($this->dataIsNeededFor('time_entries')) {
+
+				try {
+					$this->CalculateTotalsForTimeEntries->execute();
+				} catch (Exception $e) {
+					throw $e;
+				}
+
+			}
+
+			$this->log('..done.', 1);
+			return true;
+
+		}
+
+
+		/**
+		 * Deletes both the view and the model cache.
+		 */
+		private function clearCache() {
+
+			$this->log('> Clearing cache for all dashboards..', 1);
+
+			// Clear the view and the model cache
+			if (clearCache() && Cache::clear(null, '1_hour')) {
+				$this->log('..done.', 1);
+			} else {
+				$this->log('..could not delete cache!', 1);
+				throw new Exception('Could not delete cache.');
+			}
+
+			return true;
 
 		}
 
