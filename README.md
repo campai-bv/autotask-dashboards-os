@@ -10,10 +10,10 @@ To use this application you'll need:
 * Copy the files in this directory into app/Plugin/Autotask.
 * Load the Plugin by editing your app/Config/bootstrap.php like so:
   ```
-  CakePlugin::load( 'Autotask', array(
+  CakePlugin::load('Autotask', array(
   'bootstrap' => true
   ,  'routes' => true
-  ) );
+  ));
   ```
 * Make sure to check if the /app/Config/core.php file of your CakePHP installation enables the checking of cache by looking at line #130, which reads:
   ```
@@ -46,14 +46,20 @@ To use this application you'll need:
   app/Plugin/Autotask/Config/Schema/autotask.sql
   ```
   to setup your database.
-* Setup the cronjob that imports your Autotask data:
-  ```
-  sh </path/to/your/cake/installation/>/lib/CakeConsole/cake -app /path/to/your/application/folder/app Autotask.import_from_autotask
-  ```
-* Set the rights on your .htaccess file so it can be updated. If not sure what rights to give, simply set it open for the world:
+* Set the rights on your .htaccess file so it can be updated. If not sure what rights to give, simply set it open for the world (since this is a private server, right?):
   ```
   chmod 777 .htaccess
   ```
+* Setup the cronjobs that imports your Autotask data:
+  ```
+  sh </path/to/your/cake/installation/>/lib/CakeConsole/cake -app /path/to/your/application/folder/app Autotask.import_from_autotask
+  ```
+  to run every 5 minutes, and
+  ```
+  sh </path/to/your/cake/installation/>/lib/CakeConsole/cake -app /path/to/your/application/folder/app Autotask.import_from_autotask -f
+  ```
+  to run nightly.
+  The -f flag tells the cronjob to import your full history instead of only the data relevant for today. This is also the cronjob you'll want to run at first start to make sure all your resources, queues etc get imported.
 
 # Upgrading
 * Copy the files in this directory into app/Plugin/Autotask.
