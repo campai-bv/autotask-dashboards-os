@@ -25,12 +25,12 @@
 	 * Japan: https://webservices11.autotask.net/atservices/1.5/atws.wsdl
 	 * Spain, Latin America: https://webservices12.autotask.net/atservices/1.5/atws.wsdl</pre>
 	 */
-	Configure::write( 'Autotask', array(
+	Configure::write('Autotask', array(
 			'wsdl' => 'https://webservices4.autotask.net/atservices/1.5/atws.wsdl'
 		,	'asmx' => 'https://webservices4.autotask.net/atservices/1.5/atws.asmx'
 		,	'username' => ''
 		,	'password' => ''
-	) );
+	));
 
 	/**
 	 * When we get new tickets through the Email 2 Autotask system it automatically
@@ -44,25 +44,25 @@
 	 * ,	23
 	 * ) );
 	 */
-	Configure::write( 'MIT.subIssueTypeIds', array(
-	) );
+	Configure::write('MIT.subIssueTypeIds', array(
+	));
 
 	/**
 	 * With this value you can change the number of days you want to the Rolling Week widget
 	 * to display. Defaults to 7.
 	 */
-	Configure::write( 'Widget.RollingWeek.daysOfHistory', 7 );
+	Configure::write('Widget.RollingWeek.daysOfHistory', 7);
 
 	/**
 	 * With this value you can change the number of days you want to the Queue Health widget
 	 * to display. Defaults to 7.
 	 */
-	Configure::write( 'Widget.QueueHealth.daysOfHistory', 7 );
+	Configure::write('Widget.QueueHealth.daysOfHistory', 7);
 
 	/**
 	 * Enables the models to use caching.
 	 */
-	Cache::config( '1_hour', array(
+	Cache::config('1_hour', array(
 			'engine' => 'File'
 		,	'duration' => '+1 hours'
 		,	'path' => CACHE
@@ -73,7 +73,7 @@
 	 * The number of days the import script has to go back to search for open tickets.
 	 * Defaults to 365.
 	 */
-	Configure::write( 'Import.OpenTickets.history', 365 );
+	Configure::write('Import.OpenTickets.history', 365);
 
 	/**
 	 * Sets the detail of the log file.
@@ -83,4 +83,4 @@
 	 * 2 - Adds more detail, show stuff like the fases the script goes through, the amount of tickets created etc.
 	 * 4 - Shows the most detail possible: every new resource, queue, issuetype etc that gets created is logged.
 	 */
-	Configure::write( 'Import.logLevel', 0 );
+	Configure::write('Import.logLevel', 1);
