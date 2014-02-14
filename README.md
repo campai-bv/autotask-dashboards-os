@@ -43,7 +43,7 @@ To use this application you'll need:
   and enter your Autotask credentials (and optionally other values to find interesting).
 * Run
   ```
-  app/Plugin/Autotask/Config/Schema/autotask.sql
+  app/Plugin/Autotask/Config/Schema/dashboards-for-autotask.sql
   ```
   to setup your database.
 * Set the rights on your .htaccess file so it can be updated. If not sure what rights to give, simply set it open for the world (since this is a private server, right?):
