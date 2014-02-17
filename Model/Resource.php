@@ -46,7 +46,7 @@
 		}
 
 
-		public function getTotals( $aQueueIds = array(), $aResourceIds = array() ) {
+		public function getTotals($aQueueIds = array(), $aResourceIds = array()) {
 
 			$aResourceTotals = array(
 					'time_totals' => array(
@@ -58,23 +58,38 @@
 
 			// First we take care of the resources,
 			// in the end we check the unassigned tickets.
-			if( !empty( $aResourceIds ) ) {
+			if (!empty($aResourceIds)) {
 
-				$aResources = $this->find( 'all', array(
+				$aResources = $this->find('all', array(
 						'conditions' => array(
 								'Resource.id' => $aResourceIds
 						)
 					,	'contain' => array(
-								'Ticket'
-							,	'Timeentry'
+								'Ticket' => array(
+										'Timeentry'
+									,	'conditions' => array(
+												'Ticket.queue_id' => $aQueueIds
+										)
+								)
 						)
-				) );
+				));
 
 			} else {
-				$aResources = $this->find( 'all' );
+
+				$aResources = $this->find('all', array(
+						'contain' => array(
+								'Ticket' => array(
+										'Timeentry'
+									,	'conditions' => array(
+												'Ticket.queue_id' => $aQueueIds
+										)
+								)
+						)
+				));
+
 			}
 
-			foreach ( $aResources as $aResource ) {
+			foreach ($aResources as $aResource) {
 
 				$iTotalDaysOpen = 0;
 				$iTicketsToDivideBy = 0;
@@ -84,58 +99,29 @@
 					,	'hours_worked' => 0
 				);
 
-				foreach ( $aResource['Ticket'] as $aTicket ) {
+				foreach ($aResource['Ticket'] as $aTicket) {
 
-					if( 5 != $aTicket['ticketstatus_id'] ) { // Not completed
+					if (5 != $aTicket['ticketstatus_id']) { // Not completed
 
-						if( !empty( $aQueueIds ) ) {
-
-							if( in_array( $aTicket['queue_id'], $aQueueIds ) ) {
-
-								$start = strtotime( $aTicket['created'] );
-								$end = strtotime( date( 'Y-m-d h:I:s' ) );
-								$iTotalDaysOpen += round( abs( $end - $start ) / 86400,0 );
-								$iTicketsToDivideBy += 1;
-
-							}
-
-						} else {
-
-							$start = strtotime( $aTicket['created'] );
-							$end = strtotime( date( 'Y-m-d h:I:s' ) );
-							$iTotalDaysOpen += round( abs( $end - $start ) / 86400,0 );
-							$iTicketsToDivideBy += 1;
-
-						}
+						$start = strtotime($aTicket['created']);
+						$end = strtotime(date('Y-m-d h:I:s'));
+						$iTotalDaysOpen += round(abs($end-$start)/86400,0);
+						$iTicketsToDivideBy += 1;
 
 					// Closed/completed today
 					} else {
 
-						if( !empty( $aQueueIds ) ) {
-
-							if(
-								in_array( $aTicket['queue_id'], $aQueueIds )
-								&&
-								stristr( $aTicket['completed'], date( 'Y-m-d' ) )
-							) {
-								$iTicketsClosedToday ++;
-							}
-
-						} else {
-
-							if( stristr( $aTicket['completed'], date( 'Y-m-d' ) ) ) {
-								$iTicketsClosedToday ++;
-							}
-
+						if (stristr($aTicket['completed'], date('Y-m-d'))) {
+							$iTicketsClosedToday ++;
 						}
 
 					}
 
 				}
 
-				if( 0 == $iTicketsToDivideBy ) {
+				if (0 == $iTicketsToDivideBy) {
 
-					$aResourceTotals['Resource'][ $aResource['Resource']['id'] ] = array(
+					$aResourceTotals['Resource'][$aResource['Resource']['id']] = array(
 							'name' => $aResource['Resource']['name']
 						,	'count' => 0
 						,	'closed' => $iTicketsClosedToday
@@ -145,61 +131,49 @@
 
 				} else {
 
-					$aResourceTotals['Resource'][ $aResource['Resource']['id'] ] = array(
+					$aResourceTotals['Resource'][$aResource['Resource']['id']] = array(
 							'name' => $aResource['Resource']['name']
 						,	'count' => $iTicketsToDivideBy
 						,	'closed' => $iTicketsClosedToday
-						,	'average_days_open' => number_format( $iTotalDaysOpen/$iTicketsToDivideBy, 0, ',', '.' )
+						,	'average_days_open' => number_format($iTotalDaysOpen/$iTicketsToDivideBy, 0, ',', '.')
 						,	'time_totals' => $aTimeTotals
 					);
 
 				}
 				
 				// Calculate the time spent
-				if (!empty ($aResource['Timeentry'] ) ) {
-				
-					foreach($aResource['Timeentry'] as $aTimeEntry) {
+				$aResourceTimeEntries = array();
+				$aFilteredResult = Hash::extract($aResource['Ticket'], '{n}.Timeentry');
 
-						if (!empty($aQueueIds)) {
+				foreach ($aFilteredResult as $aTimeEntries) {
+					if (!empty($aTimeEntries)) {
+						$aResourceTimeEntries = array_merge($aResourceTimeEntries, $aTimeEntries);
+					}
+				}
 
-							if (in_array($aTicket['queue_id'], $aQueueIds)) {
+				if (!empty($aResourceTimeEntries)) {
 
-								$aTimeTotals['hours_worked'] += $aTimeEntry['hours_worked'];
-								$aResourceTotals['time_totals']['hours_worked'] += $aTimeEntry['hours_worked'];
+					foreach ($aResourceTimeEntries as $iKey => $aTimeEntry) {
 
-								if (0 == $aTimeEntry['non_billable']) {
+						$aTimeTotals['hours_worked'] += $aTimeEntry['hours_worked'];
+						$aResourceTotals['time_totals']['hours_worked'] += $aTimeEntry['hours_worked'];
 
-									// Don't use hours_to_bill - Autotask calculates totals in a weird way :S
-									$aTimeTotals['hours_to_bill'] += $aTimeEntry['hours_worked'];
-									$aResourceTotals['time_totals']['hours_to_bill'] += $aTimeEntry['hours_worked'];
+						if (0 == $aTimeEntry['non_billable']) {
 
-								}
-
-							}
-
-						} else {
-
-							$aTimeTotals['hours_worked'] += $aTimeEntry['hours_worked'];
-							$aResourceTotals['time_totals']['hours_worked'] += $aTimeEntry['hours_worked'];
-
-							if (0 == $aTimeEntry['non_billable']) {
-
-								// Don't use hours_to_bill - Autotask calculates totals in a weird way :S
-								$aTimeTotals['hours_to_bill'] += $aTimeEntry['hours_worked'];
-								$aResourceTotals['time_totals']['hours_to_bill'] += $aTimeEntry['hours_worked'];
-
-							}
+							// Don't use hours_to_bill - Autotask calculates totals in a weird way :S
+							$aTimeTotals['hours_to_bill'] += $aTimeEntry['hours_worked'];
+							$aResourceTotals['time_totals']['hours_to_bill'] += $aTimeEntry['hours_worked'];
 
 						}
-	
+
 					}
-					
+
 				}
 				// End
 
-				if( 0 == $iTicketsToDivideBy ) {
+				if (0 == $iTicketsToDivideBy) {
 
-					$aResourceTotals['Resource'][ $aResource['Resource']['id'] ] = array(
+					$aResourceTotals['Resource'][$aResource['Resource']['id']] = array(
 							'name' => $aResource['Resource']['name']
 						,	'count' => 0
 						,	'closed' => $iTicketsClosedToday
@@ -209,11 +183,11 @@
 
 				} else {
 
-					$aResourceTotals['Resource'][ $aResource['Resource']['id'] ] = array(
+					$aResourceTotals['Resource'][$aResource['Resource']['id']] = array(
 							'name' => $aResource['Resource']['name']
 						,	'count' => $iTicketsToDivideBy
 						,	'closed' => $iTicketsClosedToday
-						,	'average_days_open' => number_format( $iTotalDaysOpen/$iTicketsToDivideBy, 0, ',', '.' )
+						,	'average_days_open' => number_format($iTotalDaysOpen/$iTicketsToDivideBy, 0, ',', '.')
 						,	'time_totals' => $aTimeTotals
 					);
 
@@ -222,7 +196,7 @@
 			}
 			// End
 
-			$aResourceTotals['Resource'] = Hash::sort( $aResourceTotals['Resource'], '{n}.time_totals.hours_worked', 'desc', 'numeric' );
+			$aResourceTotals['Resource'] = Hash::sort($aResourceTotals['Resource'], '{n}.time_totals.hours_worked', 'desc', 'numeric');
 			return $aResourceTotals;
 
 		}
