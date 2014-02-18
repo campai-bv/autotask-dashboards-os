@@ -32,13 +32,13 @@
 		 * 
 		 * @return object
 		 */
-		public function findInAutotask( $sType = 'all', $aQuery = array() ) {
+		public function findInAutotask($sType = 'all', $aQuery = array()) {
 
-			switch ( $sType ) {
+			switch ($sType) {
 
 				case 'all':
 				default:
-					return $this->_findAllInAutotask( $aQuery );
+					return $this->_findAllInAutotask($aQuery);
 				break;
 
 			}
@@ -202,17 +202,17 @@
 		}
 
 
-		private function _findAllInAutotask( Array $aQuery ) {
+		private function _findAllInAutotask(Array $aQuery) {
 
 			$aConditions = array();
 
-			if( !empty( $aQuery['conditions'] ) ) {
-				$aQuery['conditions'] = array_merge_recursive( $aQuery['conditions'], $aConditions );
+			if (!empty($aQuery['conditions'])) {
+				$aQuery['conditions'] = array_merge_recursive($aQuery['conditions'], $aConditions);
 			} else {
 				$aQuery['conditions'] = $aConditions;
 			}
 
-			return $this->queryAutotask( 'Resource', $aQuery );
+			return $this->queryAutotask('Resource', $aQuery);
 
 		}
 

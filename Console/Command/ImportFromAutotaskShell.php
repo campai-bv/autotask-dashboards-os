@@ -33,6 +33,7 @@
 			,	'Autotask.CalculateTotalsForQueueHealth'
 			,	'Autotask.CalculateTotalsForTimeEntries'
 			,	'Autotask.CalculateTotalsOpenTickets'
+			,	'Autotask.GetResources'
 		);
 
 
@@ -49,6 +50,7 @@
 						,	'time_entries'
 						,	'ticket_sources'
 						,	'picklist'
+						,	'resources'
 					)
 			))->addOption('full', array(
 					'short' => 'f'
@@ -119,6 +121,7 @@
 					$this->importOpenTickets();
 
 					$this->calculateTotals();
+					$this->GetResources->execute();
 					$this->clearCache();
 
 				} catch(Exception $e) {
