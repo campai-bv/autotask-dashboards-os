@@ -122,7 +122,7 @@
 					$this->clearCache();
 
 				} catch(Exception $e) {
-					$this->log('Failed: we\'ve encountered some errors while running the import script. Erorr thrown: ' . $e->getMessage(), 1);
+					$this->log('Failed: we\'ve encountered some errors while running the import script. Error thrown: ' . $e->getMessage(), 1);
 				}
 
 			}
