@@ -102,7 +102,7 @@
 
 				// may as well do these first so there are none missing
 				// sync issue types
-				if ($this->dataIsNeededFor('picklist') || $this->params['full']) {
+				if ($this->dataIsNeededFor('picklist')) {
 					$this->syncPicklistsWithDatabase();
 				}
 
