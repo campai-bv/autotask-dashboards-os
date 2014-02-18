@@ -138,6 +138,8 @@
 
 		private function syncPicklistsWithDatabase() {
 
+			$this->log('> Updating all the picklists..', 1);
+
 			$aIssueTypes = $this->Ticket->getAutotaskPicklist('Ticket', 'IssueType');
 			$aSubissueTypes = $this->Ticket->getAutotaskPicklist('Ticket','SubIssueType');
 			$aQueues = $this->Ticket->getAutotaskPicklist('Ticket','QueueID');
@@ -149,6 +151,8 @@
 			$this->savePicklistToModel('Queue',$aQueues);
 			$this->savePicklistToModel('Ticketstatus',$aTicketstatus);
 			$this->savePicklistToModel('Ticketsource',$aTicketsource);
+
+			$this->log('..done.', 1);
 
 		}
 
@@ -884,7 +888,14 @@
 		private function calculateTotals() {
 
 			// Processing of the tickets data into totals for kill rates, queue healths etc.
-			$this->log('> Processing the tickets data into totals for all dashboards..', 1);
+			if ($this->dataIsNeededFor(array(
+					'completed_tickets'
+				,	'open_tickets'
+				,	'ticket_sources'
+				,	'time_entries'
+			))) {
+				$this->log('> Processing the tickets data into totals for all dashboards..', 1);
+			}
 
 			if ($this->dataIsNeededFor(array('completed_tickets', 'open_tickets'))) {
 
@@ -922,7 +933,15 @@
 
 			}
 
-			$this->log('..done.', 1);
+			if ($this->dataIsNeededFor(array(
+					'completed_tickets'
+				,	'open_tickets'
+				,	'ticket_sources'
+				,	'time_entries'
+			))) {
+				$this->log('..done.', 1);
+			}
+
 			return true;
 
 		}
