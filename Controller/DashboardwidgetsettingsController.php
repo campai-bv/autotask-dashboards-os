@@ -16,21 +16,30 @@
 
 		public $name = 'Dashboardwidgetsettings';
 
-		public function edit( $iDashboardwidgetId = null ) {
+		public function edit($iDashboardwidgetId = null) {
 
-			$aDashboardWidgetsetting = $this->Dashboardwidgetsetting->find( 'first', array(
+			$aDashboardWidgetsetting = $this->Dashboardwidgetsetting->find('first', array(
 					'conditions' => array(
 							'Dashboardwidgetsetting.dashboardwidget_id' => $iDashboardwidgetId
 						,	'Dashboardwidgetsetting.name' => $this->request->data['name']
 					)
-			) );
+			));
 
-			if( !empty( $aDashboardWidgetsetting ) ) {
+			if (!empty($aDashboardWidgetsetting)) {
 
 				$this->Dashboardwidgetsetting->id = $aDashboardWidgetsetting['Dashboardwidgetsetting']['id'];
-				if( $this->Dashboardwidgetsetting->saveField( 'value', $this->request->data['value'] ) ) {
+				if( $this->Dashboardwidgetsetting->saveField('value', $this->request->data['value'])) {
 
-					echo 'success';
+					if (
+						'clock_time_format' == $aDashboardWidgetsetting['Dashboardwidgetsetting']['name']
+						||
+						'clock_date_format' == $aDashboardWidgetsetting['Dashboardwidgetsetting']['name']
+					) {
+						echo date($this->request->data['value']);
+					} else {
+						echo 'success';
+					}
+
 					clearCache(); // Remove the view cache
 					Cache::clear( null ,'1_hour' ); // Clear the model cache
 
@@ -46,7 +55,16 @@
 					,	'value' => $this->request->data['value']
 				) ) ) {
 
-					echo 'success';
+					if (
+						'clock_time_format' == $aDashboardWidgetsetting['Dashboardwidgetsetting']['name']
+						||
+						'clock_date_format' == $aDashboardWidgetsetting['Dashboardwidgetsetting']['name']
+					) {
+						echo date($this->request->data['value']);
+					} else {
+						echo 'success';
+					}
+
 					clearCache(); // Remove the view cache
 					Cache::clear( null ,'1_hour' ); // Clear the model cache
 
