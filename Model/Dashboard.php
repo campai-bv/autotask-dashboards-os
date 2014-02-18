@@ -133,6 +133,10 @@
 						'database_field' => 'show_clock'
 					,	'widget_id' => 10
 					,	'type' => ''
+					,	'settings' => array(
+								'clock_time_format' => 'H:i'
+							,	'clock_date_format' => 'l, d F'
+						)
 				)
 			,	'open_tickets' => array(
 						'database_field' => 'show_open_tickets'
