@@ -7,6 +7,11 @@ h2 {
 	color: #acacac;
 }
 
+h3 {
+	color: #e6e6e6;
+	font-size: 20px;
+}
+
 	.navbar-inner .last-import {
 		display: block;
 		float: left;
@@ -244,8 +249,6 @@ form {
 		.checkboxes-container .controls {
 			margin: 0;
 			float: left;
-			width: 890px;
-			padding-left: 20px;
 		}
 
 			.checkboxes-container .checkbox {
@@ -267,14 +270,12 @@ form {
 
 	/* Single checkbox */
 	.control-group.input.checkbox-container {
-		padding-left: 180px;
 		margin-bottom: 0;
 	}
 
 		.control-group.input.checkbox-container label {
 			float: left;
 			text-align: left;
-			width: 170px;
 		}
 
 		.control-group.input.checkbox-container input {
