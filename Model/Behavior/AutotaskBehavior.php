@@ -112,8 +112,6 @@
 
 			$sXmlQuery = $this->prettifyXmlString($sXmlQuery);
 
-			$this->log($sXmlQuery, 'xml');
-
 			try {
 				$oResponse = $this->oAutotask->query(array('sXML' => $sXmlQuery));
 			} catch (SoapFault $fault) {

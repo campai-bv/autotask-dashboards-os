@@ -28,21 +28,90 @@
 		 */
 		public function execute() {
 
-			$aCompletedDates = array(
+			// We only fetch open tickets that go back 1 year (default).
+			// This prevents recurring tickets from being included, which often leads
+			// to insane amount of tickets.
+			$aDates = array(
 					date('Y-m-d')
 			);
 
 			if ($this->params['full']) {
-				$aCompletedDates[] = date('Y-m-d', strtotime('-1 days'));
+				$aDates[] = date('Y-m-d', strtotime('-1 days'));
+			}
+			// End
+
+			// Basic conditions.
+			$aConditions = array();
+
+			// Add the queues.
+			foreach (Hash::extract($this->Dashboardqueue->find('all'), '{n}.Dashboardqueue.queue_id') as $iKey => $iQueueId) {
+
+				$aQueueCondition = array(
+						'field' => array(
+								'expression' => array(
+										'@op' => 'equals',
+										'@' => $iQueueId
+								),
+								'@' => 'QueueID'
+						)
+				);
+
+				if (0 != $iKey) {
+					$aQueueCondition['@operator'] = 'OR';
+				}
+
+				$aConditions[] = $aQueueCondition;
+
+			}
+			// End
+
+			// Add the dates.
+			if (1 < count($aDates)) {
+
+				$aDatesConditions = array(
+						'@operator' => 'AND',
+						'condition' => array()
+				);
+
+				foreach ($aDates as $iKey => $sDate) {
+
+					$aDateCondition = array(
+							'field' => array(
+									'expression' => array(
+											'@op' => 'isthisday',
+											'@' => $sDate
+									),
+									'@' => 'CreateDate'
+							)
+					);
+
+					if (0 != $iKey) {
+						$aDateCondition['@operator'] = 'OR';
+					}
+
+					$aConditions[] = $aDateCondition;
+
+				}
+
+			} else {
+
+				$aDatesConditions = array(
+						'@operator' => 'AND',
+						'field' => array(
+								'expression' => array(
+										'@op' => 'isthisday',
+										'@' => $aDates[0]
+								),
+								'@' => 'CreateDate'
+						)
+				);
+
 			}
 
-			$oResult = $this->Ticket->findInAutotask('closed', array(
-					'conditions' => array(
-							'CompletedDate' => $aCompletedDates
-						,	'QueueID' => Hash::extract($this->Dashboardqueue->find('all'), '{n}.Dashboardqueue.queue_id')
-					)
-			));
+			$aConditions[] = $aDatesConditions;
+			// End
 
+			$oResult = $this->Ticket->findInAutotask('completed', $aConditions);
 			return $oResult;
 
 		}

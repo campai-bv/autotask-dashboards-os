@@ -34,6 +34,7 @@
 			,	'Autotask.CalculateTotalsForQueueHealth'
 			,	'Autotask.CalculateTotalsForTimeEntries'
 			,	'Autotask.CalculateTotalsOpenTickets'
+			,	'Autotask.GetResources'
 		);
 
 
@@ -50,6 +51,7 @@
 						,	'time_entries'
 						,	'ticket_sources'
 						,	'picklist'
+						,	'resources'
 					)
 			))->addOption('full', array(
 					'short' => 'f'
@@ -119,11 +121,13 @@
 					// it to use the saveResponseToDatabase function.
 					$this->importOpenTickets();
 
+					$this->GetResources->execute();
+
 					$this->calculateTotals();
 					$this->clearCache();
 
 				} catch(Exception $e) {
-					$this->log('Failed: we\'ve encountered some errors while running the import script. Erorr thrown: ' . $e->getMessage(), 1);
+					$this->log('Failed: we\'ve encountered some errors while running the import script. Error thrown: ' . $e->getMessage(), 1);
 				}
 
 			}
@@ -255,7 +259,9 @@
 						}
 
 						// Then save the updated records.
-						$this->{$sModel}->query($sQuery);
+						if (!empty($sQuery)) {
+							$this->{$sModel}->query($sQuery);
+						}
 
 					} catch (Exception $e) {
 
@@ -401,7 +407,17 @@
 
 							$this->log('> Deleting all completed tickets from database..', 1);
 
-							if ($this->Ticket->query('DELETE from tickets WHERE ticketstatus_id = 5;')) {
+							if (false !== $this->Ticket->query('DELETE from tickets WHERE ticketstatus_id = 5;')) {
+								$this->log('..done.', 1);
+							} else {
+								throw new Exception('Could not delete completed tickets.');
+							}
+
+						} else {
+
+							$this->log('> Deleting all completed tickets completed on ' . date('Y-m-d') . '..', 1);
+
+							if (false !== $this->Ticket->query('DELETE from tickets WHERE ticketstatus_id = 5 AND completed >= "' . date('Y-m-d') . ' 00:00:00";')) {
 								$this->log('..done.', 1);
 							} else {
 								throw new Exception('Could not delete completed tickets.');
@@ -418,7 +434,17 @@
 
 							$this->log('> Deleting all open tickets from database..', 1);
 
-							if ($result = $this->Ticket->query('DELETE from tickets WHERE ticketstatus_id != 5;')) {
+							if (false !== $this->Ticket->query('DELETE from tickets WHERE ticketstatus_id != 5;')) {
+								$this->log('..done.', 1);
+							} else {
+								throw new Exception('Could not delete open tickets (' . $result . ').');
+							}
+
+						} else {
+
+							$this->log('> Deleting all open tickets created on ' . date('Y-m-d') . '..', 1);
+
+							if (false !== $this->Ticket->query('DELETE from tickets WHERE ticketstatus_id != 5 AND created >= "' . date('Y-m-d') . ' 00:00:00";')) {
 								$this->log('..done.', 1);
 							} else {
 								throw new Exception('Could not delete open tickets (' . $result . ').');
@@ -648,12 +674,6 @@
 
 			$sQueryString = '';
 
-			if (empty($sExistingQuery)) {
-				$sQueryString .= "INSERT INTO tickets (`id`, `created`, `completed`, `number`, `title`, `ticketstatus_id`, `queue_id`, `resource_id`, `account_id`, `issuetype_id`, `subissuetype_id`, `due`, `priority`, `has_met_sla`, `ticketsource_id` ) VALUES ";
-			} else {
-				$sQueryString .= ', ';
-			}
-
 			// Defaults
 			$sCompletedDate = '';
 			$sDueDateTime = '';
@@ -711,6 +731,13 @@
 				$iHasMetSLA = $oTicket->ServiceLevelAgreementHasBeenMet;
 			}
 
+			// Build the query string
+			if (empty($sExistingQuery)) {
+				$sQueryString .= "INSERT INTO tickets (`id`, `created`, `completed`, `number`, `title`, `ticketstatus_id`, `queue_id`, `resource_id`, `account_id`, `issuetype_id`, `subissuetype_id`, `due`, `priority`, `has_met_sla`, `ticketsource_id` ) VALUES ";
+			} else {
+				$sQueryString .= ', ';
+			}
+
 			$sQueryString .= '(';
 				$sQueryString .= $oTicket->id;
 				$sQueryString .= ',' . $this->db->value($sCreateDate);
@@ -747,20 +774,23 @@
 
 				$sQueryString = '';
 
-				if (empty($sExistingQuery)) {
-					$sQueryString .= "INSERT INTO resources (`id`, `name` ) VALUES ";
-				} else {
-					$sQueryString .= ', ';
-				}
-
+				$this->Resource->recursive = -1;
 				$aResource = $this->Resource->read(null, $oTicket->AssignedResourceID);
 
 				if (empty($aResource) && !in_array($oTicket->AssignedResourceID, $aIds['Resource'])) {
 
-					$oResource = $this->Resource->queryAutotask($aQuery);
-
-					debug($oResource);
-					exit();
+					$oResource = $this->Resource->findInAutotask('all', array(
+							array(
+									'@operator' => 'AND',
+									'field' => array(
+											'expression' => array(
+													'@op' => 'equals',
+													'@' => $oTicket->AssignedResourceID
+											),
+											'@' => 'id'
+									)
+							)
+					));
 
 					$sResourceName = '';
 
@@ -776,12 +806,20 @@
 						$sResourceName .= $oResource[0]->LastName;
 					}
 
+					// Build the query string
+					if (empty($sExistingQuery)) {
+						$sQueryString .= "INSERT INTO resources (`id`, `name` ) VALUES ";
+					} else {
+						$sQueryString .= ', ';
+					}
+
 					$sQueryString .= '(';
-						$sQueryString .= $iResourceId;
+						$sQueryString .= $oTicket->AssignedResourceID;
 						$sQueryString .= ',' . $this->db->value($sResourceName);
 					$sQueryString .= ')';
+					// End
 
-					$aIds['Resource'][] = $iResourceId;
+					$aIds['Resource'][] = $oTicket->AssignedResourceID;
 
 					$this->log('- Found new Resource => Inserted into the database ("' . $sResourceName . '").' , 3);
 
@@ -806,24 +844,26 @@
 
 				$sQueryString = '';
 
-				if (empty($sExistingQuery)) {
-					$sQueryString .= "INSERT INTO queues (`id`, `name` ) VALUES ";
-				} else {
-					$sQueryString .= ', ';
-				}
+				$aQueue = $this->Queue->read(null, $oTicket->QueueID);
 
-				$aQueue = $this->Queue->read(null, $iQueueId);
+				if (empty($aQueue) && !in_array($oTicket->QueueID, $aIds['Queue'])) {
 
-				if (empty($aQueue) && !in_array($iQueueId, $aIds['Queue'])) {
+					// Build the query string
+					if (empty($sExistingQuery)) {
+						$sQueryString .= "INSERT INTO queues (`id`, `name`) VALUES ";
+					} else {
+						$sQueryString .= ', ';
+					}
 
 					$sQueryString .= '(';
-						$sQueryString .= $iQueueId;
+						$sQueryString .= $oTicket->QueueID;
 						$sQueryString .= ",''";
 					$sQueryString .= ')';
+					// End
 
-					$aIds['Queue'][] = $iQueueId;
+					$aIds['Queue'][] = $oTicket->QueueID;
 
-					$this->log('- Found new Queue => Inserted into the database (id ' . $iQueueId . ').' , 3);
+					$this->log('- Found new Queue => Inserted into the database (id ' . $oTicket->QueueID . ').' , 3);
 
 				}
 
@@ -842,12 +882,13 @@
 		 */
 		private function statusToQuery($oTicket, $sExistingQuery, Array $aIds) {
 
-			$sQueryString .= '';
+			$sQueryString = '';
 
 			$aTicketstatus = $this->Ticketstatus->read(null, $oTicket->Status);
 
 			if (empty($aTicketstatus) && !in_array($oTicket->Status, $aIds['Ticketstatus'])) {
 
+				// Build the query string
 				if (empty($sExistingQuery)) {
 					$sQueryString .= "INSERT INTO ticketstatuses (`id`, `name` ) VALUES ";
 				} else {
@@ -858,6 +899,7 @@
 					$sQueryString .= $oTicket->Status;
 					$sQueryString .= ",''";
 				$sQueryString .= ')';
+				// End
 
 				$aIds['Ticketstatus'][] = $oTicket->Status;
 
@@ -884,8 +926,9 @@
 
 				if (empty($aTicketsource) && !in_array($oTicket->Source, $aIds['Ticketsource'])) {
 
+					// Build the query string
 					if (empty($sExistingQuery)) {
-						$sQueryString .= "INSERT INTO ticketsources (id, name ) VALUES ";
+						$sQueryString .= "INSERT INTO ticketsources (id, name) VALUES ";
 					} else {
 						$sQueryString .= ', ';
 					}
@@ -894,6 +937,7 @@
 						$sQueryString .= $oTicket->Source;
 						$sQueryString .= ",''";
 					$sQueryString .= ')';
+					// End
 
 					$aIds['Ticketsource'][] = $oTicket->Source;
 
@@ -922,19 +966,21 @@
 
 				$sQueryString = '';
 
+				$this->Account->recursive = -1;
 				$aAccount = $this->Account->read(null, $oTicket->AccountID);
 
 				if (empty($aAccount) && !in_array($oTicket->AccountID, $aIds['Account'])) {
 
-					if (empty($sExistingQuery)) {
-						$sQueryString = "INSERT INTO accounts (`id`, `name` ) VALUES ";
-					} else {
-						$sQueryString .= ', ';
-					}
-
 					$oAccount = $this->Account->findInAutotask('all', array(
-							'conditions' => array(
-									'id' => $oTicket->AccountID
+							array(
+									'@operator' => 'AND',
+									'field' => array(
+											'expression' => array(
+													'@op' => 'equals',
+													'@' => $oTicket->AccountID
+											),
+											'@' => 'id'
+									)
 							)
 					));
 
@@ -944,10 +990,18 @@
 						$sAccountName = '';
 					}
 
+					// Build the query string
+					if (empty($sExistingQuery)) {
+						$sQueryString = "INSERT INTO accounts (`id`, `name`) VALUES ";
+					} else {
+						$sQueryString .= ', ';
+					}
+
 					$sQueryString .= '(';
 						$sQueryString .= $oTicket->AccountID;
 						$sQueryString .= ',' . $this->db->value($sAccountName);
 					$sQueryString .= ')';
+					// End
 
 					$aIds['Account'][] = $oTicket->AccountID;
 
@@ -978,6 +1032,7 @@
 
 				if (empty($aIssueType) && !in_array($oTicket->IssueType, $aIds['Issuetype'])) {
 
+					// Build the query string
 					if (empty($sExistingQuery)) {
 						$sQueryString .= "INSERT INTO issuetypes (`id`) VALUES ";
 					} else {
@@ -987,6 +1042,7 @@
 					$sQueryString .= '(';
 						$sQueryString .= $oTicket->IssueType;
 					$sQueryString .= ')';
+					// End
 
 					$aIds['Issuetype'][] = $oTicket->IssueType;
 
@@ -1017,6 +1073,7 @@
 
 				if (empty($aSubIssueType) && !in_array($oTicket->SubIssueType, $aIds['Subissuetype'])) {
 
+					// Build the query string
 					if (empty($sExistingQuery)) {
 						$sQueryString .= "INSERT INTO subissuetypes (`id`) VALUES ";
 					} else {
@@ -1026,6 +1083,7 @@
 					$sQueryString .= '(';
 						$sQueryString .= $oTicket->SubIssueType;
 					$sQueryString .= ')';
+					// End
 
 					$aIds['Subissuetype'][] = $oTicket->SubIssueType;
 

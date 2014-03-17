@@ -28,20 +28,44 @@
 
 		/**
 		 * @param  string $sType  'all'
-		 * @param  array  $aQuery [description]
+		 * @param  array  $aConditions [description]
 		 * 
 		 * @return object
 		 */
-		public function findInAutotask( $sType = 'all', $aQuery = array() ) {
+		public function findInAutotask($sType = 'all', $aConditions = array()) {
 
-			switch ( $sType ) {
+			$aQuery = array(
+				'queryxml' => array(
+						'entity' => 'Resource',
+						'query' => array(
+								'condition' => array()
+						)
+				)
+			);
+
+			$aQuery['queryxml']['query']['condition'] = array_merge($aQuery['queryxml']['query']['condition'], $aConditions);
+
+			switch ($sType) {
 
 				case 'all':
 				default:
-					return $this->_findAllInAutotask( $aQuery );
+
+					$aQuery['queryxml']['query']['condition'][] = array(
+							'@operator' => 'AND',
+							'field' => array(
+									'expression' => array(
+											'@op' => 'equals',
+											'@' => 1
+									),
+									'@' => 'Active'
+							)
+					);
+
 				break;
 
 			}
+
+			return $this->queryAutotask($aQuery);
 
 		}
 
@@ -198,21 +222,6 @@
 
 			$aResourceTotals['Resource'] = Hash::sort($aResourceTotals['Resource'], '{n}.time_totals.hours_worked', 'desc', 'numeric');
 			return $aResourceTotals;
-
-		}
-
-
-		private function _findAllInAutotask( Array $aQuery ) {
-
-			$aConditions = array();
-
-			if( !empty( $aQuery['conditions'] ) ) {
-				$aQuery['conditions'] = array_merge_recursive( $aQuery['conditions'], $aConditions );
-			} else {
-				$aQuery['conditions'] = $aConditions;
-			}
-
-			return $this->queryAutotask($aQuery);
 
 		}
 

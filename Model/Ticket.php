@@ -34,7 +34,7 @@
 		);
 
 		/**
-		 * @param  string $sType  'open', 'closed', 'waitingCustomer' 
+		 * @param  string $sType  'open', 'completed', 'waitingCustomer' 
 		 * @param  array  $aConditions an array containing conditions.
 		 * 
 		 * @return object
@@ -43,7 +43,7 @@
 
 			$aQuery = array(
 				'queryxml' => array(
-						'entity' => 'Resource',
+						'entity' => 'Ticket',
 						'query' => array(
 								'condition' => array()
 						)
@@ -69,7 +69,7 @@
 
 				break;
 
-				case 'closed':
+				case 'completed':
 
 					$aQuery['queryxml']['query']['condition'][] = array(
 							'@operator' => 'AND',
