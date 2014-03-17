@@ -94,7 +94,7 @@
 		 * or a CakePHP Xml array.
 		 * 
 		 * @param  Model  $oModel [description]
-		 * @param  [type] $mQuery [description]
+		 * @param  [type] $mQuery Query to send to Autotask. Either a clean XML string or a CakePHP Xml Component array.
 		 * @return [type]         [description]
 		 */
 		public function queryAutotask(Model $oModel, $mQuery) {
@@ -288,9 +288,18 @@
 
 			$dom = new DOMDocument;
 			$dom->preserveWhiteSpace = FALSE;
-			$dom->loadXML($sXml);
-			$dom->formatOutput = TRUE;
-			return $dom->saveXml();
+
+			if (!$dom->loadXML($sXml)) {
+
+				debug($sXml);
+				exit();
+
+			} else {
+
+				$dom->formatOutput = TRUE;
+				return $dom->saveXml();
+
+			}
 
 		}
 

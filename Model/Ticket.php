@@ -34,32 +34,77 @@
 		);
 
 		/**
-		 * 
-		 * @param  string $sType  'open', 'waitingCustomer' 
-		 * @param  array  $aQuery [description]
+		 * @param  string $sType  'open', 'closed', 'waitingCustomer' 
+		 * @param  array  $aConditions an array containing conditions.
 		 * 
 		 * @return object
 		 */
-		public function findInAutotask($sType = 'open', $aQuery = array()) {
+		public function findInAutotask($sType = 'open', $aConditions = array()) {
+
+			$aQuery = array(
+				'queryxml' => array(
+						'entity' => 'Resource',
+						'query' => array(
+								'condition' => array()
+						)
+				)
+			);
+
+			$aQuery['queryxml']['query']['condition'] = array_merge($aQuery['queryxml']['query']['condition'], $aConditions);
 
 			switch ($sType) {
 
 				case 'open':
-					return $this->_findOpenInAutotask($aQuery);
+
+					$aQuery['queryxml']['query']['condition'][] = array(
+							'@operator' => 'AND',
+							'field' => array(
+									'expression' => array(
+											'@op' => 'notequal',
+											'@' => 5 // Completed
+									),
+									'@' => 'Status'
+							)
+					);
+
 				break;
 
 				case 'closed':
-					return $this->_findClosedInAutotask($aQuery);
+
+					$aQuery['queryxml']['query']['condition'][] = array(
+							'@operator' => 'AND',
+							'field' => array(
+									'expression' => array(
+											'@op' => 'equals',
+											'@' => 5 // Completed
+									),
+									'@' => 'Status'
+							)
+					);
+
 				break;
 
 				case 'waitingCustomer':
-					return $this->_findWaitingCustomerInAutotask($aQuery);
+
+					$aQuery['queryxml']['query']['condition'][] = array(
+							'@operator' => 'AND',
+							'field' => array(
+									'expression' => array(
+											'@op' => 'equals',
+											'@' => 7 // Waiting customer
+									),
+									'@' => 'Status'
+							)
+					);
+
 				break;
 
 				default:
-					return false;
 				break;
+
 			}
+
+			return $this->queryAutotask($aQuery);
 
 		}
 
@@ -280,61 +325,6 @@
 			}
 
 			return $aKillRate;
-
-		}
-
-
-		private function _findOpenInAutotask( Array $aQuery ) {
-
-			/*
-			$aConditions = array(
-					'Status !=' => 5
-			);
-			*/
-		
-			$aConditions = array();
-
-			if (!empty($aQuery['conditions'])) {
-				$aQuery['conditions'] = array_merge_recursive($aQuery['conditions'], $aConditions);
-			} else {
-				$aQuery['conditions'] = $aConditions;
-			}
-
-			return $this->queryAutotask($aQuery);
-
-		}
-
-
-		private function _findClosedInAutotask(Array $aQuery) {
-
-			$aConditions = array(
-					'Status' => 5
-			);
-
-			if (!empty($aQuery['conditions'])) {
-				$aQuery['conditions'] = array_merge_recursive($aQuery['conditions'], $aConditions);
-			} else {
-				$aQuery['conditions'] = $aConditions;
-			}
-
-			return $this->queryAutotask('Ticket', $aQuery);
-
-		}
-
-
-		private function _findWaitingCustomerInAutotask(Array $aQuery) {
-
-			$aConditions = array(
-					'Status' => 7
-			);
-
-			if (!empty($aQuery['conditions'])) {
-				$aQuery['conditions'] = array_merge_recursive($aQuery['conditions'], $aConditions);
-			} else {
-				$aQuery['conditions'] = $aConditions;
-			}
-
-			return $this->queryAutotask('Ticket', $aQuery);
 
 		}
 

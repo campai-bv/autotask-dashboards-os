@@ -212,7 +212,7 @@
 				$aQuery['conditions'] = $aConditions;
 			}
 
-			return $this->queryAutotask( 'Resource', $aQuery );
+			return $this->queryAutotask($aQuery);
 
 		}
 

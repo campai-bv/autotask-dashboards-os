@@ -39,20 +39,13 @@
 			}
 			// End
 
-			// Basic query layout.
-			$aQuery = array(
-				'queryxml' => array(
-						'entity' => 'Ticket',
-						'query' => array(
-								'condition' => array()
-						)
-				)
-			);
+			// Basic conditions.
+			$aConditions = array();
 
 			// Add the queues.
 			foreach (Hash::extract($this->Dashboardqueue->find('all'), '{n}.Dashboardqueue.queue_id') as $iKey => $iQueueId) {
 
-				$aCondition = array(
+				$aQueueCondition = array(
 						'field' => array(
 								'expression' => array(
 										'@op' => 'equals',
@@ -63,10 +56,10 @@
 				);
 
 				if (0 != $iKey) {
-					$aCondition['@operator'] = 'OR';
+					$aQueueCondition['@operator'] = 'OR';
 				}
 
-				$aQuery['queryxml']['query']['condition'][] = $aCondition;
+				$aConditions[] = $aQueueCondition;
 
 			}
 			// End
@@ -95,7 +88,7 @@
 						$aDateCondition['@operator'] = 'OR';
 					}
 
-					$aDatesConditions['condition'][] = $aDateCondition;
+					$aConditions[] = $aDateCondition;
 
 				}
 
@@ -114,25 +107,10 @@
 
 			}
 
-			$aQuery['queryxml']['query']['condition'][] = $aDatesConditions;
+			$aConditions[] = $aDatesConditions;
 			// End
 
-			// Filter on open tickets only
-			$aQuery['queryxml']['query']['condition'][] = array(
-					'@operator' => 'AND',
-					'field' => array(
-							'expression' => array(
-									'@op' => 'notequal',
-									'@' => 5
-							),
-							'@' => 'Status'
-					)
-			);
-			// End
-
-			debug($aQuery['queryxml']['query']['condition']);
-
-			$oResult = $this->Ticket->queryAutotask($aQuery);
+			$oResult = $this->Ticket->findInAutotask('open', $aConditions);
 			return $oResult;
 
 		}
