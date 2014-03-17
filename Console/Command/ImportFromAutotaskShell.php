@@ -256,9 +256,6 @@
 
 				foreach ($this->aQueries as $sModel => $sQuery) {
 
-					$this->log($sModel, 'debug');
-					$this->log(print_r($this->aIds[$sModel], true), 'debug');
-
 					try {
 
 						if (!empty($this->aIds[$sModel])) {
