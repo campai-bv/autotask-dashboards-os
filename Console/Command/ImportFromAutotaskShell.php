@@ -63,7 +63,7 @@
 		}
 
 
-		public function log($sMessage, $iLevel = 0) {
+		public function log($sMessage, $iLevel = 0, $scope = NULL) {
 
 			if (!$this->iLogLevel = Configure::read('Import.logLevel')) {
 				$this->iLogLevel = 0;
@@ -78,7 +78,7 @@
 					$sIdentation .= "   ";
 				}
 
-				parent::log($sIdentation . $sMessage, 'cronjob');
+				parent::log($sIdentation . $sMessage, 'cronjob', $scope);
 
 			}
 
