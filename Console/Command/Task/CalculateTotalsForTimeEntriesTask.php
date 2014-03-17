@@ -83,6 +83,11 @@
 							$dHoursWorked = $oResult->HoursWorked;
 						}
 
+						$iNonBillable = 0;
+						if (!empty($oResult->NonBillable)) {
+							$iNonBillable = $oResult->NonBillable;
+						}
+
 						$this->Timeentry->create();
 						if( !$this->Timeentry->save( array(
 								'created' => $this->TimeConverter->convertToOwnTimezone( $sStartDateTime )
@@ -90,7 +95,7 @@
 							,	'ticket_id' => $iTicketId
 							,	'hours_to_bill' => $dHoursToBill
 							,	'hours_worked' => $dHoursWorked
-							,	'non_billable' => $oResult->NonBillable
+							,	'non_billable' => $iNonBillable
 							,	'offset_hours' => $oResult->OffsetHours
 						) ) ) {
 
@@ -125,6 +130,11 @@
 								$dHoursWorked = $oTimeentry->HoursWorked;
 							}
 
+							$iNonBillable = 0;
+							if (!empty($oTimeentry->NonBillable)) {
+								$iNonBillable = $oTimeentry->NonBillable;
+							}
+
 							$this->Timeentry->create();
 							if( !$this->Timeentry->save( array(
 									'created' => $this->TimeConverter->convertToOwnTimezone( $sStartDateTime )
@@ -132,7 +142,7 @@
 								,	'ticket_id' => $iTicketId
 								,	'hours_to_bill' => $dHoursToBill
 								,	'hours_worked' => $dHoursWorked
-								,	'non_billable' => $oTimeentry->NonBillable
+								,	'non_billable' => $iNonBillable
 								,	'offset_hours' => $oTimeentry->OffsetHours
 							) ) ) {
 								$bErrorsEncountered = true;
