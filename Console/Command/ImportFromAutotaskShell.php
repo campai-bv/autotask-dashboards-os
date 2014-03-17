@@ -286,8 +286,8 @@
 		private function rebuildAPIResponseToSaveData($oTicket, &$aQueries, &$aIds) {
 
 			// Defaults
-			$sCompletedDate = '';
-			$sDueDateTime = '';
+			$sCompletedDate = NULL;
+			$sDueDateTime = NULL;
 			$iResourceId = 0;
 			$iAccountId = 9999999999; // This ID gets used for your own company. Autotask uses 0 as ID, I use an actual ID ;-)
 			$iIssueTypeId = 0;
