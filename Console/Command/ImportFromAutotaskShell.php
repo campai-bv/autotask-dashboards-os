@@ -37,6 +37,35 @@
 			,	'Autotask.GetResources'
 		);
 
+		/**
+		 * Gets filled up with queries that should get executed.
+		 */
+		private $aQueries = array(
+				'Ticket' => ''
+			,	'Account' => ''
+			,	'Resource' => ''
+			,	'Queue' => ''
+			,	'Ticketstatus' => ''
+			,	'Ticketsource' => ''
+			,	'Issuetype' => ''
+			,	'Subissuetype' => ''
+		);
+
+		/**
+		 * Gets filled up with the id's of all new records, to prevent duplicate ones
+		 * (they get removed right before executing the insert queries).
+		 */
+		private $aIds = array(
+				'Ticket' => array()
+			,	'Account' => array()
+			,	'Resource' => array()
+			,	'Queue' => array()
+			,	'Ticketstatus' => array()
+			,	'Issuetype' => array()
+			,	'Subissuetype' => array()
+			,	'Ticketsource' => array()
+		);
+
 
 		public function getOptionParser() {
 
@@ -222,40 +251,19 @@
 
 			if (!empty($oTickets)) {
 
-				// Gets filled up with queries that should get executed.
-				$aQueries = array(
-						'Ticket' => ''
-					,	'Account' => ''
-					,	'Resource' => ''
-					,	'Queue' => ''
-					,	'Ticketstatus' => ''
-					,	'Ticketsource' => ''
-					,	'Issuetype' => ''
-					,	'Subissuetype' => ''
-				);
+				// Fills up the $this->aQueries and $this->aIds arrays
+				$this->rebuildAPIResponseToQueries($oTickets);
 
-				// Gets filled up with the id's of all new records, to prevent duplicate ones.
-				$aIds = array(
-						'Ticket' => array()
-					,	'Account' => array()
-					,	'Resource' => array()
-					,	'Queue' => array()
-					,	'Ticketstatus' => array()
-					,	'Issuetype' => array()
-					,	'Subissuetype' => array()
-					,	'Ticketsource' => array()
-				);
+				foreach ($this->aQueries as $sModel => $sQuery) {
 
-				// Fills up the $aQueries and $aIds arrays
-				$this->rebuildAPIResponseToQueries($oTickets, $aQueries, $aIds);
-
-				foreach ($aQueries as $sModel => $sQuery) {
+					$this->log($sModel, 'debug');
+					$this->log(print_r($this->aIds[$sModel], true), 'debug');
 
 					try {
 
-						if (!empty($aIds[$sModel])) {
+						if (!empty($this->aIds[$sModel])) {
 							// Delete only the entries that we're going to insert again.
-							$this->{$sModel}->deleteAll(array($sModel . '.id' => $aIds[$sModel]));
+							$this->{$sModel}->deleteAll(array($sModel . '.id' => $this->aIds[$sModel]));
 						}
 
 						// Then save the updated records.
@@ -292,22 +300,20 @@
 		 * "{item}toQuery()".
 		 * 
 		 * @param  object $oTicket - The ticket object we got from Autotask.
-		 * @param  array $aQueries - The (referenced) array with queries we'll be executing later on.
-		 * @param  array $aIds - The (referenced) array with the id's of any new records. Helps you prevent duplicate id's.
 		 * @return -
 		 */
-		private function rebuildAPIResponseToQueries($oTickets, &$aQueries, &$aIds) {
+		private function rebuildAPIResponseToQueries($oTickets) {
 
 			foreach ($oTickets as $oTicket) {
 
-				$aQueries['Ticket'] .= $this->ticketToQuery($oTicket, $aQueries['Ticket'], &$aIds);
-				$aQueries['Resource'] .= $this->resourceToQuery($oTicket, $aQueries['Resource'], &$aIds);
-				$aQueries['Queue'] .= $this->queueToQuery($oTicket, $aQueries['Queue'], &$aIds);
-				$aQueries['Ticketstatus'] .= $this->statusToQuery($oTicket, $aQueries['Ticketstatus'], &$aIds);
-				$aQueries['Ticketsource'] .= $this->ticketsourceToQuery($oTicket, $aQueries['Ticketsource'], &$aIds);
-				$aQueries['Account'] .= $this->accountToQuery($oTicket, $aQueries['Account'], &$aIds);
-				$aQueries['Issuetype'] .= $this->issuetypeToQuery($oTicket, $aQueries['Issuetype'], &$aIds);
-				$aQueries['Subissuetype'] .= $this->subissuetypeToQuery($oTicket, $aQueries['Subissuetype'], &$aIds);
+				$this->aQueries['Ticket'] .= $this->ticketToQuery($oTicket);
+				$this->aQueries['Resource'] .= $this->resourceToQuery($oTicket);
+				$this->aQueries['Queue'] .= $this->queueToQuery($oTicket);
+				$this->aQueries['Ticketstatus'] .= $this->statusToQuery($oTicket);
+				$this->aQueries['Ticketsource'] .= $this->ticketsourceToQuery($oTicket);
+				$this->aQueries['Account'] .= $this->accountToQuery($oTicket);
+				$this->aQueries['Issuetype'] .= $this->issuetypeToQuery($oTicket);
+				$this->aQueries['Subissuetype'] .= $this->subissuetypeToQuery($oTicket);
 
 			}
 
@@ -670,7 +676,7 @@
 		 * Rebuilds the data of a ticket object into a string that you can use
 		 * for your mysql query.
 		 */
-		private function ticketToQuery($oTicket, $sExistingQuery) {
+		private function ticketToQuery($oTicket) {
 
 			$sQueryString = '';
 
@@ -732,7 +738,7 @@
 			}
 
 			// Build the query string
-			if (empty($sExistingQuery)) {
+			if (empty($this->aQueries['Ticket'])) {
 				$sQueryString .= "INSERT INTO tickets (`id`, `created`, `completed`, `number`, `title`, `ticketstatus_id`, `queue_id`, `resource_id`, `account_id`, `issuetype_id`, `subissuetype_id`, `due`, `priority`, `has_met_sla`, `ticketsource_id` ) VALUES ";
 			} else {
 				$sQueryString .= ', ';
@@ -757,7 +763,7 @@
 			$sQueryString .= ')';
 			// End
 
-			$aIds['Ticket'][] = $oTicket->id;
+			$this->aIds['Ticket'][] = $oTicket->id;
 
 			return $sQueryString;
 
@@ -768,7 +774,7 @@
 		 * Rebuilds the data of a ticket object into a string that you can use
 		 * for your mysql query.
 		 */
-		private function resourceToQuery($oTicket, $sExistingQuery, Array $aIds) {
+		private function resourceToQuery($oTicket) {
 
 			if (!empty($oTicket->AssignedResourceID)) {
 
@@ -777,7 +783,7 @@
 				$this->Resource->recursive = -1;
 				$aResource = $this->Resource->read(null, $oTicket->AssignedResourceID);
 
-				if (empty($aResource) && !in_array($oTicket->AssignedResourceID, $aIds['Resource'])) {
+				if (empty($aResource) && !in_array($oTicket->AssignedResourceID, $this->aIds['Resource'])) {
 
 					$oResource = $this->Resource->findInAutotask('all', array(
 							array(
@@ -807,7 +813,7 @@
 					}
 
 					// Build the query string
-					if (empty($sExistingQuery)) {
+					if (empty($this->aQueries['Resource'])) {
 						$sQueryString .= "INSERT INTO resources (`id`, `name` ) VALUES ";
 					} else {
 						$sQueryString .= ', ';
@@ -819,7 +825,7 @@
 					$sQueryString .= ')';
 					// End
 
-					$aIds['Resource'][] = $oTicket->AssignedResourceID;
+					$this->aIds['Resource'][] = $oTicket->AssignedResourceID;
 
 					$this->log('- Found new Resource => Inserted into the database ("' . $sResourceName . '").' , 3);
 
@@ -838,7 +844,7 @@
 		 * Rebuilds the data of a ticket object into a string that you can use
 		 * for your mysql query.
 		 */
-		private function queueToQuery($oTicket, $sExistingQuery, Array $aIds) {
+		private function queueToQuery($oTicket) {
 
 			if (isset($oTicket->QueueID)) {
 
@@ -846,10 +852,10 @@
 
 				$aQueue = $this->Queue->read(null, $oTicket->QueueID);
 
-				if (empty($aQueue) && !in_array($oTicket->QueueID, $aIds['Queue'])) {
+				if (empty($aQueue) && !in_array($oTicket->QueueID, $this->aIds['Queue'])) {
 
 					// Build the query string
-					if (empty($sExistingQuery)) {
+					if (empty($this->aQueries['Queue'])) {
 						$sQueryString .= "INSERT INTO queues (`id`, `name`) VALUES ";
 					} else {
 						$sQueryString .= ', ';
@@ -861,7 +867,7 @@
 					$sQueryString .= ')';
 					// End
 
-					$aIds['Queue'][] = $oTicket->QueueID;
+					$this->aIds['Queue'][] = $oTicket->QueueID;
 
 					$this->log('- Found new Queue => Inserted into the database (id ' . $oTicket->QueueID . ').' , 3);
 
@@ -880,16 +886,16 @@
 		 * Rebuilds the data of a ticket object into a string that you can use
 		 * for your mysql query.
 		 */
-		private function statusToQuery($oTicket, $sExistingQuery, Array $aIds) {
+		private function statusToQuery($oTicket) {
 
 			$sQueryString = '';
 
 			$aTicketstatus = $this->Ticketstatus->read(null, $oTicket->Status);
 
-			if (empty($aTicketstatus) && !in_array($oTicket->Status, $aIds['Ticketstatus'])) {
+			if (empty($aTicketstatus) && !in_array($oTicket->Status, $this->aIds['Ticketstatus'])) {
 
 				// Build the query string
-				if (empty($sExistingQuery)) {
+				if (empty($this->aQueries['Ticketstatus'])) {
 					$sQueryString .= "INSERT INTO ticketstatuses (`id`, `name` ) VALUES ";
 				} else {
 					$sQueryString .= ', ';
@@ -901,7 +907,7 @@
 				$sQueryString .= ')';
 				// End
 
-				$aIds['Ticketstatus'][] = $oTicket->Status;
+				$this->aIds['Ticketstatus'][] = $oTicket->Status;
 
 				$this->log('- Found new Ticket Status => Inserted into the database (id ' . $oTicket->Status . ').' ,3);
 
@@ -916,7 +922,7 @@
 		 * Rebuilds the data of a ticket object into a string that you can use
 		 * for your mysql query.
 		 */
-		private function ticketsourceToQuery($oTicket, $sExistingQuery, Array $aIds) {
+		private function ticketsourceToQuery($oTicket) {
 
 			if (isset($oTicket->Source)) {
 
@@ -924,10 +930,10 @@
 
 				$aTicketsource = $this->Ticketsource->read(null, $oTicket->Source);
 
-				if (empty($aTicketsource) && !in_array($oTicket->Source, $aIds['Ticketsource'])) {
+				if (empty($aTicketsource) && !in_array($oTicket->Source, $this->aIds['Ticketsource'])) {
 
 					// Build the query string
-					if (empty($sExistingQuery)) {
+					if (empty($this->aQueries['Ticketsource'])) {
 						$sQueryString .= "INSERT INTO ticketsources (id, name) VALUES ";
 					} else {
 						$sQueryString .= ', ';
@@ -939,7 +945,7 @@
 					$sQueryString .= ')';
 					// End
 
-					$aIds['Ticketsource'][] = $oTicket->Source;
+					$this->aIds['Ticketsource'][] = $oTicket->Source;
 
 					if (3 < $this->iLogLevel) {
 						$this->log('- Found new Ticket Source => Inserted into the database (id ' . $oTicket->Source . ').', 'cronjob');
@@ -960,7 +966,7 @@
 		 * Rebuilds the data of a ticket object into a string that you can use
 		 * for your mysql query.
 		 */
-		private function accountToQuery($oTicket, $sExistingQuery, Array $aIds) {
+		private function accountToQuery($oTicket) {
 
 			if (!empty($oTicket->AccountID)) {
 
@@ -969,7 +975,7 @@
 				$this->Account->recursive = -1;
 				$aAccount = $this->Account->read(null, $oTicket->AccountID);
 
-				if (empty($aAccount) && !in_array($oTicket->AccountID, $aIds['Account'])) {
+				if (empty($aAccount) && !in_array($oTicket->AccountID, $this->aIds['Account'])) {
 
 					$oAccount = $this->Account->findInAutotask('all', array(
 							array(
@@ -991,7 +997,7 @@
 					}
 
 					// Build the query string
-					if (empty($sExistingQuery)) {
+					if (empty($this->aQueries['Account'])) {
 						$sQueryString = "INSERT INTO accounts (`id`, `name`) VALUES ";
 					} else {
 						$sQueryString .= ', ';
@@ -1003,7 +1009,7 @@
 					$sQueryString .= ')';
 					// End
 
-					$aIds['Account'][] = $oTicket->AccountID;
+					$this->aIds['Account'][] = $oTicket->AccountID;
 
 					$this->log('- Found new Account => Inserted into the database ("' . $sAccountName . '").' , 3);
 
@@ -1022,7 +1028,7 @@
 		 * Rebuilds the data of a ticket object into a string that you can use
 		 * for your mysql query.
 		 */
-		private function issuetypeToQuery($oTicket, $sExistingQuery, Array $aIds) {
+		private function issuetypeToQuery($oTicket) {
 
 			if (!empty($oTicket->IssueType)) {
 
@@ -1030,10 +1036,10 @@
 
 				$aIssueType = $this->Issuetype->read(null, $oTicket->IssueType);
 
-				if (empty($aIssueType) && !in_array($oTicket->IssueType, $aIds['Issuetype'])) {
+				if (empty($aIssueType) && !in_array($oTicket->IssueType, $this->aIds['Issuetype'])) {
 
 					// Build the query string
-					if (empty($sExistingQuery)) {
+					if (empty($this->aQueries['Issuetype'])) {
 						$sQueryString .= "INSERT INTO issuetypes (`id`) VALUES ";
 					} else {
 						$sQueryString .= ', ';
@@ -1044,7 +1050,7 @@
 					$sQueryString .= ')';
 					// End
 
-					$aIds['Issuetype'][] = $oTicket->IssueType;
+					$this->aIds['Issuetype'][] = $oTicket->IssueType;
 
 					$this->log('- Found new Issue Type => Inserted into the database (id ' . $oTicket->IssueType . ').', 3);
 
@@ -1063,7 +1069,7 @@
 		 * Rebuilds the data of a ticket object into a string that you can use
 		 * for your mysql query.
 		 */
-		private function subissuetypeToQuery($oTicket, $sExistingQuery, Array $aIds) {
+		private function subissuetypeToQuery($oTicket) {
 
 			if (!empty($oTicket->SubIssueType)) {
 
@@ -1071,10 +1077,10 @@
 
 				$aSubIssueType = $this->Subissuetype->read(null, $oTicket->SubIssueType);
 
-				if (empty($aSubIssueType) && !in_array($oTicket->SubIssueType, $aIds['Subissuetype'])) {
+				if (empty($aSubIssueType) && !in_array($oTicket->SubIssueType, $this->aIds['Subissuetype'])) {
 
 					// Build the query string
-					if (empty($sExistingQuery)) {
+					if (empty($this->aQueries['Subissuetype'])) {
 						$sQueryString .= "INSERT INTO subissuetypes (`id`) VALUES ";
 					} else {
 						$sQueryString .= ', ';
@@ -1085,7 +1091,7 @@
 					$sQueryString .= ')';
 					// End
 
-					$aIds['Subissuetype'][] = $oTicket->SubIssueType;
+					$this->aIds['Subissuetype'][] = $oTicket->SubIssueType;
 
 					$this->log('- Found new Sub Issue Type => Inserted into the database (id ' . $oTicket->SubIssueType . ').' , 3);
 

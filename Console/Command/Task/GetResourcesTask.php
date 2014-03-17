@@ -23,8 +23,14 @@
 				$this->log('> Importing active resources into the database..', 1);
 
 				$oResources = $this->Resource->findInAutotask('all', array(
-						'conditions' => array(
-								'Active' => true
+						array(
+								'field' => array(
+										'expression' => array(
+												'@op' => 'equals',
+												'@' => 1
+										),
+										'@' => 'Active'
+								)
 						)
 				));
 
