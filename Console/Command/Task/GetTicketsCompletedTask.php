@@ -38,12 +38,8 @@
 
 			$oResult = $this->Ticket->findInAutotask('closed', array(
 					'conditions' => array(
-							'IsThisDay' => array(
-								'CompletedDate' => $aCompletedDates
-							)
-						,	'Equals' => array(
-								'QueueID' => Hash::extract($this->Dashboardqueue->find('all'), '{n}.Dashboardqueue.queue_id')
-							)
+							'CompletedDate' => $aCompletedDates
+						,	'QueueID' => Hash::extract($this->Dashboardqueue->find('all'), '{n}.Dashboardqueue.queue_id')
 					)
 			));
 

@@ -39,17 +39,100 @@
 			}
 			// End
 
-			$oResult = $this->Ticket->findInAutotask('open', array(
-					'conditions' => array(
-							'Equals' => array(
-								'QueueID' => Hash::extract($this->Dashboardqueue->find('all'), '{n}.Dashboardqueue.queue_id')
-							)
-						,	'IsThisDay' => array(
-								'CreateDate' => $aDates
-							)
-					)
-			));
+			// Basic query layout.
+			$aQuery = array(
+				'queryxml' => array(
+						'entity' => 'Ticket',
+						'query' => array(
+								'condition' => array()
+						)
+				)
+			);
 
+			// Add the queues.
+			foreach (Hash::extract($this->Dashboardqueue->find('all'), '{n}.Dashboardqueue.queue_id') as $iKey => $iQueueId) {
+
+				$aCondition = array(
+						'field' => array(
+								'expression' => array(
+										'@op' => 'equals',
+										'@' => $iQueueId
+								),
+								'@' => 'QueueID'
+						)
+				);
+
+				if (0 != $iKey) {
+					$aCondition['@operator'] = 'OR';
+				}
+
+				$aQuery['queryxml']['query']['condition'][] = $aCondition;
+
+			}
+			// End
+
+			// Add the dates.
+			if (1 < count($aDates)) {
+
+				$aDatesConditions = array(
+						'@operator' => 'AND',
+						'condition' => array()
+				);
+
+				foreach ($aDates as $iKey => $sDate) {
+
+					$aDateCondition = array(
+							'field' => array(
+									'expression' => array(
+											'@op' => 'isthisday',
+											'@' => $sDate
+									),
+									'@' => 'CreateDate'
+							)
+					);
+
+					if (0 != $iKey) {
+						$aDateCondition['@operator'] = 'OR';
+					}
+
+					$aDatesConditions['condition'][] = $aDateCondition;
+
+				}
+
+			} else {
+
+				$aDatesConditions = array(
+						'@operator' => 'AND',
+						'field' => array(
+								'expression' => array(
+										'@op' => 'isthisday',
+										'@' => $aDates[0]
+								),
+								'@' => 'CreateDate'
+						)
+				);
+
+			}
+
+			$aQuery['queryxml']['query']['condition'][] = $aDatesConditions;
+			// End
+
+			// Filter on open tickets only
+			$aQuery['queryxml']['query']['condition'][] = array(
+					'@operator' => 'AND',
+					'field' => array(
+							'expression' => array(
+									'@op' => 'notequal',
+									'@' => 5
+							),
+							'@' => 'Status'
+					)
+			);
+			// End
+
+			debug($aQuery['queryxml']['query']['condition']);
+
+			$oResult = $this->Ticket->queryAutotask($aQuery);
 			return $oResult;
 
 		}

@@ -286,57 +286,55 @@
 
 		private function _findOpenInAutotask( Array $aQuery ) {
 
+			/*
 			$aConditions = array(
-					'NotEqual' => array(
-							'Status' => 5
-					)
+					'Status !=' => 5
 			);
+			*/
+		
+			$aConditions = array();
 
-			if( !empty( $aQuery['conditions'] ) ) {
-				$aQuery['conditions'] = array_merge_recursive( $aQuery['conditions'], $aConditions );
+			if (!empty($aQuery['conditions'])) {
+				$aQuery['conditions'] = array_merge_recursive($aQuery['conditions'], $aConditions);
 			} else {
 				$aQuery['conditions'] = $aConditions;
 			}
 
-			return $this->queryAutotask( 'Ticket', $aQuery );
+			return $this->queryAutotask($aQuery);
 
 		}
 
 
-		private function _findClosedInAutotask( Array $aQuery ) {
+		private function _findClosedInAutotask(Array $aQuery) {
 
 			$aConditions = array(
-					'Equals' => array(
-							'Status' => 5
-					)
+					'Status' => 5
 			);
 
-			if( !empty( $aQuery['conditions'] ) ) {
-				$aQuery['conditions'] = array_merge_recursive( $aQuery['conditions'], $aConditions );
+			if (!empty($aQuery['conditions'])) {
+				$aQuery['conditions'] = array_merge_recursive($aQuery['conditions'], $aConditions);
 			} else {
 				$aQuery['conditions'] = $aConditions;
 			}
 
-			return $this->queryAutotask( 'Ticket', $aQuery );
+			return $this->queryAutotask('Ticket', $aQuery);
 
 		}
 
 
-		private function _findWaitingCustomerInAutotask( Array $aQuery ) {
+		private function _findWaitingCustomerInAutotask(Array $aQuery) {
 
 			$aConditions = array(
-					'Equals' => array(
-							'Status' => 7
-					)
+					'Status' => 7
 			);
 
-			if( !empty( $aQuery['conditions'] ) ) {
-				$aQuery['conditions'] = array_merge_recursive( $aQuery['conditions'], $aConditions );
+			if (!empty($aQuery['conditions'])) {
+				$aQuery['conditions'] = array_merge_recursive($aQuery['conditions'], $aConditions);
 			} else {
 				$aQuery['conditions'] = $aConditions;
 			}
 
-			return $this->queryAutotask( 'Ticket', $aQuery );
+			return $this->queryAutotask('Ticket', $aQuery);
 
 		}
 

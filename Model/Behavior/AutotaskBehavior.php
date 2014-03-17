@@ -16,7 +16,9 @@
 		private $_aResults = array();
 		private $_aPicklistResult = array();
 		private $_aPicklist = array();
-		
+
+		private $iXmlIndent = 2;
+
 		public function __construct() {
 			if( !$this->iLogLevel = Configure::read( 'Import.logLevel' ) ) {
 				$this->iLogLevel = 0;
@@ -86,68 +88,34 @@
 			return false;
 		}
 		
-		public function queryAutotask( Model $oModel, $sEntity, Array $aQuery ) {
+
+		/**
+		 * Query the Autotask API. Provide either an XML string
+		 * or a CakePHP Xml array.
+		 * 
+		 * @param  Model  $oModel [description]
+		 * @param  [type] $mQuery [description]
+		 * @return [type]         [description]
+		 */
+		public function queryAutotask(Model $oModel, $mQuery) {
 
 			if ($this->connectAutotask() !== true) {
 				$this->log('could not connect to autotask');
 			}
-			$sXML = '
-				<queryxml>
-					<entity>' . $sEntity . '</entity>
-					<query>
-			';
 
-			if (!empty($aQuery['conditions'])) {
-
-				// Every query consists of a set of conditions ($aDetails) grouped by the equality ($sEquality),
-				// i.e. 'Equals' or 'NotEqual'.
-				foreach ($aQuery['conditions'] as $sEquality => $aDetails) {
-
-					// Every field gets transformed to a proper XML string, i.e.
-					// QueueID ($sField) equals ($sEquality) 2233932 ($sExpression).
-					foreach ($aDetails as $sField => $mExpressions) {
-
-						// Multiple values to match.
-						if (is_array($mExpressions)) {
-
-							$sXML .= '<condition>';
-
-								foreach ($mExpressions as $iKey => $sExpression) {
-
-									if (0 == $iKey) {
-										$sXML .= '<condition>';
-									} else {
-										$sXML .= '<condition operator="OR">';
-									}
-										$sXML .= '<field>' . $sField . '<expression op="' . $sEquality . '">' . $sExpression . '</expression></field>';
-									$sXML .= '</condition>';
-
-								}
-
-							$sXML .= '</condition>';
-
-						// Just one value to match.
-						} else {
-
-							$sXML .= '<condition>';
-								$sXML .= '<field>' . $sField . '<expression op="' . $sEquality . '">' . $mExpressions . '</expression></field>';
-							$sXML .= '</condition>';
-
-						}
-
-					}
-
-				}
-
+			if (is_array($mQuery)) {
+				$xmlObject = Xml::fromArray($mQuery, array('format' => 'tags'));
+				$sXmlQuery = $xmlObject->asXML();
+			} else {
+				$sXmlQuery = $mQuery;
 			}
 
-			$sXML .= '
-					</query>
-				</queryxml>
-			';
+			$sXmlQuery = $this->prettifyXmlString($sXmlQuery);
+
+			$this->log($sXmlQuery, 'xml');
 
 			try {
-				$oResponse = $this->oAutotask->query(array('sXML' => $sXML));
+				$oResponse = $this->oAutotask->query(array('sXML' => $sXmlQuery));
 			} catch (SoapFault $fault) {
 				$this->log(' - Error occured while performing query: "' . $fault->faultcode .' - ' . $fault->faultstring . '"', 'cronjob');
 				return false;
@@ -186,8 +154,37 @@
 				if (500 == count($oResponse->queryResult->EntityResults->Entity)) {
 
 					$this->log(' - Whoa, that\'s quite the amount of entries! Going for another 500, hang on..', 'cronjob');
-					$aQuery['conditions']['GreaterThan']['id'] = $this->_iLastId;
-					return $this->queryAutotask($oModel, $sEntity, $aQuery);
+					
+					$xmlArray = Xml::toArray(Xml::build($sXmlQuery));
+
+					$iRecords = count($xmlArray['queryxml']['query']['condition'])-1;
+
+					if (
+						'AND' == $xmlArray['queryxml']['query']['condition'][$iRecords]['@operator']
+						&&
+						'id' == $xmlArray['queryxml']['query']['condition'][$iRecords]['field']['@']
+						&&
+						'greaterthan' == $xmlArray['queryxml']['query']['condition'][$iRecords]['field']['expression']['@op']
+					) {
+						$xmlArray['queryxml']['query']['condition'][$iRecords]['field']['expression']['@'] = $this->_iLastId;
+					} else {
+
+						$xmlArray['queryxml']['query']['condition'][] = array(
+								'@operator' => 'AND',
+									'field' => array(
+											'expression' => array(
+													'@op' => 'greaterthan'
+												,	'@' => '13864'
+											)
+										,	'@' => 'id'
+									)
+						);
+
+					}
+
+					$sXmlQuery = Xml::fromArray($xmlArray)->asXML();
+
+					return $this->queryAutotask($oModel, $sXmlQuery);
 
 				} else {
 
@@ -278,6 +275,22 @@
 				unset($this->oAutotask);
 				return false;
 			}
+
+		}
+
+
+		public function prettifyXmlString($sXml) {
+
+			$sXml = trim(preg_replace(array(
+					'/\t+/'
+				,	'/\n+/'
+			), '', $sXml));
+
+			$dom = new DOMDocument;
+			$dom->preserveWhiteSpace = FALSE;
+			$dom->loadXML($sXml);
+			$dom->formatOutput = TRUE;
+			return $dom->saveXml();
 
 		}
 

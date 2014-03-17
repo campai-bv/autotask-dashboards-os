@@ -377,9 +377,7 @@
 
 					$oResource = $this->Resource->findInAutotask('all', array(
 							'conditions' => array(
-									'Equals' => array(
-											'id' => $oTicket->AssignedResourceID
-									)
+									'id' => $oTicket->AssignedResourceID
 							)
 					));
 
@@ -520,28 +518,34 @@
 					!in_array($oTicket->AccountID, $aIds['Account'])
 				) {
 
-					$oAccount = $this->Account->findInAutotask('all', array(
-							'conditions' => array(
-									'Equals' => array(
-											'id' => $oTicket->AccountID
-									)
-							)
-					));
-
 					if (empty($aQueries['Account'])) {
 						$aQueries['Account'] = "INSERT INTO accounts (`id`, `name` ) VALUES ";
 					} else {
 						$aQueries['Account'] .= ', ';
 					}
 
+					$oAccount = $this->Account->findInAutotask('all', array(
+							'conditions' => array(
+									'id' => $oTicket->AccountID
+							)
+					));
+
+					debug($oAccount);
+
+					if (!empty($oAccount[0]->AccountName)) {
+						$sAccountName = $oAccount[0]->AccountName;
+					} else {
+						$sAccountName = '';
+					}
+
 					$aQueries['Account'] .= '(';
 						$aQueries['Account'] .= $oTicket->AccountID;
-						$aQueries['Account'] .= ',' . $this->db->value($oAccount[0]->AccountName);
+						$aQueries['Account'] .= ',' . $this->db->value($sAccountName);
 					$aQueries['Account'] .= ')';
 
 					$aIds['Account'][] = $oTicket->AccountID;
 
-					$this->log('- Found new Account => Inserted into the database ("' . $oAccount[0]->AccountName . '").' , 3);
+					$this->log('- Found new Account => Inserted into the database ("' . $sAccountName . '").' , 3);
 
 				}
 
@@ -706,11 +710,11 @@
 
 							$this->log('> Deleting all completed tickets from database..', 1);
 
-							if (!$this->Ticket->query('DELETE from tickets WHERE ticketstatus_id = 5;')) {
+							if ($this->Ticket->query('DELETE from tickets WHERE ticketstatus_id = 5;')) {
+								$this->log('..done.', 1);
+							} else {
 								throw new Exception('Could not delete completed tickets.');
 							}
-
-							$this->log('..done.', 1);
 
 						}
 
@@ -723,11 +727,11 @@
 
 							$this->log('> Deleting all open tickets from database..', 1);
 
-							if (!$this->Ticket->query('DELETE from tickets WHERE ticketstatus_id != 5;')) {
-								throw new Exception('Could not delete open tickets.');
+							if ($result = $this->Ticket->query('DELETE from tickets WHERE ticketstatus_id != 5;')) {
+								$this->log('..done.', 1);
+							} else {
+								throw new Exception('Could not delete open tickets (' . $result . ').');
 							}
-
-							$this->log('..done.', 1);
 
 						}
 
