@@ -289,7 +289,7 @@
 			$sCompletedDate = NULL;
 			$sDueDateTime = NULL;
 			$iResourceId = 0;
-			$iAccountId = 9999999999; // This ID gets used for your own company. Autotask uses 0 as ID, I use an actual ID ;-)
+			$iAccountId = 9999999; // This ID gets used for your own company. Autotask uses 0 as ID, I use an actual ID ;-)
 			$iIssueTypeId = 0;
 			$iSubIssueTypeId = 0;
 			$iQueueId = 0;
@@ -794,7 +794,7 @@
 				} else {
 
 					if (!$this->saveTicketsToDatabase($oTickets)) {
-						throw new Exception('Could save completed tickets to the database using saveTicketsToDatabase().');
+						throw new Exception('Could not save completed tickets to the database using saveTicketsToDatabase().');
 					} else {
 
 						if ($this->outputIsNeededFor('completed_tickets')) {
