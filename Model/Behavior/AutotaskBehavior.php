@@ -172,7 +172,7 @@
 									'field' => array(
 											'expression' => array(
 													'@op' => 'greaterthan'
-												,	'@' => '13864'
+												,	'@' => $this->_iLastId
 											)
 										,	'@' => 'id'
 									)
