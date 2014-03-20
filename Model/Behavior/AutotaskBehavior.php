@@ -20,7 +20,7 @@
 		private $iXmlIndent = 2;
 
 		public function __construct() {
-			if( !$this->iLogLevel = Configure::read( 'Import.logLevel' ) ) {
+			if (!$this->iLogLevel = Configure::read('Import.logLevel')) {
 				$this->iLogLevel = 0;
 			}
 		}
