@@ -48,6 +48,9 @@
 							)
 					));
 
+					// All history records are kept in an array of their respective source.
+					$sSourceName = $aHistoryRecord['Ticketsource']['name'];
+
 					if (!empty($aHistory)) {
 
 						foreach ($aHistory as $aHistoryRecord) {
@@ -59,9 +62,6 @@
 							if (!in_array($sRecordDate, $aList['dates'])) {
 								$aList['dates'][] = $sRecordDate;
 							}
-
-							// All history records are kept in an array of their respective source.
-							$sSourceName = $aHistoryRecord['Ticketsource']['name'];
 
 							if (!isset($aList[$sSourceName])) {
 								$aList[$sSourceName] = array();
