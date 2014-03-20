@@ -1,7 +1,8 @@
--- ----------------------------
---  Installs a clean database to be used by
---  Dashboards for Autotask.
--- ----------------------------
+/*
+SQL file to setup a brand new Dashboards for Autotask installation.
+Built for version 1.5.2.
+*/
+
 SET NAMES utf8;
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -23,7 +24,8 @@ CREATE TABLE `dashboardqueues` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `dashboard_id` int(10) NOT NULL,
   `queue_id` int(10) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `dashboard_x_queue` (`dashboard_id`,`queue_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=COMPACT;
 
 -- ----------------------------
@@ -34,7 +36,8 @@ CREATE TABLE `dashboardresources` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `dashboard_id` int(10) NOT NULL,
   `resource_id` int(10) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `dashboard_x_resource` (`dashboard_id`,`resource_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=COMPACT;
 
 -- ----------------------------
@@ -45,20 +48,20 @@ CREATE TABLE `dashboards` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `slug` varchar(255) NOT NULL,
-  `show_kill_rate` tinyint(2) NOT NULL DEFAULT '1',
-  `show_accounts` tinyint(2) NOT NULL DEFAULT '1',
-  `show_queues` tinyint(2) NOT NULL DEFAULT '1',
-  `show_resources` tinyint(2) NOT NULL DEFAULT '1',
-  `show_unassigned` tinyint(2) NOT NULL DEFAULT '1',
-  `show_missing_issue_type` tinyint(2) NOT NULL DEFAULT '1',
-  `show_rolling_week` tinyint(2) NOT NULL DEFAULT '1',
-  `show_rolling_week_bars` tinyint(2) NOT NULL,
-  `show_queue_health` tinyint(2) NOT NULL DEFAULT '1',
-  `show_sla_violations` tinyint(2) NOT NULL,
-  `show_tickets_top_x` tinyint(2) NOT NULL DEFAULT '0',
-  `show_clock` tinyint(2) NOT NULL DEFAULT '0',
-  `show_open_tickets` tinyint(2) NOT NULL DEFAULT '0',
-  `show_tickets_by_source` tinyint(2) NOT NULL DEFAULT '0',
+  `show_kill_rate` tinyint(1) NOT NULL DEFAULT '1',
+  `show_accounts` tinyint(1) NOT NULL DEFAULT '1',
+  `show_queues` tinyint(1) NOT NULL DEFAULT '1',
+  `show_resources` tinyint(1) NOT NULL DEFAULT '1',
+  `show_unassigned` tinyint(1) NOT NULL DEFAULT '1',
+  `show_missing_issue_type` tinyint(1) NOT NULL DEFAULT '1',
+  `show_rolling_week` tinyint(1) NOT NULL DEFAULT '1',
+  `show_rolling_week_bars` tinyint(1) NOT NULL,
+  `show_queue_health` tinyint(1) NOT NULL DEFAULT '1',
+  `show_sla_violations` tinyint(1) NOT NULL,
+  `show_tickets_top_x` tinyint(1) NOT NULL DEFAULT '0',
+  `show_clock` tinyint(1) NOT NULL DEFAULT '0',
+  `show_open_tickets` tinyint(1) NOT NULL DEFAULT '0',
+  `show_tickets_by_source` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=COMPACT;
 
@@ -70,7 +73,8 @@ CREATE TABLE `dashboardticketstatuses` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `dashboard_id` int(10) NOT NULL,
   `ticketstatus_id` int(10) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `dashboard_x_ticketstatus` (`dashboard_id`,`ticketstatus_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=COMPACT;
 
 -- ----------------------------
@@ -88,7 +92,8 @@ CREATE TABLE `dashboardwidgets` (
   `type` varchar(255) NOT NULL,
   `col` int(1) NOT NULL,
   `row` int(2) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `dashboard_x_widget` (`dashboard_id`,`widget_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 
 -- ----------------------------
@@ -100,8 +105,9 @@ CREATE TABLE `dashboardwidgetsettings` (
   `dashboardwidget_id` int(10) NOT NULL,
   `name` varchar(255) NOT NULL,
   `value` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`id`),
+  KEY `dashboardwidget_id` (`dashboardwidget_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 
 -- ----------------------------
 --  Table structure for `issuetypes`
@@ -123,7 +129,8 @@ CREATE TABLE `killratecounts` (
   `new_count` int(10) NOT NULL,
   `completed_count` int(10) NOT NULL,
   `dashboard_id` int(10) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `dashboard_id` (`dashboard_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT;
 
 -- ----------------------------
@@ -136,7 +143,9 @@ CREATE TABLE `queuehealthcounts` (
   `dashboard_id` int(10) NOT NULL,
   `queue_id` int(10) NOT NULL,
   `average_days_open` int(10) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `dashboard_id` (`dashboard_id`),
+  KEY `queue_id` (`queue_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 
 -- ----------------------------
@@ -197,17 +206,49 @@ CREATE TABLE `tickets` (
   `title` varchar(255) NOT NULL,
   `ticketstatus_id` int(10) NOT NULL,
   `queue_id` int(10) NOT NULL,
-  `ticketsource_id` int(10) NOT NULL,
-  `resource_id` int(10) DEFAULT NULL,
+  `resource_id` int(10) NOT NULL,
   `completed` datetime DEFAULT NULL,
   `account_id` int(10) DEFAULT NULL,
   `issuetype_id` int(10) DEFAULT NULL,
   `subissuetype_id` int(10) DEFAULT NULL,
   `due` datetime NOT NULL,
   `priority` int(2) NOT NULL,
-  `has_met_sla` tinyint(2) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  `has_met_sla` tinyint(1) NOT NULL DEFAULT '0',
+  `ticketsource_id` int(10) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `ticketstatus_id` (`ticketstatus_id`),
+  KEY `queue_id` (`queue_id`),
+  KEY `ticketsource_id` (`ticketsource_id`),
+  KEY `resource_id` (`resource_id`),
+  KEY `account_id` (`account_id`),
+  KEY `issuetype_id` (`issuetype_id`),
+  KEY `subissuetype_id` (`subissuetype_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=COMPACT;
+
+-- ----------------------------
+--  Table structure for `ticketsourcecounts`
+-- ----------------------------
+DROP TABLE IF EXISTS `ticketsourcecounts`;
+CREATE TABLE `ticketsourcecounts` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `created` date NOT NULL,
+  `ticketsource_id` int(10) NOT NULL,
+  `count` int(10) NOT NULL,
+  `queue_id` int(10) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ticketsource_id` (`ticketsource_id`),
+  KEY `queue_id` (`queue_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT;
+
+-- ----------------------------
+--  Table structure for `ticketsources`
+-- ----------------------------
+DROP TABLE IF EXISTS `ticketsources`;
+CREATE TABLE `ticketsources` (
+  `id` int(10) NOT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT;
 
 -- ----------------------------
 --  Table structure for `ticketstatuscounts`
@@ -217,9 +258,11 @@ CREATE TABLE `ticketstatuscounts` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `created` date NOT NULL,
   `ticketstatus_id` int(10) NOT NULL,
-  `queue_id` int(10) NOT NULL,
   `count` int(10) NOT NULL,
-  PRIMARY KEY (`id`)
+  `queue_id` int(10) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `queue_id` (`queue_id`),
+  KEY `ticketstatus_id` (`ticketstatus_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=COMPACT;
 
 -- ----------------------------
@@ -239,37 +282,16 @@ DROP TABLE IF EXISTS `timeentries`;
 CREATE TABLE `timeentries` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `created` datetime NOT NULL,
-  `resource_id` int(10) DEFAULT NULL,
+  `resource_id` int(10) NOT NULL,
   `ticket_id` int(10) NOT NULL,
   `hours_to_bill` double(10,2) NOT NULL,
   `hours_worked` double(10,2) NOT NULL,
-  `non_billable` tinyint(2) DEFAULT NULL,
+  `non_billable` tinyint(1) NOT NULL,
   `offset_hours` double(10,2) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- ----------------------------
---  Table structure for `ticketsources`
--- ----------------------------
-DROP TABLE IF EXISTS `ticketsources`;
-CREATE TABLE `ticketsources` (
-  `id` int(10) NOT NULL,
-  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- ----------------------------
---  Table structure for `ticketsourcecounts`
--- ----------------------------
-DROP TABLE IF EXISTS `ticketsourcecounts`;
-CREATE TABLE `ticketsourcecounts` (
-  `id` int(10) NOT NULL AUTO_INCREMENT,
-  `created` date NOT NULL,
-  `ticketsource_id` int(10) NOT NULL,
-  `queue_id` int(10) NOT NULL,
-  `count` int(10) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  PRIMARY KEY (`id`),
+  KEY `resource_id` (`resource_id`),
+  KEY `ticket_id` (`ticket_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 
 -- ----------------------------
 --  Table structure for `widgets`
