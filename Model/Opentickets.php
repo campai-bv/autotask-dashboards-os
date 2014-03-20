@@ -27,7 +27,7 @@
 			$aOldStatuses = $this->Ticketstatuscount->find('all', array(
 					'conditions' => array(
 							'Ticketstatuscount.created' => date('Y-m-d', strtotime('-1 day'))
-						,	'Ticketstatuscount.ticketstatus_id' => 2
+						,	'Ticketstatuscount.ticketstatus_id <>' => 5
 						,	'Ticketstatuscount.queue_id' => $aQueueIds
 					)
 			));
@@ -35,7 +35,7 @@
 			$aNewStatuses = $this->Ticketstatuscount->find('all', array(
 					'conditions' => array(
 							'Ticketstatuscount.created' => date('Y-m-d')
-						,	'Ticketstatuscount.ticketstatus_id' => 2
+						,	'Ticketstatuscount.ticketstatus_id <>' => 5
 						,	'Ticketstatuscount.queue_id' => $aQueueIds
 					)
 			));
