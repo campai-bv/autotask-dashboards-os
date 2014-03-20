@@ -51,8 +51,6 @@
 					// All history records are kept in an array of their respective source.
 					$sSourceName = $aSource['Ticketsource']['name'];
 
-					$this->log($sSourceName, 'debug');
-
 					if (!empty($aHistory)) {
 
 						foreach ($aHistory as $aHistoryRecord) {
