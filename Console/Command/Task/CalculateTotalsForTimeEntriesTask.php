@@ -54,99 +54,55 @@
 						)
 				));
 
-				if( !empty( $oResult ) ) {
+				if (!empty($oResult)) {
 
 					$bErrorsEncountered = false;
 
-					if( 1 == count( $oResult ) ) {
+					foreach ($oResult as $oTimeentry) {
 
 						$iTicketId = 0;
-						if( !empty( $oResult->TicketID ) ) {
-							$iTicketId = $oResult->TicketID;
+						if (!empty($oTimeentry->TicketID)) {
+							$iTicketId = $oTimeentry->TicketID;
 						}
 
-						if( isset( $oResult->StartDateTime ) ) {
-							$sStartDateTime = $oResult->StartDateTime;
+						if (isset($oTimeentry->StartDateTime)) {
+							$sStartDateTime = $oTimeentry->StartDateTime;
 						} else {
-							$sStartDateTime = $oResult->CreateDateTime;
+							$sStartDateTime = $oTimeentry->CreateDateTime;
 						}
 
 						$dHoursToBill = 0.00;
-						if( isset( $oResult->HoursToBill ) ) {
-							$dHoursToBill = $oResult->HoursToBill;
+						if (isset($oTimeentry->HoursToBill)) {
+							$dHoursToBill = $oTimeentry->HoursToBill;
 						}
 
 						$dHoursWorked = 0.00;
-						if( isset( $oResult->HoursWorked ) ) {
-							$dHoursWorked = $oResult->HoursWorked;
+						if (isset($oTimeentry->HoursWorked)) {
+							$dHoursWorked = $oTimeentry->HoursWorked;
 						}
 
 						$this->Timeentry->create();
-						if( !$this->Timeentry->save( array(
-								'created' => $this->TimeConverter->convertToOwnTimezone( $sStartDateTime )
-							,	'resource_id' => $oResult->ResourceID
+						if (!$this->Timeentry->save(array(
+								'created' => $this->TimeConverter->convertToOwnTimezone($sStartDateTime)
+							,	'resource_id' => $oTimeentry->ResourceID
 							,	'ticket_id' => $iTicketId
 							,	'hours_to_bill' => $dHoursToBill
 							,	'hours_worked' => $dHoursWorked
-							,	'non_billable' => $oResult->NonBillable
-							,	'offset_hours' => $oResult->OffsetHours
-						) ) ) {
-
+							,	'non_billable' => $oTimeentry->NonBillable
+							,	'offset_hours' => $oTimeentry->OffsetHours
+						))) {
 							$bErrorsEncountered = true;
-
-						} else {
-							$this->log('..done - imported 1 time entry.', 2);
 						}
 
-					} else {
+					}
 
-						foreach ( $oResult as $oTimeentry ) {
+					if (!$bErrorsEncountered) {
 
-							$iTicketId = 0;
-							if( !empty( $oTimeentry->TicketID ) ) {
-								$iTicketId = $oTimeentry->TicketID;
-							}
-
-							if( isset( $oTimeentry->StartDateTime ) ) {
-								$sStartDateTime = $oTimeentry->StartDateTime;
-							} else {
-								$sStartDateTime = $oTimeentry->CreateDateTime;
-							}
-
-							$dHoursToBill = 0.00;
-							if( isset( $oTimeentry->HoursToBill ) ) {
-								$dHoursToBill = $oTimeentry->HoursToBill;
-							}
-
-							$dHoursWorked = 0.00;
-							if( isset( $oTimeentry->HoursWorked ) ) {
-								$dHoursWorked = $oTimeentry->HoursWorked;
-							}
-
-							$this->Timeentry->create();
-							if( !$this->Timeentry->save( array(
-									'created' => $this->TimeConverter->convertToOwnTimezone( $sStartDateTime )
-								,	'resource_id' => $oTimeentry->ResourceID
-								,	'ticket_id' => $iTicketId
-								,	'hours_to_bill' => $dHoursToBill
-								,	'hours_worked' => $dHoursWorked
-								,	'non_billable' => $oTimeentry->NonBillable
-								,	'offset_hours' => $oTimeentry->OffsetHours
-							) ) ) {
-								$bErrorsEncountered = true;
-							}
-
+						if ($this->outputIsNeededFor('time_entries')) {
+							$this->out(count($oResult) . ' time entries found with Worked Date equal to ' . date('Y-m-d') . '.', 1, Shell::QUIET);
 						}
 
-						if( !$bErrorsEncountered ) {
-
-							if ($this->outputIsNeededFor('time_entries')) {
-								$this->out(count($oResult) . ' time entries found with Worked Date equal to ' . date('Y-m-d') . '.', 1, Shell::QUIET);
-							}
-
-							$this->log('..done - imported ' . count( $oResult ) . ' time entries.', 2);
-						}
-
+						$this->log('..done - imported ' . count( $oResult ) . ' time entries.', 2);
 					}
 
 				} else {

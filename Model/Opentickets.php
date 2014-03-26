@@ -32,27 +32,16 @@
 					)
 			));
 
-			$aNewStatuses = $this->Ticketstatuscount->find('all', array(
+			$iCurrentOpenTicketCount = $this->Ticket->find('count', array(
 					'conditions' => array(
-							'Ticketstatuscount.created' => date('Y-m-d')
-						,	'Ticketstatuscount.ticketstatus_id <>' => 5
-						,	'Ticketstatuscount.queue_id' => $aQueueIds
+							'Ticket.ticketstatus_id <>' => 5
+						,	'Ticket.queue_id' => $aQueueIds
 					)
 			));
 
-			$iNew = 0;
-			if (!empty($aNewStatuses)) {
-
-				foreach ($aNewStatuses as $aStatus) {
-					$iNew += $aStatus['Ticketstatuscount']['count'];
-				}
-
-			}
-
-			$aTotals = array();
 			$aTotals = array(
 					'counts' => array(
-							'new' => $iNew
+							'new' => $iCurrentOpenTicketCount
 						,	'old' => 0
 						,	'difference' => 0
 					)
@@ -71,7 +60,11 @@
 				$iOld = 1;
 			}
 
-			$aTotals['counts']['difference'] = number_format(((100*$iNew)/$iOld)-100, 0, ',', '.');
+			if (0 == $iCurrentOpenTicketCount) {
+				$iCurrentOpenTicketCount = 1;
+			}
+
+			$aTotals['counts']['difference'] = number_format(((100*$iCurrentOpenTicketCount)/$iOld)-100, 0, ',', '.');
 
 			return $aTotals;
 

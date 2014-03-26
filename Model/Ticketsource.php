@@ -11,8 +11,6 @@
 			,	'Autotask.Ticketsourcecount'
 		);
 
-
-		
 		public function getTotals(Array $aQueueIds) {
 
 			$aList = array(
@@ -48,6 +46,11 @@
 							)
 					));
 
+					// All history records are kept in an array of their respective source.
+					$sSourceName = $aSource['Ticketsource']['name'];
+
+					$this->log($sSourceName, 'debug');
+
 					if (!empty($aHistory)) {
 
 						foreach ($aHistory as $aHistoryRecord) {
@@ -59,9 +62,6 @@
 							if (!in_array($sRecordDate, $aList['dates'])) {
 								$aList['dates'][] = $sRecordDate;
 							}
-
-							// All history records are kept in an array of their respective source.
-							$sSourceName = $aHistoryRecord['Ticketsource']['name'];
 
 							if (!isset($aList[$sSourceName])) {
 								$aList[$sSourceName] = array();
