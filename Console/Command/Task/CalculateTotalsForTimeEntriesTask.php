@@ -39,14 +39,19 @@
 
 			if ($this->dataIsNeededFor('time_entries')) {
 
-				$this->log('> Importing time entries..', 2);
+				$this->log('> Importing time entries..', 1);
 				$bErrorsEncountered = false;
 
-				$this->log('> Truncating timeentries table..', 4);
-				$this->Timeentry->query('TRUNCATE TABLE timeentries;');
-				$this->log('..done.', 4);
+				$this->log('> Deleting time entries created ' . date('Y-m-d') . '..', 2);
+				
+				if ($this->Timeentry->deleteAll(array('Timeentry.created >=' => date('Y-m-d') . ' 00:00:00'))) {
+					$this->log('..done.', 2);
+				} else {
+					$this->log('..could not delete time entries.', 2);
+					return false;
+				}
 
-				$this->log('> Importing time entries into the database for today (' . date( 'Y-m-d' ) . ')..', 4);
+				$this->log('> Importing time entries into the database for today (' . date( 'Y-m-d' ) . ')..', 2);
 
 				$oResult = $this->Timeentry->findInAutotask('all', array(
 						'conditions' => array(
