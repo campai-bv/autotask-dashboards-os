@@ -69,6 +69,8 @@
 										'Timeentry'
 									,	'conditions' => array(
 												'Ticket.queue_id' => $aQueueIds
+											,	'created >=' => date('Y-m-d') . ' 00:00:00'
+											,	'created <=' => date('Y-m-d') . ' 23:59:59'
 										)
 								)
 						)
@@ -82,6 +84,8 @@
 										'Timeentry'
 									,	'conditions' => array(
 												'Ticket.queue_id' => $aQueueIds
+											,	'created >=' => date('Y-m-d') . ' 00:00:00'
+											,	'created <=' => date('Y-m-d') . ' 23:59:59'
 										)
 								)
 						)
