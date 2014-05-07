@@ -56,6 +56,8 @@
 				,	'Resource' => array()
 			);
 
+			$sDate = date('Y-m-d');
+
 			// First we take care of the resources,
 			// in the end we check the unassigned tickets.
 			if (!empty($aResourceIds)) {
@@ -66,12 +68,15 @@
 						)
 					,	'contain' => array(
 								'Ticket' => array(
-										'Timeentry'
-									,	'conditions' => array(
-												'Ticket.queue_id' => $aQueueIds
-											,	'created >=' => date('Y-m-d') . ' 00:00:00'
-											,	'created <=' => date('Y-m-d') . ' 23:59:59'
+									'Timeentry' => array(
+										'conditions' => array(
+											'created >=' => $sDate . ' 00:00:00',
+											'created <=' => $sDate . ' 23:59:59',
 										)
+									),
+									'conditions' => array(
+										'Ticket.queue_id' => $aQueueIds,
+									)
 								)
 						)
 				));
@@ -81,12 +86,15 @@
 				$aResources = $this->find('all', array(
 						'contain' => array(
 								'Ticket' => array(
-										'Timeentry'
-									,	'conditions' => array(
-												'Ticket.queue_id' => $aQueueIds
-											,	'created >=' => date('Y-m-d') . ' 00:00:00'
-											,	'created <=' => date('Y-m-d') . ' 23:59:59'
-										)
+										'Timeentry' => array(
+											'conditions' => array(
+												'created >=' => $sDate . ' 00:00:00',
+												'created <=' => $sDate . ' 23:59:59',
+											)
+										),
+									'conditions' => array(
+										'Ticket.queue_id' => $aQueueIds,
+									)
 								)
 						)
 				));
