@@ -61,6 +61,7 @@ h3 {
 		.kill-rate-bars h4,
 		.tickets-source-counts h4,
 		.queue-health-counts h4,
+		.tickets-issuetype-counts h4,
 		#resources h2,
 		#resources h4 {
 			color: #959595;
@@ -71,7 +72,8 @@ h3 {
 			.kill-rate-counts h4,
 			.kill-rate-bars h4,
 			.tickets-source-counts h4,
-			.queue-health-counts h4 {
+			.queue-health-counts h4,
+			.tickets-issuetype-counts h4 {
 				position: absolute;
 				z-index: 99999;
 				margin-left: 40%;

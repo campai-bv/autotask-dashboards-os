@@ -25,6 +25,7 @@
 			,	'Autotask.Ticketstatus'
 			,	'Autotask.Queue'
 			,	'Autotask.Ticketstatuscount'
+			,	'Autotask.Issuetypecount'
 			,	'Autotask.Account'
 			,	'Autotask.Issuetype'
 			,	'Autotask.Subissuetype'

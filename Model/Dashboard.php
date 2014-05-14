@@ -147,7 +147,12 @@
 						'database_field' => 'show_tickets_by_source'
 					,	'widget_id' => 12
 					,	'type' => ''
-				)
+				),
+			'tickets_by_issuetype' => array(
+				'database_field' => 'show_tickets_by_issuetype',
+				'widget_id' => 13,
+				'type' => '',
+			),
 		);
 
 		var $validate = array(
@@ -428,6 +433,16 @@
 							$aWidget = array_merge( $aWidget, array(
 									'Widgetdata' => $this->Ticketsource->getTotals($aQueueIds)
 							) );
+						break;
+
+						// Tickets by issue type
+						case 13:
+							App::uses('Issuetype', 'Autotask.Model');
+							$this->Issuetype = new Issuetype();
+
+							$aWidget = array_merge($aWidget, array(
+								'Widgetdata' => $this->Issuetype->getTotals($aQueueIds),
+							));
 						break;
 
 						default:

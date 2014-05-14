@@ -2,6 +2,27 @@ SET NAMES utf8;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
+--  Add a field to the dashboards table
+-- ----------------------------
+ALTER TABLE `dashboards` ADD `show_tickets_by_issuetype` tinyint(2) NOT NULL DEFAULT '0';
+
+-- ----------------------------
+--  Table structure for `issuetypecounts`
+--  Used by the new widget "Tickets by Issue Type"
+-- ----------------------------
+DROP TABLE IF EXISTS `issuetypecounts`;
+CREATE TABLE `issuetypecounts` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `created` date NOT NULL,
+  `issuetype_id` int(10) NOT NULL,
+  `queue_id` int(10) DEFAULT NULL,
+  `count` int(10) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `issuetype_id` (`issuetype_id`) USING BTREE,
+  KEY `queue_id` (`queue_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=COMPACT;
+
+-- ----------------------------
 --  There are a lot of fields atm that don't allow NULL, which is giving a lot of trouble on some
 --  hosting environments.
 -- ----------------------------
