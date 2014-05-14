@@ -29,6 +29,7 @@
 			,	'Autotask.GetTicketsOpen'
 			,	'Autotask.CalculateTotalsByTicketStatus'
 			,	'Autotask.CalculateTotalsByTicketSource'
+			,	'Autotask.CalculateTotalsByIssuetype'
 			,	'Autotask.CalculateTotalsForKillRate'
 			,	'Autotask.CalculateTotalsForQueueHealth'
 			,	'Autotask.CalculateTotalsForTimeEntries'
@@ -906,6 +907,7 @@
 					$this->CalculateTotalsForKillRate->execute();
 					$this->CalculateTotalsForQueueHealth->execute();
 					$this->CalculateTotalsByTicketSource->execute();
+					$this->CalculateTotalsByIssuetype->execute();
 
 				} catch (Exception $e) {
 					throw $e;

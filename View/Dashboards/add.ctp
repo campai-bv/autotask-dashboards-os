@@ -274,6 +274,19 @@
 								,	'title' => 'View of tickets by source.'
 							)
 					));
+
+					echo $this->Form->input('Dashboard.show_tickets_by_issuetype', array(
+						'type' => 'checkbox',
+						'div' => array(
+							'class' => 'control-group input checkbox-container',
+						),
+						'class' => 'checkbox',
+						'label' => array(
+							'class' => 'control-label',
+							'text' => 'Show Tickets by Issue type',
+							'title' => 'View of tickets by issue type.',
+						),
+					));
 				?>
 
 			</div>
